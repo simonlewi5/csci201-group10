@@ -3,45 +3,47 @@ package main
 import (
 	"log"
 	"net/http"
-	"github.com/gorilla/websocket"
-	"github.com/simonlewi5/csci201-group10/game-server/internal/matchmaking"
+	// "os"
 
+	socketio "github.com/googollee/go-socket.io"
+	"github.com/simonlewi5/csci201-group10/game-server/internal/models"
+	// "github.com/simonlewi5/csci201-group10/game-server/pkg/handlers"
+	"github.com/simonlewi5/csci201-group10/game-server/pkg/matchmaking"
 )
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-	ReadBufferSize: 1024,
-	WriteBufferSize: 1024,
-}
-
 func main() {
+	server := socketio.NewServer(nil)
+	
 	matcher := matchmaking.NewMatcher()
 
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		serveWs(matcher, w, r)
+	server.OnConnect("/", func(s socketio.Conn) error {
+		log.Println("connected:", s.ID())
+		return nil
 	})
 
-	log.Println("Server started on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
-}
+	server.OnEvent("/", "joinMatchmaking", func(s socketio.Conn, userID string) {
+		
+		// dummy player creation
+		player := models.NewPlayer(userID, "username", "firebaseUID", "email")
+		matcher.AddPlayer(&player, s)
+		log.Printf("Player %s joined matchmaking", player.ID)
 
-func serveWs(matcher *matchmaking.Matcher, w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println("Error upgrading connection:", err)
-		return
-	}
-	defer conn.Close()
+	})
 
-	for {
-		_, message, err := conn.ReadMessage()
-		if err != nil {
-			log.Println("Error reading message:", err)
-			break
+	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
+		log.Println("Disconnected: ", reason)
+	})
+
+	go func() {
+		if err := server.Serve(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("serve error: %v\n", err)
 		}
-		log.Printf("Received message: %s from %s\n", message, conn.RemoteAddr())
+	}()
+	defer server.Close()
 
+	http.Handle("/socket.io/", server)
+	log.Println("Socket.IO server running at localhost:8000")
+	if err := http.ListenAndServe(":8000", nil); err != nil {
+		log.Fatalf("listen error: %v\n", err)
 	}
 }

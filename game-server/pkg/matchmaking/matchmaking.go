@@ -3,38 +3,31 @@ package matchmaking
 import (
 	"sync"
 
-	"github.com/gorilla/websocket"
+	socketio "github.com/googollee/go-socket.io"
+	"github.com/simonlewi5/csci201-group10/game-server/internal/models"
 )
 
-type Player struct {
-	ID string
-	Conn *websocket.Conn
-}
-
-type Match struct {
-	Players []Player // players in the match
-	// other match data
-}
-
 type Matcher struct {
-	QueuedPlayers []Player // players waiting to be matched
-	Matches []Match // matches that have been created
-	MatchLock sync.Mutex // lock for queue and matches
+	QueuedPlayers []*models.Player         // players waiting to be matched
+	Matches       []*models.Match          // matches that have been created
+	PlayerConns   map[string]socketio.Conn // map of player IDs to their connections
+	MatchLock     sync.Mutex               // lock for queue and matches
 }
 
 func NewMatcher() *Matcher {
 	return &Matcher{
-		QueuedPlayers: make([]Player, 0),
-		Matches: make([]Match, 0),
+		QueuedPlayers: make([]*models.Player, 0),
+		Matches:       make([]*models.Match, 0),
+		PlayerConns:   make(map[string]socketio.Conn),
 	}
 }
 
 // enqueues a player to be matched
-func (m *Matcher) AddPlayer(p Player) {
+func (m *Matcher) AddPlayer(p *models.Player, conn socketio.Conn) {
 	m.MatchLock.Lock()
 	defer m.MatchLock.Unlock()
 	m.QueuedPlayers = append(m.QueuedPlayers, p)
+	m.PlayerConns[p.ID] = conn
 }
 
 // attempts to pair players in the queue
-
