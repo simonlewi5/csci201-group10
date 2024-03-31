@@ -1,37 +1,35 @@
 name: CI
 
 on:
-    push:
-        branches:
-            - main
-    pull_request_target:
-        branches:
-            - main
+  push:
+    branches:
+      - main
+  pull_request_target:
+    branches:
+      - main
 
 jobs:
-    setup-gcloud:
-        permissions:
-            id-token: write
-            contents: read
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-            - name: 'Authenticate with Google Cloud'
-              id: 'auth'
-              uses: google-github-actions/auth@v0.4.0
-              with:
-                workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
-                service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
-            - name: 'Verify authentication'
-              run: |
-                  gcloud auth list
-                  gcloud config list
-                  gcloud compute instances list
-            - name: 'Retrieve DB password'
-                id: 'db-password'
-                run: |
-                    echo "DB_PASSWORD=$(gcloud secrets versions access latest --secret=${secrets.DB_PASSWORD_SECRET_ID})" >> $GITHUB_ENV
-            - name: "Output DB password"
-                run: |
-                    echo ${{ env.DB_PASSWORD }}
+  setup-gcloud:
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: 'Authenticate with Google Cloud'
+        uses: google-github-actions/auth@v0.4.0
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+      - name: 'Verify authentication'
+        run: |
+          gcloud auth list
+          gcloud config list
+          gcloud compute instances list
+      - name: 'Retrieve DB password'
+        run: |
+          echo "DB_PASSWORD=$(gcloud secrets versions access latest --secret=${{ secrets.DB_PASSWORD_SECRET_ID }})" >> $GITHUB_ENV
+      - name: "Output DB password"
+        run: |
+          echo "The DB Password is ${{ env.DB_PASSWORD }}
             
