@@ -17,5 +17,5 @@ jobs:
               id: auth
               uses: google-github-actions/auth@v0.4.0
               with:
-                workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
-                service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+                workload_identity_provider: projects/762133163917/locations/global/workloadIdentityPools/github/providers/my-repo
+                service_account: github-actions-deployment@egyptian-ratscrew.iam.gserviceaccount.com
