@@ -33,7 +33,7 @@ jobs:
         working-directory: ./game-server
       - name: "Build the go executable"
         run: |
-          go build -o ./bin/game-server ../game-server/cmd/server/main.go
+          go build -o bin/game-server cmd/server/main.go
         working-directory: ./game-server
         env:
           DB_PASSWORD: ${{ env.DB_PASSWORD }}
