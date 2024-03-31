@@ -78,4 +78,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             chmod +x /opt/game-server/game-server
-            nohup /opt/game-server/game-server > /var/log/game-server/game-server.log 2>&1 &
+            sudo nohup /opt/game-server/game-server > /var/log/game-server/game-server.log 2>&1 &
