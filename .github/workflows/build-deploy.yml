@@ -30,11 +30,11 @@ jobs:
           go-version: '1.22'
       - name: "Install dependencies"
         run: go mod download
-        working-directory: ../game-server
+        working-directory: ./game-server
       - name: "Build the go executable"
         run: |
           go build -o ./bin/game-server ../game-server/cmd/server/main.go
-        working-directory: ../game-server
+        working-directory: ./game-server
         env:
           DB_PASSWORD: ${{ env.DB_PASSWORD }}
           DB_HOST: ${{ env.DB_HOST }}
@@ -70,7 +70,7 @@ jobs:
           host: ${{ env.GAME_SERVER_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: '../game-server/bin/game-server'
+          source: './game-server/bin/game-server'
           target: '/etc/game-server'
           strip_components: 1
       - name: 'Execute game-server binary'
