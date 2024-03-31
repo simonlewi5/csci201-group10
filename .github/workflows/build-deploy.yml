@@ -1,0 +1,72 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    permissions:
+        id-token: write
+        contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: 'Authenticate with Google Cloud'
+        uses: google-github-actions/auth@v0.4.0
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+      - name: 'Retrieve DB password'
+        run: |
+          echo "DB_PASSWORD=$(gcloud secrets versions access latest --secret=db_password)" >> $GITHUB_ENV
+      - name: 'Retrieve DB host'
+        run: |
+          echo "DB_HOST=$(gcloud sql instances describe game-db --format='value(ipAddresses[0].ipAddress)')" >> $GITHUB_ENV
+      - name: "Set up Go"
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.22'
+      - name: "Install dependencies"
+        run: go mod download
+      - name: "Build the go executable"
+        run: |
+          go build -o ./bin/game-server ../game-server/cmd/server/main.go
+        env:
+          DB_PASSWORD: ${{ env.DB_PASSWORD }}
+          DB_HOST: ${{ env.DB_HOST }}
+          DB_USER: admin
+          DB_NAME: game-db
+
+  deploy:
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: 'Authenticate with Google Cloud'
+        uses: google-github-actions/auth@v0.4.0
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+      - name: 'Get game-server ip'
+        run: |
+          echo "GAME_SERVER_IP=$(gcloud compute instances describe game-server --format='value(networkInterfaces[0].accessConfigs[0].natIP)')" >> $GITHUB_ENV
+      - name: 'Test ssh connection'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.GAME_SERVER_IP }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "SSH connection successful"
+      - name: 'Copy game-server binary to game-server'
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ env.GAME_SERVER_IP }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: './bin/game-server'
+          target: '/etc/game-server'

@@ -1,15 +1,12 @@
-name: CI
+name: Infrastructure
 
 on:
   push:
     branches:
       - main
-  pull_request_target:
-    branches:
-      - main
 
 jobs:
-  deploy:
+  build:
     permissions:
       id-token: write
       contents: read
