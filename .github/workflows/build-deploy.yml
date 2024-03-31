@@ -68,7 +68,7 @@ jobs:
           host: ${{ env.GAME_SERVER_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: 'bin/game-server'
+          source: './game-server/bin/game-server'
           target: '/opt/game-server'
       - name: 'Execute game-server binary'
         uses: appleboy/ssh-action@master
@@ -77,5 +77,5 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            chmod +x /opt/game-server/game-server
-            nohup /opt/game-server/game-server > /var/log/game-server/game-server.log 2>&1 &
+            chmod +x /opt/game-server/game-server/bin/game-server
+            nohup /opt/game-server/game-server/bin/game-server > /var/log/game-server/game-server.log 2>&1 &
