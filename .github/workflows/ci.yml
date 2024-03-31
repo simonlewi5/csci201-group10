@@ -22,3 +22,7 @@ jobs:
               with:
                 workload_identity_provider: projects/762133163917/locations/global/workloadIdentityPools/github/providers/my-repo
                 service_account: github-actions-deployment@egyptian-ratscrew.iam.gserviceaccount.com
+            - name: 'Verify authentication'
+              run: |
+                  gcloud auth list
+                  gcloud config list
