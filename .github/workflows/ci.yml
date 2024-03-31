@@ -27,3 +27,11 @@ jobs:
                   gcloud auth list
                   gcloud config list
                   gcloud compute instances list
+            - name: 'Retrieve DB password'
+                id: 'db-password'
+                run: |
+                    echo "DB_PASSWORD=$(gcloud secrets versions access latest --secret=${secrets.DB_PASSWORD_SECRET_ID})" >> $GITHUB_ENV
+            - name: "Output DB password"
+                run: |
+                    echo ${{ env.DB_PASSWORD }}
+            
