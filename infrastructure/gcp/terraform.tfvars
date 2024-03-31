@@ -1,1 +1,1 @@
-public_key_paths = [ ".pub-keys/simonlew.pub" ]
+public_key_paths = [ "../../.pub-keys/simonlew.pub" ]
