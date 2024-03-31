@@ -71,7 +71,7 @@ func main() {
 
 	log.Println("read operation completed")
 
-	logFile, err := os.OpenFile("/var/log/game-server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile("/var/log/game-server/game-server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening log file: %v", err)
 	}

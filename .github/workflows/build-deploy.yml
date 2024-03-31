@@ -40,8 +40,6 @@ jobs:
           DB_HOST: ${{ env.DB_HOST }}
           DB_USER: admin
           DB_NAME: game-db
-      - name: List bin directory after build
-        run: ls -alh ./game-server/bin/
       - name: 'Get game-server IP'
         run: |
           echo "GAME_SERVER_IP=$(gcloud compute instances describe game-server --zone=us-west1-a --format='value(networkInterfaces[0].accessConfigs[0].natIP)')" >> $GITHUB_ENV
@@ -62,6 +60,8 @@ jobs:
           script: |
             sudo mkdir -p /opt/game-server
             sudo chown -R ${{ secrets.SSH_USERNAME }} /opt/game-server
+            sudo mkdir -p /var/log/game-server
+            sudo chown ${{ secrets.SSH_USERNAME }}: /var/log/game-server
       - name: 'Copy game-server binary to game-server'
         uses: appleboy/scp-action@master
         with:
@@ -78,4 +78,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             chmod +x /opt/game-server/game-server
-            nohup /opt/game-server/game-server > /var/log/game-server.log 2>&1 &
+            nohup /opt/game-server/game-server > /var/log/game-server/game-server.log 2>&1 &
