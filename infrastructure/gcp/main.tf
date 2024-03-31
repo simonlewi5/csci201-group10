@@ -1,5 +1,5 @@
 locals {
-  ssh_keys = [for file in var.public_key_paths : trimspace(file("${path.module}/${file}"))]
+  ssh_keys = [for file in var.public_key_paths : "${trimspace(basename(file))}:" + trimspace(file("${path.module}/${file}"))]
   ssh_keys_metadata = join("\n", local.ssh_keys)
 }
 
