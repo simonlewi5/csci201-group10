@@ -53,9 +53,9 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
-      - name: 'Get game-server ip'
+      - name: 'Get game-server IP'
         run: |
-          echo "GAME_SERVER_IP=$(gcloud compute instances describe game-server --format='value(networkInterfaces[0].accessConfigs[0].natIP)')" >> $GITHUB_ENV
+          echo "GAME_SERVER_IP=$(gcloud compute instances describe game-server --zone=us-central1-a --format='value(networkInterfaces[0].accessConfigs[0].natIP)')" >> $GITHUB_ENV
       - name: 'Test ssh connection'
         uses: appleboy/ssh-action@master
         with:
