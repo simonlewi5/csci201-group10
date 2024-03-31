@@ -40,6 +40,8 @@ jobs:
           DB_HOST: ${{ env.DB_HOST }}
           DB_USER: admin
           DB_NAME: game-db
+      - name: List bin directory after build
+        run: ls -alh ./game-server/bin/
 
   deploy:
     permissions:
@@ -72,6 +74,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             mkdir -p /etc/game-server
+      - name: List bin directory after build
+        run: ls -alh ./game-server/bin/
       - name: 'Copy game-server binary to game-server'
         uses: appleboy/scp-action@master
         with:
@@ -80,7 +84,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: './game-server/bin/game-server'
           target: '/etc/game-server'
-          strip_components: 1
       - name: 'Execute game-server binary'
         uses: appleboy/ssh-action@master
         with:
