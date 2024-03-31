@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  setup-gcloud:
+  deploy:
     permissions:
       id-token: write
       contents: read
@@ -21,16 +21,16 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
-      - name: 'Verify authentication'
-        run: |
-          gcloud auth list
-          gcloud config list
-          gcloud compute instances list
-          gcloud secrets list
       - name: 'Retrieve DB password'
         run: |
           echo "DB_PASSWORD=$(gcloud secrets versions access latest --secret=db_password)" >> $GITHUB_ENV
-      - name: "Output DB password"
+      - name: 'Setup Terraform'
+        uses: hashicorp/setup-terraform@v1
+      - name: 'Run Terraform'
+        env:
+          TF_VAR_db_password: ${{ env.DB_PASSWORD }}
         run: |
-          echo "The DB Password is ${{ env.DB_PASSWORD }}
-            
+          cd infrastructure/gcp
+          terraform init
+          terraform apply -auto-approve
+
