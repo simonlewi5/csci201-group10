@@ -8,7 +8,7 @@ locals {
 
 resource "google_compute_network" "vpc_network" {
   name = "vpc-network"
-  auto_create_subnetworks = true
+#   auto_create_subnetworks = true
 }
 
 resource "google_compute_global_address" "private_ip_range" {
