@@ -37,6 +37,9 @@ jobs:
           terraform import google_sql_database_instance.game_db projects/egyptian-ratscrew/instances/game-db
           terraform import google_compute_instance.game_server projects/egyptian-ratscrew/zones/us-west1-a/instances/game-server
           terraform import google_sql_user.default egyptian-ratscrew/game-db/admin
+          terraform import google_compute_network.vpc_network projects/egyptian-ratscrew/global/networks/vpc-network
+          terraform import google_compute_global_address.private_ip_range projects/egyptian-ratscrew/global/addresses/private-ip-range
+          terraform import google_service_networking_connection.private_vpc_connection projects/egyptian-ratscrew/regions/us-west1/serviceNetworkingConnections/servicenetworking.googleapis.com%2Fconnections%2Fvpc-network
           terraform plan
           terraform apply -auto-approve
 
