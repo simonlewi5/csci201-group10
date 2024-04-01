@@ -39,6 +39,7 @@ resource "google_compute_instance" "game_server" {
 
     network_interface {
         network = google_compute_network.vpc_network.self_link
+        subnetwork = google_compute_network.vpc_network.self_link
 
         access_config {
             // Ephemeral IP
