@@ -6,6 +6,11 @@ locals {
   ssh_keys_metadata = join("\n", local.ssh_keys)
 }
 
+resource "google_compute_network" "vpc_network" {
+  name = "vpc-network"
+  auto_create_subnetworks = true
+}
+
 resource "google_compute_instance" "game_server" {
     name         = "game-server"
     machine_type = "e2-micro"
@@ -18,7 +23,7 @@ resource "google_compute_instance" "game_server" {
     }
 
     network_interface {
-        network = "default"
+        network = google_compute_network.vpc_network.self_link
 
         access_config {
             // Ephemeral IP
@@ -95,6 +100,7 @@ resource "google_sql_database_instance" "game_db" {
         disk_type = "PD_SSD"
         ip_configuration {
             ipv4_enabled = true
+            private_network = google_compute_network.vpc_network.self_link
         }
         backup_configuration {
             enabled = true
