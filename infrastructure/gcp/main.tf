@@ -29,7 +29,7 @@ resource "google_compute_instance" "game_server" {
     name         = "game-server"
     machine_type = "e2-micro"
     zone         = "${var.region}-a"
-    allow_stopping_for_update = false
+    allow_stopping_for_update = true
 
     boot_disk {
         initialize_params {
