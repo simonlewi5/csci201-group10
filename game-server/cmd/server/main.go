@@ -3,84 +3,110 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	// "log"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
-	dbUser := os.Getenv("DB_USER")
-	dbPass := os.Getenv("DB_PASS")
-	dbName := os.Getenv("DB_NAME")
-	dbHost := os.Getenv("DB_HOST")
+    fmt.Println("Starting server...")
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", dbUser, dbPass, dbHost, dbName)
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		log.Fatalf("error opening database: %v", err)
-	}
-	defer db.Close()
+    dbUser := os.Getenv("DB_USER")
+    dbPass := os.Getenv("DB_PASS")
+    dbName := os.Getenv("DB_NAME")
+    dbHost := os.Getenv("DB_HOST")
 
-	if err := db.Ping(); err != nil {
-		log.Fatalf("error pinging database: %v", err)
-	}
+    dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", dbUser, dbPass, dbHost, dbName)
+    db, err := sql.Open("mysql", dsn)
+    if err != nil {
+        fmt.Printf("Error opening database: %v\n", err)
+        return
+    }
+    defer db.Close()
 
-	log.Println("connected to database")
+    fmt.Println("Database connection opened.")
 
-	// create table
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS players (
-		id INT AUTO_INCREMENT PRIMARY KEY,
-		username VARCHAR(255) NOT NULL,
-		firebase_uid VARCHAR(255) NOT NULL,
-		email VARCHAR(255) NOT NULL
-		games_played INT NOT NULL,
-		games_won INT NOT NULL,
-		games_lost INT NOT NULL,
-		total_score INT NOT NULL
-	)`)
+    if err := db.Ping(); err != nil {
+        fmt.Printf("Error pinging database: %v\n", err)
+        return
+    }
 
-	if err != nil {
-		log.Fatalf("error creating players table: %v", err)
-	}
-
-	log.Println("created players table")
-
-	rows, err := db.Query("SELECT id, username, firebase_uid, email, games_played, games_won, games_lost, total_score FROM players")
-	if err != nil {
-		log.Fatalf("error querying players table: %v", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var id, gamesPlayed, gamesWon, gamesLost, totalScore int
-		var username, firebaseUID, email string
-
-		err := rows.Scan(&id, &username, &firebaseUID, &email, &gamesPlayed, &gamesWon, &gamesLost, &totalScore)
-		if err != nil {
-			log.Fatal("error reading row: ", err)
-		}
-
-		log.Printf("Read player: ID=%d, Username=%s, FirebaseUID=%s, Email=%s, GamesPlayed=%d, GamesWon=%d, GamesLost=%d, TotalScore=%d\n",
-			id, username, firebaseUID, email, gamesPlayed, gamesWon, gamesLost, totalScore)
-	}
-
-	if err = rows.Err(); err != nil {
-		log.Fatal("error iterating rows: ", err)
-	}
-
-	log.Println("read operation completed")
-
-	logFile, err := os.OpenFile("/var/log/game-server/game-server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("error opening log file: %v", err)
-	}
-	defer logFile.Close()
-
-	log.SetOutput(logFile)
-
-	log.Println("server started")
+    fmt.Println("Connected to database.")
 }
+
+// func main() {
+// 	dbUser := os.Getenv("DB_USER")
+// 	dbPass := os.Getenv("DB_PASS")
+// 	dbName := os.Getenv("DB_NAME")
+// 	dbHost := os.Getenv("DB_HOST")
+
+// 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", dbUser, dbPass, dbHost, dbName)
+// 	db, err := sql.Open("mysql", dsn)
+// 	if err != nil {
+// 		log.Fatalf("error opening database: %v", err)
+// 	}
+// 	defer db.Close()
+
+// 	if err := db.Ping(); err != nil {
+// 		log.Fatalf("error pinging database: %v", err)
+// 	}
+
+// 	log.Println("connected to database")
+
+// 	// create table
+// 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS players (
+// 		id INT AUTO_INCREMENT PRIMARY KEY,
+// 		username VARCHAR(255) NOT NULL,
+// 		firebase_uid VARCHAR(255) NOT NULL,
+// 		email VARCHAR(255) NOT NULL,
+// 		games_played INT NOT NULL,
+// 		games_won INT NOT NULL,
+// 		games_lost INT NOT NULL,
+// 		total_score INT NOT NULL
+// 	)`)
+
+// 	if err != nil {
+// 		log.Fatalf("error creating players table: %v", err)
+// 	}
+
+// 	log.Println("created players table")
+
+// 	rows, err := db.Query("SELECT id, username, firebase_uid, email, games_played, games_won, games_lost, total_score FROM players")
+// 	if err != nil {
+// 		log.Fatalf("error querying players table: %v", err)
+// 	}
+// 	defer rows.Close()
+
+// 	for rows.Next() {
+// 		var id, gamesPlayed, gamesWon, gamesLost, totalScore int
+// 		var username, firebaseUID, email string
+
+// 		err := rows.Scan(&id, &username, &firebaseUID, &email, &gamesPlayed, &gamesWon, &gamesLost, &totalScore)
+// 		if err != nil {
+// 			log.Fatal("error reading row: ", err)
+// 		}
+
+// 		log.Printf("Read player: ID=%d, Username=%s, FirebaseUID=%s, Email=%s, GamesPlayed=%d, GamesWon=%d, GamesLost=%d, TotalScore=%d\n",
+// 			id, username, firebaseUID, email, gamesPlayed, gamesWon, gamesLost, totalScore)
+// 	}
+
+// 	if err = rows.Err(); err != nil {
+// 		log.Fatal("error iterating rows: ", err)
+// 	}
+
+// 	log.Println("read operation completed")
+
+// 	logFile, err := os.OpenFile("/var/log/game-server/game-server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+// 	if err != nil {
+// 		log.Fatalf("error opening log file: %v", err)
+// 	}
+// 	defer logFile.Close()
+
+// 	log.SetOutput(logFile)
+
+// 	log.Println("server started")
+// }
 
 
 // import (
