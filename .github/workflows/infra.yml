@@ -37,6 +37,7 @@ jobs:
           terraform import google_compute_firewall.ssh projects/egyptian-ratscrew/global/firewalls/ssh
           terraform import google_compute_instance.game_server projects/egyptian-ratscrew/zones/us-west1-a/instances/game-server
           terraform import google_sql_user.default egyptian-ratscrew/game-db/admin
+          terraform import google_compute_address.static projects/egyptian-ratscrew/regions/us-west1/addresses/game-server-ip
           terraform plan
           terraform apply -auto-approve
           
