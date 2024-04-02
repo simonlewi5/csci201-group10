@@ -30,13 +30,13 @@ jobs:
         run: |
           cd infrastructure/gcp
           terraform init
-          terraform import google_compute_firewall.http projects/egyptian-ratscrew/global/firewalls/http
-          terraform import google_compute_firewall.ssh projects/egyptian-ratscrew/global/firewalls/ssh
-          terraform import google_compute_firewall.icmp projects/egyptian-ratscrew/global/firewalls/icmp
-          terraform import google_storage_bucket.game_assets_bucket game-assets-bucket-egyptian-ratscrew
-          terraform import google_sql_database_instance.game_db projects/egyptian-ratscrew/instances/game-db
-          terraform import google_compute_instance.game_server projects/egyptian-ratscrew/zones/us-west1-a/instances/game-server
-          terraform import google_sql_user.default egyptian-ratscrew/game-db/admin
           terraform plan
           terraform apply -auto-approve
           
+# terraform import google_compute_firewall.http projects/egyptian-ratscrew/global/firewalls/http
+# terraform import google_compute_firewall.ssh projects/egyptian-ratscrew/global/firewalls/ssh
+# terraform import google_compute_firewall.icmp projects/egyptian-ratscrew/global/firewalls/icmp
+# terraform import google_storage_bucket.game_assets_bucket game-assets-bucket-egyptian-ratscrew
+# terraform import google_sql_database_instance.game_db projects/egyptian-ratscrew/instances/game-db
+# terraform import google_compute_instance.game_server projects/egyptian-ratscrew/zones/us-west1-a/instances/game-server
+# terraform import google_sql_user.default egyptian-ratscrew/game-db/admin
