@@ -95,10 +95,6 @@ resource "google_sql_database_instance" "game_db" {
         disk_type = "PD_SSD"
         ip_configuration {
             ipv4_enabled = true
-            authorized_networks {
-                name = "default"
-                value = google_compute_instance.game_server.network_interface.0.network_ip
-            }
         }
         backup_configuration {
             enabled = true
