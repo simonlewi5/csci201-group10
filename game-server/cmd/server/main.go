@@ -18,7 +18,7 @@ func main() {
     dbHost := os.Getenv("DB_HOST")
 
     // dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", dbUser, dbPass, dbHost, dbName)
-    dsn := fmt.Sprintf("%s:%s@tcp(%s)", dbUser, dbPass, dbHost)
+    dsn := fmt.Sprintf("%s:%s@tcp(%s)/mysql", dbUser, dbPass, dbHost)
     fmt.Printf("Connecting to database with DSN: %s\n", dsn)
     db, err := sql.Open("mysql", dsn)
     if err != nil {
