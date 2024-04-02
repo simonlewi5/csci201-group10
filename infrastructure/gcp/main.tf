@@ -6,6 +6,10 @@ locals {
   ssh_keys_metadata = join("\n", local.ssh_keys)
 }
 
+resource "google_compute_address" "static" {
+  name = "game-server-ip"
+}
+
 resource "google_compute_instance" "game_server" {
     name         = "game-server"
     machine_type = "e2-micro"
@@ -21,7 +25,8 @@ resource "google_compute_instance" "game_server" {
         network = "default"
 
         access_config {
-            // Ephemeral IP
+            // Static ip
+            nat_ip = google_compute_address.static.address
         }
     }
 
