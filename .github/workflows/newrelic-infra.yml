@@ -32,7 +32,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            curl -Ls https://download.newrelic.com/install/newrelic-cli/scripts/install.sh | bash && sudo NEW_RELIC_API_KEY=${env.NR_API_KEY} NEW_RELIC_ACCOUNT_ID=4406929 /usr/local/bin/newrelic install -y
+            curl -Ls https://download.newrelic.com/install/newrelic-cli/scripts/install.sh | bash && sudo NEW_RELIC_API_KEY=${{env.NR_API_KEY}} NEW_RELIC_ACCOUNT_ID=4406929 /usr/local/bin/newrelic install -y
       - name: 'Copy log config to game-server'
         uses: appleboy/scp-action@master
         with:
