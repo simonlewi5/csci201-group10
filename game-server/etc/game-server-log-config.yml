@@ -1,5 +1,0 @@
-logs:
-  - name: game-server
-    file: /var/log/game-server/game-server.log
-    attributes:
-      service: game-server

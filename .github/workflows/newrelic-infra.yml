@@ -32,20 +32,6 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            curl -Ls https://download.newrelic.com/install/newrelic-cli/scripts/install.sh | bash && sudo NEW_RELIC_API_KEY=${{env.NR_API_KEY}} NEW_RELIC_ACCOUNT_ID=4406929 /usr/local/bin/newrelic install -y
-      - name: 'Copy log config to game-server'
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ env.GAME_SERVER_IP }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: 'game-server/etc/game-server-log-config.yml'
-          target: '/etc/newrelic-infra/integrations.d/'
-      - name: 'Restart New Relic infrastructure agent'
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ env.GAME_SERVER_IP }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            sudo systemctl restart newrelic-infra
+            if ! /usr/local/bin/newrelic --version > /dev/null 2>&1; then
+              curl -Ls https://download.newrelic.com/install/newrelic-cli/scripts/install.sh | bash && sudo NEW_RELIC_API_KEY=${{env.NR_API_KEY}} NEW_RELIC_ACCOUNT_ID=4406929 /usr/local/bin/newrelic install -y
+            fi
