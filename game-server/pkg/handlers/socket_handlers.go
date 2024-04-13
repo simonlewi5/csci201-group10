@@ -2,7 +2,8 @@ package handlers
 
 import (
 	"log"
-	"github.com/googollee/go-socket.io"
+
+	socketio "github.com/googollee/go-socket.io"
 )
 
 func RegisterSocketHandlers(server *socketio.Server) {
@@ -27,4 +28,3 @@ func RegisterSocketHandlers(server *socketio.Server) {
 		log.Println("closed", reason)
 	})
 }
-

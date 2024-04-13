@@ -3,38 +3,64 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
+	"net/http"
+
 	// "log"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+	socketio "github.com/googollee/go-socket.io"
+
+	"github.com/simonlewi5/csci201-group10/game-server/pkg/handlers"
 )
 
 func main() {
-    fmt.Println("Starting server...")
+	fmt.Println("Starting server...")
 
-    dbUser := os.Getenv("DB_USER")
-    dbPass := os.Getenv("DB_PASS")
-    // dbName := os.Getenv("DB_NAME")
-    dbHost := os.Getenv("DB_HOST")
+	// Connect to SQL database
+	dbUser := os.Getenv("DB_USER")
+	dbPass := os.Getenv("DB_PASS")
+	// dbName := os.Getenv("DB_NAME")
+	dbHost := os.Getenv("DB_HOST")
 
-    // dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", dbUser, dbPass, dbHost, dbName)
-    dsn := fmt.Sprintf("%s:%s@tcp(%s)/mysql", dbUser, dbPass, dbHost)
-    fmt.Printf("Connecting to database with DSN: %s\n", dsn)
-    db, err := sql.Open("mysql", dsn)
-    if err != nil {
-        fmt.Printf("Error opening database: %v\n", err)
-        return
-    }
-    defer db.Close()
+	// dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", dbUser, dbPass, dbHost, dbName)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/mysql", dbUser, dbPass, dbHost)
+	fmt.Printf("Connecting to database with DSN: %s\n", dsn)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		fmt.Printf("Error opening database: %v\n", err)
+		return
+	}
+	defer db.Close()
 
-    fmt.Println("Database connection opened.")
+	fmt.Println("Database connection opened.")
 
-    if err := db.Ping(); err != nil {
-        fmt.Printf("Error pinging database: %v\n", err)
-        return
-    }
+	if err := db.Ping(); err != nil {
+		fmt.Printf("Error pinging database: %v\n", err)
+		return
+	}
 
-    fmt.Println("Connected to database.")
+	fmt.Println("Connected to database.")
+
+	// Set up socket.io handling
+	socketServer := socketio.NewServer(nil)
+	handlers.RegisterSocketHandlers(socketServer)
+
+	// Set up HTTP server
+	router := http.NewServeMux() // ServeMux dispatches requests to different handlers based on URL pattern
+	router.Handle("/socket.io/", socketServer)
+	httpServer := &http.Server{
+		Addr:    ":8080",
+		Handler: router,
+	}
+
+	// Start HTTP server
+	log.Println("Starting server at http://localhost:8080")
+	listenErr := httpServer.ListenAndServe()
+	if listenErr != nil {
+		log.Fatal("ListenAndServe: ", listenErr)
+	}
 }
 
 // func main() {
@@ -110,7 +136,6 @@ func main() {
 // 	log.Println("server started")
 // }
 
-
 // import (
 // 	"log"
 // 	"net/http"
@@ -124,7 +149,7 @@ func main() {
 
 // func main() {
 // 	server := socketio.NewServer(nil)
-	
+
 // 	matcher := matchmaking.NewMatcher()
 
 // 	server.OnConnect("/", func(s socketio.Conn) error {
@@ -133,7 +158,7 @@ func main() {
 // 	})
 
 // 	server.OnEvent("/", "joinMatchmaking", func(s socketio.Conn, userID string) {
-		
+
 // 		// dummy player creation
 // 		player := models.NewPlayer(userID, "username", "firebaseUID", "email")
 // 		matcher.AddPlayer(&player, s)
