@@ -103,3 +103,11 @@ jobs:
           target: '/var/www/html'
           overwrite: true
           strip_components: 2
+      - name: 'Restart Nginx'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.GAME_SERVER_IP }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo systemctl restart nginx

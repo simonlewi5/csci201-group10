@@ -35,7 +35,7 @@ func echo(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-    http.HandleFunc("/echo", echo)
+    http.HandleFunc("/ws", echo)
     fmt.Println("WebSocket server starting on port 8080...")
     if err := http.ListenAndServe(":8080", nil); err != nil {
         fmt.Printf("Error starting server: %v\n", err)
