@@ -90,5 +90,6 @@ jobs:
           host: ${{ env.GAME_SERVER_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: './game-server/www/'
+          source: './game-server/www/*'
           target: '/var/www/html'
+          overwrite: true
