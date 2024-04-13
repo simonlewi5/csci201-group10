@@ -84,3 +84,11 @@ jobs:
             export DB_NAME=game-db
             chmod +x /opt/game-server/game-server/bin/game-server
             nohup /opt/game-server/game-server/bin/game-server > /var/log/game-server/game-server.log 2>&1 &
+      - name: 'Copy static content to server'
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ env.GAME_SERVER_IP }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: './game-server/www/'
+          target: '/var/www/html'
