@@ -1,6 +1,8 @@
 package com.mygdx.game;
 
+import java.net.URISyntaxException;
 import java.util.Iterator;
+import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -16,8 +18,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 
-public class GameScreen implements Screen {
-    final Egyptian_Ratscrew game;
+
+public class GameScreen implements Screen, MessageListener {
+    final EgyptianRatscrew game;
+    GameWebSocketClient webSocketClient;
+    private String serverMessage = "";
 
     // Here, we can instantiate objects for each of the classes
 
@@ -31,8 +36,12 @@ public class GameScreen implements Screen {
 
     // This is needed to basically position the game on the screen
     OrthographicCamera camera;
+    
+    public void messageReceived(String message) {
+    	this.serverMessage = message;
+    }
 
-    public GameScreen(final Egyptian_Ratscrew game) {
+    public GameScreen(final EgyptianRatscrew game) {
         this.game = game;
 
         // Here we'd load all the images from the asset folder like this:
@@ -72,11 +81,26 @@ public class GameScreen implements Screen {
 
         // This writes text on the screen at a specific x,y coordinate
         game.font.draw(game.batch, "something something", 0, 480);
-
+        
+        if (!serverMessage.isEmpty()) {
+            game.font.draw(game.batch, "Server said: " + serverMessage, 100, 100);
+        }
+        
         // This commented out code is how you would draw a rectangle on the screen
         // This is important since we're probably going to be rendering the cards as rectangles
 
         // game.batch.draw(name of object, x co-ord, y co-ord, width, height);
+        
+        if (Gdx.input.isKeyPressed(Keys.ENTER)) {
+        	
+        	Random rand = new Random(); // Instance of random
+            int randomNum = rand.nextInt(1000);
+            
+            StringBuilder message = new StringBuilder("hello");
+            message.append(randomNum);
+            
+            webSocketClient.send(message.toString());
+        }
 
         // process user input
         if (Gdx.input.isTouched()) {
@@ -98,6 +122,7 @@ public class GameScreen implements Screen {
             // Basically, put anything here that needs to be done over and over again while the game is running
             // So, updating the cards that are facing up, updating any text displayed on the screen, etc
 
+        game.batch.end();
     }
 
     @Override
@@ -109,6 +134,13 @@ public class GameScreen implements Screen {
         // start the playback of the background music
         // when the screen is shown:
         // musicName.play();
+    	
+        try {
+            webSocketClient = new GameWebSocketClient("wss://egyptianratscrew.dev/ws", this);
+            webSocketClient.connect();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -127,6 +159,7 @@ public class GameScreen implements Screen {
     public void dispose() {
         // Dispose of all the assets we loaded earlier
         // objectName.dispose();
+    	webSocketClient.close();
     }
 
 }

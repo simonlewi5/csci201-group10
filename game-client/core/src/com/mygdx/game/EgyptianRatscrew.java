@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-public class Egyptian_Ratscrew extends Game {
+public class EgyptianRatscrew extends Game {
 	public BitmapFont font;
 	public SpriteBatch batch;
 

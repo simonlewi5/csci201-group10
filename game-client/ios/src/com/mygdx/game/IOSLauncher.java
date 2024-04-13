@@ -10,7 +10,7 @@ public class IOSLauncher extends IOSApplication.Delegate {
     @Override
     protected IOSApplication createApplication() {
         IOSApplicationConfiguration config = new IOSApplicationConfiguration();
-        return new IOSApplication(new Egyptian_Ratscrew(), config);
+        return new IOSApplication(new EgyptianRatscrew(), config);
     }
 
     public static void main(String[] argv) {

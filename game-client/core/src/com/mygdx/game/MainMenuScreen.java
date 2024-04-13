@@ -7,11 +7,11 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 public class MainMenuScreen implements Screen {
 
-    final Egyptian_Ratscrew game;
+    final EgyptianRatscrew game;
 
     OrthographicCamera camera;
 
-    public MainMenuScreen(final Egyptian_Ratscrew game) {
+    public MainMenuScreen(final EgyptianRatscrew game) {
         this.game = game;
 
         camera = new OrthographicCamera();

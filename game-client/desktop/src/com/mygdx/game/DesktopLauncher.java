@@ -9,6 +9,6 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		config.setTitle("Egyptian Ratscrew");
-		new Lwjgl3Application(new Egyptian_Ratscrew(), config);
+		new Lwjgl3Application(new EgyptianRatscrew(), config);
 	}
 }
