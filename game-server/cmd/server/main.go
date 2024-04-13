@@ -1,41 +1,92 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
-	// "log"
-	"os"
-
-	_ "github.com/go-sql-driver/mysql"
+    "fmt"
+    "net/http"
+    // "os"
+    "github.com/gorilla/websocket"
 )
 
-func main() {
-    fmt.Println("Starting server...")
-
-    dbUser := os.Getenv("DB_USER")
-    dbPass := os.Getenv("DB_PASS")
-    // dbName := os.Getenv("DB_NAME")
-    dbHost := os.Getenv("DB_HOST")
-
-    // dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", dbUser, dbPass, dbHost, dbName)
-    dsn := fmt.Sprintf("%s:%s@tcp(%s)/mysql", dbUser, dbPass, dbHost)
-    fmt.Printf("Connecting to database with DSN: %s\n", dsn)
-    db, err := sql.Open("mysql", dsn)
-    if err != nil {
-        fmt.Printf("Error opening database: %v\n", err)
-        return
-    }
-    defer db.Close()
-
-    fmt.Println("Database connection opened.")
-
-    if err := db.Ping(); err != nil {
-        fmt.Printf("Error pinging database: %v\n", err)
-        return
-    }
-
-    fmt.Println("Connected to database.")
+var upgrader = websocket.Upgrader{
+    ReadBufferSize:  1024,
+    WriteBufferSize: 1024,
 }
+
+func echo(w http.ResponseWriter, r *http.Request) {
+    conn, err := upgrader.Upgrade(w, r, nil)
+    if err != nil {
+        fmt.Println("Error upgrading WebSocket:", err)
+        return
+    }
+    defer conn.Close()
+
+    for {
+        mt, message, err := conn.ReadMessage()
+        if err != nil {
+            fmt.Println("Error reading message:", err)
+            break
+        }
+        fmt.Printf("Received message: %s\n", message)
+
+        if err := conn.WriteMessage(mt, message); err != nil {
+            fmt.Println("Error writing message:", err)
+            break
+        }
+    }
+}
+
+func helloWorld(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintln(w, "Hello, world!")
+}
+
+func main() {
+    http.HandleFunc("/echo", echo)             // Set WebSocket endpoint
+    http.HandleFunc("/", helloWorld)           // Set HTTP endpoint
+
+    fmt.Println("Server starting on port 8080...")
+    if err := http.ListenAndServe(":8080", nil); err != nil {
+        fmt.Printf("Error starting server: %v\n", err)
+    }
+}
+
+// package main
+
+// import (
+// 	"database/sql"
+// 	"fmt"
+// 	// "log"
+// 	"os"
+
+// 	_ "github.com/go-sql-driver/mysql"
+// )
+
+// func main() {
+//     fmt.Println("Starting server...")
+
+//     dbUser := os.Getenv("DB_USER")
+//     dbPass := os.Getenv("DB_PASS")
+//     // dbName := os.Getenv("DB_NAME")
+//     dbHost := os.Getenv("DB_HOST")
+
+//     // dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", dbUser, dbPass, dbHost, dbName)
+//     dsn := fmt.Sprintf("%s:%s@tcp(%s)/mysql", dbUser, dbPass, dbHost)
+//     fmt.Printf("Connecting to database with DSN: %s\n", dsn)
+//     db, err := sql.Open("mysql", dsn)
+//     if err != nil {
+//         fmt.Printf("Error opening database: %v\n", err)
+//         return
+//     }
+//     defer db.Close()
+
+//     fmt.Println("Database connection opened.")
+
+//     if err := db.Ping(); err != nil {
+//         fmt.Printf("Error pinging database: %v\n", err)
+//         return
+//     }
+
+//     fmt.Println("Connected to database.")
+// }
 
 // func main() {
 // 	dbUser := os.Getenv("DB_USER")
