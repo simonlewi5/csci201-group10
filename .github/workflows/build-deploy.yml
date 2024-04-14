@@ -71,14 +71,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: './game-server/bin/game-server'
           target: '/opt/game-server'
-      - name: 'Stop existing game-server processes'
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ env.GAME_SERVER_IP }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            pkill -f /opt/game-server/game-server || true
       - name: 'Execute game-server binary'
         uses: appleboy/ssh-action@master
         with:
