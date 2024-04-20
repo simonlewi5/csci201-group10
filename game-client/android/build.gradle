@@ -32,6 +32,8 @@ android {
     }
 }
 
+apply plugin: 'com.android.application'
+
 
 // called every time gradle gets executed, takes the native dependencies of
 // the natives configuration, and extracts them to the proper libs/ folders
@@ -84,6 +86,20 @@ tasks.register('run', Exec) {
 
     def adb = path + "/platform-tools/adb"
     commandLine "$adb", 'shell', 'am', 'start', '-n', 'com.mygdx.game/com.mygdx.game.AndroidLauncher'
+}
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.0'
+    }
+}
+
+dependencies {
+    implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
 }
 
 eclipse.project.name = appName + "-android"
