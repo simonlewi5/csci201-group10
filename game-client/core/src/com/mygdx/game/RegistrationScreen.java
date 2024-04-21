@@ -12,10 +12,8 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.Gdx;
@@ -23,7 +21,6 @@ import com.badlogic.gdx.Gdx;
 
 public class RegistrationScreen implements Screen, MessageListener  {
     final EgyptianRatscrew game;
-    private BitmapFont fontSmall;
     private final float ASPECT_RATIO = 16 / 9f;
     private Texture backgroundImage;
     private Music backgroundMusic;
@@ -32,8 +29,7 @@ public class RegistrationScreen implements Screen, MessageListener  {
     private GameWebSocketClient webSocketClient;
 
     private Stage stage;
-    private TextField emailField, usernameField, passwordField;
-    private Label emailLabel, usernameLabel, passwordLabel;
+    private TextField emailField, usernameField, passwordField, confirmPasswordField;
     private TextButton submitButton, exitButton;
     Viewport viewport;
 
@@ -49,11 +45,8 @@ public class RegistrationScreen implements Screen, MessageListener  {
         camera = new OrthographicCamera();
         viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera);
         camera.setToOrtho(false, 800, 800 / ASPECT_RATIO); 
-
-        fontSmall = game.assetManager.getFontSmall();
         backgroundImage = game.assetManager.getBackgroundImage();
         backgroundMusic = game.assetManager.getBackgroundMusic();
-    
     }
     
     @Override
@@ -69,44 +62,54 @@ public class RegistrationScreen implements Screen, MessageListener  {
 
     private void initFormElements() {
         TextField.TextFieldStyle textFieldStyle = game.assetManager.getTextFieldStyle(1.0f);
-        LabelStyle labelStyle = new LabelStyle(fontSmall, color);
         TextButtonStyle buttonStyle = game.assetManager.getTextButtonStyle(1.0f);
     
-        emailLabel = new Label("Email", labelStyle);
         emailField = new TextField("", textFieldStyle);
-        usernameLabel = new Label("Username", labelStyle);
+        emailField.setMessageText("Email Address");
         usernameField = new TextField("", textFieldStyle);
-        passwordLabel = new Label("Password", labelStyle);
+        usernameField.setMessageText("Username");
         passwordField = new TextField("", textFieldStyle);
+        passwordField.setMessageText("Password");
+        confirmPasswordField = new TextField("", textFieldStyle);
+        confirmPasswordField.setMessageText("Confirm Password");
         submitButton = new TextButton("Submit", buttonStyle);
         exitButton = new TextButton("Exit", buttonStyle);
     
         passwordField.setPasswordMode(true);
         passwordField.setPasswordCharacter('*');
     
+        float fieldWidth = 400;
         float y = viewport.getWorldHeight() / 2 + 100;
     
         emailField.pack();
         usernameField.pack();
         passwordField.pack();
 
-        emailField.setPosition((viewport.getWorldWidth() - emailField.getPrefWidth()) / 2, y);
+        emailField.setSize(fieldWidth, emailField.getHeight());
+        emailField.setPosition((viewport.getWorldWidth() - fieldWidth) / 2, y);
         y -= (emailField.getHeight() + 20);
-        usernameField.setPosition((viewport.getWorldWidth() - usernameField.getPrefWidth()) / 2, y);
+    
+        usernameField.setSize(fieldWidth, usernameField.getHeight());
+        usernameField.setPosition((viewport.getWorldWidth() - fieldWidth) / 2, y);
         y -= (usernameField.getHeight() + 20);
-        passwordField.setPosition((viewport.getWorldWidth() - passwordField.getPrefWidth()) / 2, y);
-        y -= (passwordField.getHeight() + 40); 
+
+        passwordField.setSize(fieldWidth, passwordField.getHeight());
+        passwordField.setPosition((viewport.getWorldWidth() - fieldWidth) / 2, y);
+        y -= (passwordField.getHeight() + 20);
+
+        confirmPasswordField.setSize(fieldWidth, confirmPasswordField.getHeight());
+        confirmPasswordField.setPosition((viewport.getWorldWidth() - fieldWidth) / 2, y);
+        y -= (confirmPasswordField.getHeight() + 20);
+
         submitButton.setPosition((viewport.getWorldWidth() - submitButton.getPrefWidth()) / 2, y);
         y -= (submitButton.getHeight() + 20);
         exitButton.setPosition((viewport.getWorldWidth() - exitButton.getPrefWidth()) / 2, y);
         
         // add all of it to the stage
-        stage.addActor(emailLabel);
         stage.addActor(emailField);
-        stage.addActor(usernameLabel);
         stage.addActor(usernameField);
-        stage.addActor(passwordLabel);
         stage.addActor(passwordField);
+        stage.addActor(confirmPasswordField);
         stage.addActor(submitButton);
         stage.addActor(exitButton);
 
@@ -116,7 +119,8 @@ public class RegistrationScreen implements Screen, MessageListener  {
                 String email = emailField.getText();
                 String username = usernameField.getText();
                 String password = passwordField.getText();
-                System.out.println("Email: " + email + " Username: " + username + " Password: " + password);
+                String confirmPassword = confirmPasswordField.getText();
+                System.out.println("Email: " + email + " Username: " + username + " Password: " + password + " Confirm Password: " + confirmPassword);
                 // webSocketClient = new GameWebSocketClient("ws://localhost:8080/registration", RegistrationScreen.this);
                 // webSocketClient.connect();
                 // webSocketClient.send("email=" + email + "&username=" + username + "&password=" + password);

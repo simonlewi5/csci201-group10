@@ -123,29 +123,24 @@ public class GameAssetManager {
     }
 
     public TextField.TextFieldStyle getTextFieldStyle(float scale) {
-        Texture fieldTex = manager.get(TEXT_FIELD_BACKGROUND_UP, Texture.class);
+        TextureRegion upRegion = new TextureRegion(manager.get(TEXT_FIELD_BACKGROUND_UP, Texture.class));
+        TextureRegion downRegion = new TextureRegion(manager.get(TEXT_FIELD_BACKGROUND_DOWN, Texture.class));
+        NinePatch upPatch = new NinePatch(upRegion, 35, 25, 0, 0);
+        NinePatch downPatch = new NinePatch(downRegion, 35, 25, 0, 0); 
+    
+        NinePatchDrawable backgroundUpDrawable = new NinePatchDrawable(upPatch);
+        NinePatchDrawable backgroundDownDrawable = new NinePatchDrawable(downPatch);
+    
         BitmapFont buttonFont = getFontSmall();
-        int left = 25;
-        int right = 25;
-        int top = 0;
-        int bottom = 0;
-        NinePatchDrawable backgroundDrawable = new NinePatchDrawable(new NinePatch(fieldTex, left, right, top, bottom));
-        Drawable cursorDrawable = new TextureRegionDrawable(new TextureRegion(manager.get(TEXT_CURSOR_IMAGE, Texture.class)));
-        
+        buttonFont.getData().setScale(scale);
+    
         TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle();
         textFieldStyle.font = buttonFont;
         textFieldStyle.fontColor = Color.valueOf(color);
-        textFieldStyle.cursor = cursorDrawable;
-        // textFieldStyle.selection = selectionDrawable;
-        textFieldStyle.background = backgroundDrawable;
-
-        textFieldStyle.font.getData().setScale(scale);
-
-        // textFieldStyle.font.getData().padTop = -10;
-        // textFieldStyle.font.getData().padBottom = -10;
-        // textFieldStyle.font.getData().padLeft = -10;
-        // textFieldStyle.font.getData().padRight = 0;
-
+        textFieldStyle.background = backgroundUpDrawable;
+        textFieldStyle.focusedBackground = backgroundDownDrawable;
+        textFieldStyle.cursor = new TextureRegionDrawable(new TextureRegion(manager.get(TEXT_CURSOR_IMAGE, Texture.class)));
+    
         return textFieldStyle;
     }
 
