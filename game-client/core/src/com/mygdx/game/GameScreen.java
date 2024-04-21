@@ -17,6 +17,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.graphics.Color;
 
 
 public class GameScreen implements Screen, MessageListener {
@@ -81,6 +82,8 @@ public class GameScreen implements Screen, MessageListener {
 
         // This writes text on the screen at a specific x,y coordinate
         game.font.draw(game.batch, "something something", 0, 480);
+
+        game.font.setColor(Color.WHITE);
         
         if (!serverMessage.isEmpty()) {
             game.font.draw(game.batch, "Server said: " + serverMessage, 100, 100);
