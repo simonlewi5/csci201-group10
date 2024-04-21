@@ -23,6 +23,10 @@ var (
 func websocketHandler(dbService db.DBService) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         conn, err := upgrader.Upgrade(w, r, nil)
+        // db service check
+        if dbService == nil {
+            log.Fatal("dbService is nil")
+        }
         if err != nil {
             log.Println("Failed to upgrade to websocket:", err)
             return
@@ -34,7 +38,7 @@ func websocketHandler(dbService db.DBService) http.HandlerFunc {
 }
 
 func main() {
-    dbService := db.SetupDatabase()
+    dbService = db.SetupDatabase()
     http.HandleFunc("/ws", websocketHandler(dbService))
     fmt.Println("WebSocket server starting on port 8080...")
     if err := http.ListenAndServe(":8080", nil); err != nil {

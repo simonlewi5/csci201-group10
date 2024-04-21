@@ -42,5 +42,6 @@ func SetupDatabase() DBService {
         log.Fatalf("Could not ping database: %v", err)
     }
 
+    log.Println("Database connection successfully established")
     return NewService(db)
 }
