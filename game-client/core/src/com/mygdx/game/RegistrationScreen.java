@@ -52,6 +52,7 @@ public class RegistrationScreen implements Screen, MessageListener  {
         camera.setToOrtho(false, 800, 800 / ASPECT_RATIO); 
         backgroundImage = game.assetManager.getBackgroundImage();
         backgroundMusic = game.assetManager.getBackgroundMusic();
+        stage = new Stage(viewport, game.batch);
     }
     
     @Override
@@ -59,7 +60,6 @@ public class RegistrationScreen implements Screen, MessageListener  {
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
 
-        stage = new Stage(new ScreenViewport()); 
         Gdx.input.setInputProcessor(stage);
     
         initFormElements();
@@ -177,7 +177,10 @@ public class RegistrationScreen implements Screen, MessageListener  {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
-        
+
+        viewport.apply();
+        game.batch.setProjectionMatrix(viewport.getCamera().combined);
+
         game.batch.begin();
         game.batch.draw(backgroundImage, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
         game.batch.end();
@@ -188,10 +191,8 @@ public class RegistrationScreen implements Screen, MessageListener  {
 
     @Override
     public void resize(int width, int height) {
-        stage.getViewport().update(width, height, true);
+        viewport.update(width, height, true);
     }
-
-
 
     @Override
     public void hide() {

@@ -12,6 +12,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 
 public class LoginScreen implements Screen, MessageListener {
 
@@ -25,6 +30,8 @@ public class LoginScreen implements Screen, MessageListener {
     private String serverMessage;
     private GameWebSocketClient webSocketClient;
     private Stage stage;
+    private TextField  usernameField, passwordField;
+    private TextButton submitButton, exitButton;
 
     private final float ASPECT_RATIO = 16 / 9f;
     
@@ -42,23 +49,97 @@ public class LoginScreen implements Screen, MessageListener {
         viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera);
         camera.setToOrtho(false, 800, 800 / ASPECT_RATIO);
 
+        fontLarge = game.assetManager.getFontLarge();
         backgroundImage = game.assetManager.getBackgroundImage();
         backgroundMusic = game.assetManager.getBackgroundMusic();
 
         // Add a resize listener to handle window resizing
         Gdx.graphics.setResizable(true);
+
+        stage = new Stage(viewport, game.batch);
     }
     
     @Override
     public void show() {
-        fontLarge = game.assetManager.getFontLarge();
-        backgroundImage = game.assetManager.getBackgroundImage();
-        backgroundMusic = game.assetManager.getBackgroundMusic();
-
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
 
         Gdx.input.setInputProcessor(stage);
+
+        initFormElements();
+    }
+
+    private void initFormElements() {
+        TextField.TextFieldStyle textFieldStyle = game.assetManager.getTextFieldStyle(1.0f);
+        TextButtonStyle buttonStyle = game.assetManager.getTextButtonStyle(1.0f);
+
+        usernameField = new TextField("", textFieldStyle);
+        usernameField.setMessageText("Username");
+        passwordField = new TextField("", textFieldStyle);
+        passwordField.setMessageText("Password");
+        submitButton = new TextButton("Submit", buttonStyle);
+        exitButton = new TextButton("Exit", buttonStyle);
+
+        passwordField.setPasswordMode(true);
+        passwordField.setPasswordCharacter('*');
+
+        float fieldWidth = 400;
+        float y = viewport.getWorldHeight() / 2 + 100;
+
+        usernameField.pack();
+        passwordField.pack();
+
+        usernameField.setSize(fieldWidth, usernameField.getHeight());
+        usernameField.setPosition((viewport.getWorldWidth() - fieldWidth) / 2, y);
+        y -= (usernameField.getHeight() + 20);
+
+        passwordField.setSize(fieldWidth, passwordField.getHeight());
+        passwordField.setPosition((viewport.getWorldWidth() - fieldWidth) / 2, y);
+        y -= (passwordField.getHeight() + 20);
+
+        submitButton.setPosition((viewport.getWorldWidth() - submitButton.getPrefWidth()) / 2, y);
+        y -= (submitButton.getHeight() + 20);
+        exitButton.setPosition((viewport.getWorldWidth() - exitButton.getPrefWidth()) / 2, y);
+
+        // add all of it to the stage
+        stage.addActor(usernameField);
+        stage.addActor(passwordField);
+        stage.addActor(submitButton);
+        stage.addActor(exitButton);
+
+        submitButton.addListener(new ClickListener() {
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                if (webSocketClient != null && webSocketClient.isOpen()) {
+//                    String username = usernameField.getText();
+//                    String password = passwordField.getText();
+//                    System.out.println(" Username: " + username + " Password: " + password);
+//
+//                    HashMap<String, Object> data = new HashMap<>();
+//                    data.put("action", "register");
+//                    data.put("username", username);
+//                    data.put("password", password);
+//
+//                    String json = new Gson().toJson(data);
+//                    webSocketClient.send(json);
+//                    emailField.setText("");
+//                    usernameField.setText("");
+//                    passwordField.setText("");
+//                    confirmPasswordField.setText("");
+//                } else {
+//                    System.out.println("WebSocket is not open");
+//                }
+//            }
+        });
+
+        exitButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new MainMenuScreen(game));
+            }
+        });
+
+
     }
 
 
@@ -71,19 +152,21 @@ public class LoginScreen implements Screen, MessageListener {
         game.batch.begin();
         game.batch.draw(backgroundImage, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
 
-        GlyphLayout layout = new GlyphLayout(fontLarge, "LOGIN SCREEN");
-        float x = (viewport.getWorldWidth() - layout.width) / 2;
-        float y = (viewport.getWorldHeight() - layout.height) / 2;
-        fontLarge.setColor(Color.WHITE);
-        fontLarge.draw(game.batch, layout, x, y);
+//        GlyphLayout layout = new GlyphLayout(fontLarge, "LOGIN SCREEN");
+//        float x = (viewport.getWorldWidth() - layout.width) / 2;
+//        float y = (viewport.getWorldHeight() - layout.height) / 2;
+//        fontLarge.setColor(Color.WHITE);
+//        fontLarge.draw(game.batch, layout, x, y);
 
         game.batch.end();
+
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
-//        stage.getViewport().update(width, height, true);
     }
 
 
