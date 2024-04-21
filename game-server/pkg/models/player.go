@@ -9,12 +9,6 @@ type Player struct {
 	GamesWon    int    `json:"games_won"`
 	GamesLost   int    `json:"games_lost"`
 	TotalScore  int    `json:"total_score"`
-
-	// Info for the current match
-	CurrentMatchID string `json:"current_match_id"`
-	CurrentMatch   *Match `json:"current_match"`
-	Hand		   Hand   `json:"hand"`
-	CurrScore      int    `json:"curr_score"`
 }
 
 type Credentials struct {

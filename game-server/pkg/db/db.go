@@ -7,13 +7,14 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
-    "github.com/simonlewi5/csci201-group10/game-server/internal/models"
+    "github.com/simonlewi5/csci201-group10/game-server/pkg/models"
 )
 
 type DBService interface {
     RecordMatchEnd(match *models.Match) error
     NewPlayer(player *models.Player) error
     GetPlayer(credentials *models.Credentials) (*models.Player, error)
+    HandleRegisterEmailAndPassword(credentials *models.Credentials) (*models.Player, error)
 }
 
 type serviceImpl struct {

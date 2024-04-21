@@ -9,6 +9,8 @@ const (
 	MessageTypeMatchEnd    MessageType = "MATCH_END"
 	MessageTypeGameUpdate  MessageType = "GAME_UPDATE"
 	MessageTypePlayerAction MessageType = "PLAYER_ACTION"
+	MessageTypeAuthSuccess MessageType = "AUTH_SUCCESS"
+	MessageTypeAuthError   MessageType = "AUTH_ERROR"
 )
 
 type Message struct {

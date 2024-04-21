@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/simonlewi5/csci201-group10/game-server/internal/models"
+	"github.com/simonlewi5/csci201-group10/game-server/pkg/models"
 	"github.com/simonlewi5/csci201-group10/game-server/pkg/db"
 )
 
