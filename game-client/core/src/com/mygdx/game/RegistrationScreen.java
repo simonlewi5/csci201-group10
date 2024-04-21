@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.google.gson.Gson;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
@@ -16,6 +17,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+
+import java.net.URISyntaxException;
+import java.util.HashMap;
+
 import com.badlogic.gdx.Gdx;
 
 
@@ -58,6 +63,15 @@ public class RegistrationScreen implements Screen, MessageListener  {
         Gdx.input.setInputProcessor(stage);
     
         initFormElements();
+
+        try {
+            webSocketClient = new GameWebSocketClient("wss://egyptianratscrew.dev/ws", this);
+            webSocketClient.connect();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void initFormElements() {
@@ -77,6 +91,9 @@ public class RegistrationScreen implements Screen, MessageListener  {
     
         passwordField.setPasswordMode(true);
         passwordField.setPasswordCharacter('*');
+
+        confirmPasswordField.setPasswordMode(true);
+        confirmPasswordField.setPasswordCharacter('*');
     
         float fieldWidth = 400;
         float y = viewport.getWorldHeight() / 2 + 100;
@@ -116,14 +133,33 @@ public class RegistrationScreen implements Screen, MessageListener  {
         submitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                String email = emailField.getText();
-                String username = usernameField.getText();
-                String password = passwordField.getText();
-                String confirmPassword = confirmPasswordField.getText();
-                System.out.println("Email: " + email + " Username: " + username + " Password: " + password + " Confirm Password: " + confirmPassword);
-                // webSocketClient = new GameWebSocketClient("ws://localhost:8080/registration", RegistrationScreen.this);
-                // webSocketClient.connect();
-                // webSocketClient.send("email=" + email + "&username=" + username + "&password=" + password);
+                if (webSocketClient != null && webSocketClient.isOpen()) {
+                    String email = emailField.getText();
+                    String username = usernameField.getText();
+                    String password = passwordField.getText();
+                    String confirmPassword = confirmPasswordField.getText();
+                    System.out.println("Email: " + email + " Username: " + username + " Password: " + password + " Confirm Password: " + confirmPassword);
+
+                    if (!password.equals(confirmPassword)) {
+                        System.out.println("Passwords do not match");
+                        return;
+                    }
+
+                    HashMap<String, Object> data = new HashMap<>();
+                    data.put("action", "register");
+                    data.put("email", email);
+                    data.put("username", username);
+                    data.put("password", password);
+
+                    String json = new Gson().toJson(data);
+                    webSocketClient.send(json);
+                    emailField.setText("");
+                    usernameField.setText("");
+                    passwordField.setText("");
+                    confirmPasswordField.setText("");
+                } else {
+                    System.out.println("WebSocket is not open");
+                }
             }
         });
 
