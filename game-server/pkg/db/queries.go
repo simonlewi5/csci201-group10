@@ -9,7 +9,7 @@ import (
 )
 
 func (s *serviceImpl) NewPlayer(player *models.Player) error {
-	_, err := DB.Exec(`
+	_, err := s.db.Exec(`
 		INSERT INTO players (id, username, firebase_uid, email)
 		VALUES (?, ?, ?, ?)
 	`, player.ID, player.Username, player.FirebaseUID, player.Email)
@@ -31,7 +31,7 @@ func (s *serviceImpl) GetPlayer(credentials *models.Credentials) (*models.Player
 
 func (s *serviceImpl) getPlayerByToken(token string) (*models.Player, error) {
     player := &models.Player{}
-    err := DB.QueryRow(`
+    err := s.db.QueryRow(`
         SELECT id, username, firebase_uid, email, games_played, games_won, games_lost, total_score
         FROM players
         WHERE firebase_uid = ?
@@ -75,26 +75,27 @@ func (s *serviceImpl) getPlayerByEmailAndPassword(email, password string) (*mode
 
 
 func (s *serviceImpl) HandleRegisterEmailAndPassword(credentials *models.Credentials) (*models.Player, error) {
+    
     if credentials.Username == "" || credentials.Email == "" || credentials.Password == "" {
         return nil, errors.New("missing required fields")
     }
 
     // Check if the username or email already exists
     var count int
-    err := DB.QueryRow(`
+    err := s.db.QueryRow(`
         SELECT COUNT(*)
         FROM players
         WHERE username = ? OR email = ?
     `, credentials.Username, credentials.Email).Scan(&count)
     if err != nil {
-        return nil, err
+        return nil, errors.New("failed to check if username or email exists")
     }
     if count > 0 {
         return nil, errors.New("username or email already exists")
     }
     hashedPassword, err := HashPassword(credentials.Password)
     if err != nil {
-        return nil, err
+        return nil, errors.New("failed to hash password")
     }
 
     uuid := generateUUID()
@@ -119,7 +120,7 @@ func (s *serviceImpl) HandleRegisterEmailAndPassword(credentials *models.Credent
 }
 
 func (s *serviceImpl) RecordMatchEnd(match *models.Match) error {
-    tx, err := DB.Begin()
+    tx, err := s.db.Begin()
     if err != nil {
         return err
     }

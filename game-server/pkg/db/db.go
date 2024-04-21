@@ -43,5 +43,9 @@ func SetupDatabase() DBService {
     }
 
     log.Println("Database connection successfully established")
-    return NewService(db)
+    service := NewService(db)
+    if service == nil {
+        log.Fatal("Could not create new service")
+    }
+    return service
 }

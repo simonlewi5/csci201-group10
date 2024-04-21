@@ -59,6 +59,10 @@ func handleLogin(dbService db.DBService, conn *websocket.Conn, data map[string]i
 }
 
 func handleRegistration(dbService db.DBService, conn *websocket.Conn, data map[string]interface{}) {
+    if dbService == nil {
+        log.Println("dbService is nil")
+        return
+    }
     credentials := models.Credentials{
         Username: data["username"].(string),
         Email: data["email"].(string),
