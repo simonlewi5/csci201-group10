@@ -12,6 +12,8 @@ require (
 
 require (
 	github.com/go-sql-driver/mysql v1.8.1
+	github.com/google/uuid v1.6.0
 	github.com/googollee/go-socket.io v1.7.0
-	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/crypto v0.22.0
+	golang.org/x/net v0.21.0 // indirect
 )

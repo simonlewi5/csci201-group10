@@ -39,3 +39,17 @@ func (d Deck) Shuffle() {
 		d.Cards[i], d.Cards[j] = d.Cards[j], d.Cards[i]
 	}
 }
+
+func (d *Deck) DrawCard() Card {
+	card := d.Cards[0]
+	d.Cards = d.Cards[1:]
+	return card
+}
+
+func (d *Deck) DrawCards(n int) []Card {
+	cards := make([]Card, n)
+	for i := 0; i < n; i++ {
+		cards[i] = d.DrawCard()
+	}
+	return cards
+}

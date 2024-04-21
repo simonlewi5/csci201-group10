@@ -9,11 +9,9 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.audio.Music;
+// import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+// import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 
 public class MainMenuScreen implements Screen {
@@ -28,11 +26,6 @@ public class MainMenuScreen implements Screen {
 
     private final float ASPECT_RATIO = 16 / 9f;
     private int lastWidth, lastHeight;
-
-    // Define a ShapeRenderer instance as a class member
-    private final ShapeRenderer shapeRenderer = new ShapeRenderer();
-
-    BitmapFont font;
 
     public MainMenuScreen(final EgyptianRatscrew game) {
         this.game = game;
@@ -79,85 +72,30 @@ public class MainMenuScreen implements Screen {
         float startX = (windowWidth - viewportWidth) / 2;
         float startY = (windowHeight - viewportHeight) / 2;
 
-        // Calculate button dimensions and positions
-        float buttonWidth = 200; // Adjust as needed
-        float buttonHeight = 50; // Adjust as needed
-        float buttonSpacing = 20; // Adjust as needed
-        float bstartX = (viewport.getWorldWidth() - buttonWidth) / 2;
-        float bstartY = (viewport.getWorldHeight() - (buttonHeight * 3 + buttonSpacing * 2)) / 2;
-
         // Set the viewport position to center it in the window
         viewport.setScreenPosition((int) startX, (int) startY);
 
         // Draw background image based on viewport dimensions
         game.batch.draw(backgroundImage, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
 
+//        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("styles.css"));
+//        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+//        parameter.size = 24; // Set the font size
+//        BitmapFont customFont = generator.generateFont(parameter);
+//        generator.dispose(); // Dispose the generator when you're done
+//
+//        // Set the custom font
+//        game.font = customFont;
+
+        game.font.draw(game.batch, "Welcome to Egyptian Ratscrew!!! ", 100, 150);
+        game.font.draw(game.batch, "Tap anywhere to begin!", 100, 100);
+
         game.batch.end();
-
-        // Draw buttons
-        drawButton(bstartX, bstartY + (buttonHeight + buttonSpacing) * 2, buttonWidth, buttonHeight, "Start Game", delta);
-        drawButton(bstartX, bstartY + (buttonHeight + buttonSpacing), buttonWidth, buttonHeight, "Join Game", delta);
-        drawButton(bstartX, bstartY, buttonWidth, buttonHeight, "Exit", delta);
-
-//        if (Gdx.input.isTouched()) {
-//            int touchX = Gdx.input.getX();
-//            int touchY = Gdx.input.getY();
-//
-//            // Check if any button is touched
-//            if (touchX >= startX && touchX <= startX + buttonWidth &&
-//                    touchY >= startY + (buttonHeight + buttonSpacing) * 2 && touchY <= startY + (buttonHeight + buttonSpacing) * 2 + buttonHeight) {
-//                // Start Game button clicked
-//                game.setScreen(new GameScreen(game));
-//                dispose();
-//            } else if (touchX >= startX && touchX <= startX + buttonWidth &&
-//                    touchY >= startY + buttonHeight + buttonSpacing && touchY <= startY + (buttonHeight + buttonSpacing) * 2) {
-//                // Join Game button clicked
-//                // Implement Join Game functionality
-//            } else if (touchX >= startX && touchX <= startX + buttonWidth &&
-//                    touchY >= startY && touchY <= startY + buttonHeight) {
-//                // Exit button clicked
-//                Gdx.app.exit();
-//            }
-//
-//
-//        }
 
         if (Gdx.input.isTouched()) {
             game.setScreen(new GameScreen(game));
             dispose();
         }
-    }
-
-    private void drawButton(float x, float y, float width, float height, String text, float delta) {
-        // Ensure the ShapeRenderer is active
-        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
-        shapeRenderer.setAutoShapeType(true); // Enable automatic shape type selection
-
-        // Draw yellow outline
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(Color.YELLOW);
-        shapeRenderer.rect(x, y, width, height);
-        shapeRenderer.end();
-
-        // Draw white button
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.WHITE);
-        shapeRenderer.rect(x, y, width, height);
-        shapeRenderer.end();
-
-        game.batch.begin();
-
-        // Draw text centered on the button
-        GlyphLayout layout = new GlyphLayout();
-        layout.setText(game.font, text);
-        float textX = x + (width - layout.width) / 2;
-        float textY = y + (height + layout.height) / 2;
-
-        // Adjust text color to black
-        game.font.setColor(Color.BLACK);
-        game.font.draw(game.batch, layout, textX, textY);
-
-        game.batch.end();
     }
 
     @Override

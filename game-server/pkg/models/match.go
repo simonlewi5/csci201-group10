@@ -1,5 +1,10 @@
 package models
 
+import (
+	"fmt"
+	"time"
+)
+
 type MatchState string
 
 const (
@@ -12,6 +17,7 @@ const (
 type Match struct {
 	ID         string     `json:"id"`
 	Players    []*Player  `json:"players"`
+	PlayerScores map[string]int `json:"player_scores"` //map of player ID to score
 	MatchState MatchState `json:"match_state"`
 	TurnIndex  int        `json:"turn_index"`
 	Winner     Player     `json:"winner"`
@@ -43,4 +49,30 @@ type MatchEndResponse struct {
 
 type MatchEndUpdate struct {
 	Match Match `json:"match"`
+}
+
+func NewMatch(players []*Player) *Match {
+	deck := NewDeck()
+	deck.Shuffle()
+
+	matchID := generateMatchID()
+
+	match := &Match{
+		ID:         matchID,
+		Players:    players,
+		MatchState: MatchStateInit,
+		TurnIndex:  0,
+		//Winner is set to an empty player to indicate that the match is still in progress
+		Winner:     Player{},
+		StartTime:  time.Now().Unix(),
+		//EndTime is set to 0 to indicate that the match is still in progress
+		EndTime: 	0,
+		Deck:       deck,
+	}
+
+	return match
+}
+
+func generateMatchID() string {
+	return fmt.Sprintf("%d", time.Now().UnixNano())
 }

@@ -11,6 +11,17 @@ type Player struct {
 	TotalScore  int    `json:"total_score"`
 }
 
+type Credentials struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Token    string `json:"token"`
+}
+
+type Hand struct {
+	Cards []Card `json:"cards"`
+}
+
 func NewPlayer(id, username, firebaseUID, email string) Player {
 	return Player{
 		ID:          id,
