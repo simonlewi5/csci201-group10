@@ -38,7 +38,7 @@ public class MainMenuScreen implements Screen {
         this.game = game;
 
         camera = new OrthographicCamera();
-        viewport = new FitViewport(800, 800 / ASPECT_RATIO, camera); // Use desired aspect ratio
+        viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera); // Use desired aspect ratio
         camera.setToOrtho(false, 800, 800 / ASPECT_RATIO); // Set camera size to match viewport size
 
         backgroundImage = new Texture(Gdx.files.internal("main_menu_background.png"));
@@ -57,6 +57,7 @@ public class MainMenuScreen implements Screen {
     @Override
     public void show() {
 
+        mainMenuMusic.setVolume(0.5f);
         mainMenuMusic.play();
 
     }

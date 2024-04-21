@@ -145,7 +145,8 @@ func (s *serviceImpl) RecordMatchEnd(match *models.Match) error {
 
     for _, player := range match.Players {
         won := player.ID == match.Winner.ID
-        _, err = updateStmt.Exec(boolToInt(won), boolToInt(!won), player.CurrScore, player.ID)
+        playerScore := match.PlayerScores[player.ID]
+        _, err = updateStmt.Exec(boolToInt(won), boolToInt(!won), playerScore, player.ID)
         if err != nil {
             return err
         }
