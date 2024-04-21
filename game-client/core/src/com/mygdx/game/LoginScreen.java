@@ -9,8 +9,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.graphics.Color;
 
-
-public class GameScreen implements Screen, MessageListener {
+public class LoginScreen implements Screen, MessageListener {
     final EgyptianRatscrew game;
     private BitmapFont fontLarge;
     private Texture backgroundImage;
@@ -24,7 +23,7 @@ public class GameScreen implements Screen, MessageListener {
         System.out.println("Message received: " + serverMessage);
     }
 
-    public GameScreen(final EgyptianRatscrew game) {
+    public LoginScreen(final EgyptianRatscrew game) {
         this.game = game;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
@@ -50,7 +49,7 @@ public class GameScreen implements Screen, MessageListener {
         game.batch.begin();
         game.batch.draw(backgroundImage, 0, 0, 800, 480);
 
-        GlyphLayout layout = new GlyphLayout(fontLarge, "GAME SCREEN");
+        GlyphLayout layout = new GlyphLayout(fontLarge, "LOGIN SCREEN");
         float x = (800 - layout.width) / 2;
         float y = (480 + layout.height) / 2;
         fontLarge.setColor(Color.WHITE);

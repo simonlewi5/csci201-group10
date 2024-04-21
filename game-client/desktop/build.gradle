@@ -5,7 +5,8 @@ sourceSets.main.resources.srcDirs = ["../assets"]
 project.ext.mainClassName = "com.mygdx.game.DesktopLauncher"
 project.ext.assetsDir = new File("../assets")
 
-import org.gradle.internal.os.OperatingSystem
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
 
 tasks.register('run', JavaExec) {
     dependsOn classes
@@ -15,8 +16,7 @@ tasks.register('run', JavaExec) {
     workingDir = project.assetsDir
     ignoreExitValue = true
 
-    if (OperatingSystem.current() == OperatingSystem.MAC_OS) {
-        // Required to run on macOS
+    if (DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX()) {
         jvmArgs += "-XstartOnFirstThread"
     }
 }
