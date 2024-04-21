@@ -78,7 +78,7 @@ public class MainMenuScreen implements Screen {
         
         Gdx.input.setInputProcessor(stage);
 
-        TextButton.TextButtonStyle textButtonStyle = game.assetManager.getTextButtonStyle(0.8f);
+        TextButton.TextButtonStyle textButtonStyle = game.assetManager.getTextButtonStyle(1.0f);
         
         loginButton = new TextButton("Login", textButtonStyle);
         registrationButton = new TextButton("Create a Profile", textButtonStyle);
@@ -139,7 +139,6 @@ public class MainMenuScreen implements Screen {
         game.batch.draw(backgroundImage, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
         game.batch.end();
         
-        // Draw the stage with all its actors (buttons)
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }

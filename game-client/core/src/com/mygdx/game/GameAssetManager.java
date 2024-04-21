@@ -1,9 +1,12 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
@@ -11,7 +14,9 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader.FreeTypeFontLoaderParameter;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.audio.Music;
 
@@ -24,6 +29,11 @@ public class GameAssetManager {
     private static final String BACKGROUND_MUSIC = "Taj_Mahal.ogg";
     private static final String BUTTON_IMAGE = "buttons.png";
     private static final String CURSOR_IMAGE = "cursor.png";
+    private static final String TEXT_CURSOR_IMAGE = "text_cursor.png";
+    private static final String TEXT_FIELD_BACKGROUND_UP = "button-up.9.png";
+    private static final String TEXT_FIELD_BACKGROUND_DOWN = "button-down.9.png";
+
+    String color = "#e7e5e4";
 
     // Loading assets
     public void loadAssets() {
@@ -42,14 +52,24 @@ public class GameAssetManager {
         fontParams.fontParameters.size = 72;
         manager.load("font72.ttf", BitmapFont.class, fontParams);
 
+        fontParams.fontParameters.size = 24;
+        manager.load("font24.ttf", BitmapFont.class, fontParams);
+
         // Load other assets
         manager.load(BACKGROUND_IMAGE, Texture.class);
         manager.load(BACKGROUND_MUSIC, Music.class);
         manager.load(BUTTON_IMAGE, Texture.class);
         manager.load(CURSOR_IMAGE, Texture.class);
+        manager.load(TEXT_CURSOR_IMAGE, Texture.class);
+        manager.load(TEXT_FIELD_BACKGROUND_UP, Texture.class);
+        manager.load(TEXT_FIELD_BACKGROUND_DOWN, Texture.class);
     }
 
     // Retrieving assets
+    public BitmapFont getFontSmall() {
+        return manager.get("font24.ttf", BitmapFont.class);
+    }
+
     public BitmapFont getFontMedium() {
         return manager.get("font36.ttf", BitmapFont.class);
     }
@@ -79,8 +99,8 @@ public class GameAssetManager {
     }
 
     public TextButton.TextButtonStyle getTextButtonStyle(float scale) {
-        Texture buttonTex = manager.get(BUTTON_IMAGE, Texture.class);
         BitmapFont buttonFont = getFontMedium();
+        Texture buttonTex = manager.get(BUTTON_IMAGE, Texture.class);
         Drawable upDrawable = new TextureRegionDrawable(new TextureRegion(manager.get(BUTTON_IMAGE, Texture.class), 0, 0, buttonTex.getWidth(), buttonTex.getHeight() / 2));
         Drawable downDrawable = new TextureRegionDrawable(new TextureRegion(manager.get(BUTTON_IMAGE, Texture.class), 0, buttonTex.getHeight() / 2, buttonTex.getWidth(), buttonTex.getHeight() / 2));
         
@@ -102,8 +122,39 @@ public class GameAssetManager {
         return textButtonStyle;
     }
 
+    public TextField.TextFieldStyle getTextFieldStyle(float scale) {
+        Texture fieldTex = manager.get(TEXT_FIELD_BACKGROUND_UP, Texture.class);
+        BitmapFont buttonFont = getFontSmall();
+        int left = 25;
+        int right = 25;
+        int top = 0;
+        int bottom = 0;
+        NinePatchDrawable backgroundDrawable = new NinePatchDrawable(new NinePatch(fieldTex, left, right, top, bottom));
+        Drawable cursorDrawable = new TextureRegionDrawable(new TextureRegion(manager.get(TEXT_CURSOR_IMAGE, Texture.class)));
+        
+        TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle();
+        textFieldStyle.font = buttonFont;
+        textFieldStyle.fontColor = Color.valueOf(color);
+        textFieldStyle.cursor = cursorDrawable;
+        // textFieldStyle.selection = selectionDrawable;
+        textFieldStyle.background = backgroundDrawable;
+
+        textFieldStyle.font.getData().setScale(scale);
+
+        // textFieldStyle.font.getData().padTop = -10;
+        // textFieldStyle.font.getData().padBottom = -10;
+        // textFieldStyle.font.getData().padLeft = -10;
+        // textFieldStyle.font.getData().padRight = 0;
+
+        return textFieldStyle;
+    }
+
     public Texture getCursorImage() {
         return manager.get(CURSOR_IMAGE, Texture.class);
+    }
+
+    public Texture getTextCursorImage() {
+        return manager.get(TEXT_CURSOR_IMAGE, Texture.class);
     }
 
     // Dispose of assets and manager
