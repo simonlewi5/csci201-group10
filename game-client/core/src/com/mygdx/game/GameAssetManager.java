@@ -23,6 +23,7 @@ public class GameAssetManager {
     private static final String BACKGROUND_IMAGE = "main_menu_background.png";
     private static final String BACKGROUND_MUSIC = "Taj_Mahal.ogg";
     private static final String BUTTON_IMAGE = "buttons.png";
+    private static final String CURSOR_IMAGE = "cursor.png";
 
     // Loading assets
     public void loadAssets() {
@@ -41,11 +42,11 @@ public class GameAssetManager {
         fontParams.fontParameters.size = 72;
         manager.load("font72.ttf", BitmapFont.class, fontParams);
 
-
-        // Load background image and music
+        // Load other assets
         manager.load(BACKGROUND_IMAGE, Texture.class);
         manager.load(BACKGROUND_MUSIC, Music.class);
         manager.load(BUTTON_IMAGE, Texture.class);
+        manager.load(CURSOR_IMAGE, Texture.class);
     }
 
     // Retrieving assets
@@ -99,6 +100,10 @@ public class GameAssetManager {
         textButtonStyle.font.getData().padRight = -50;
         
         return textButtonStyle;
+    }
+
+    public Texture getCursorImage() {
+        return manager.get(CURSOR_IMAGE, Texture.class);
     }
 
     // Dispose of assets and manager
