@@ -29,10 +29,9 @@ public class MainMenuScreen implements Screen {
     Music mainMenuMusic;
 
     private final float ASPECT_RATIO = 16 / 9f;
-    private int lastWidth, lastHeight;
 
     private float buttonHeight = 50;
-    private float buttonSpacing = 40; 
+    private float buttonSpacing = 40;
     private float bstartY;
 
     private TextButton loginButton;
@@ -51,7 +50,7 @@ public class MainMenuScreen implements Screen {
 
         camera = new OrthographicCamera();
         viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera);
-        camera.setToOrtho(false, 800, 800 / ASPECT_RATIO); 
+        camera.setToOrtho(false, 800, 800 / ASPECT_RATIO);
 
         backgroundImage = game.assetManager.getBackgroundImage();
         mainMenuMusic = game.assetManager.getBackgroundMusic();
@@ -60,11 +59,6 @@ public class MainMenuScreen implements Screen {
 
         // Add a resize listener to handle window resizing
         Gdx.graphics.setResizable(true);
-
-        // Initialize lastWidth and lastHeight with initial screen size
-        lastWidth = Gdx.graphics.getWidth();
-        lastHeight = Gdx.graphics.getHeight();
-        System.out.println("Last width: " + lastWidth + ", Last height: " + lastHeight);
 
         bstartY = (viewport.getWorldHeight() - (buttonHeight * 3 + buttonSpacing * 2)) / 2;
 
@@ -75,11 +69,11 @@ public class MainMenuScreen implements Screen {
     public void show() {
         mainMenuMusic.setVolume(0.5f);
         mainMenuMusic.play();
-        
+
         Gdx.input.setInputProcessor(stage);
 
         TextButton.TextButtonStyle textButtonStyle = game.assetManager.getTextButtonStyle(1.0f);
-        
+
         loginButton = new TextButton("Login", textButtonStyle);
         registrationButton = new TextButton("Create a Profile", textButtonStyle);
         exitButton = new TextButton("Exit", textButtonStyle);
@@ -87,7 +81,7 @@ public class MainMenuScreen implements Screen {
         loginButton.getLabel().setAlignment(Align.center);
         registrationButton.getLabel().setAlignment(Align.center);
         exitButton.getLabel().setAlignment(Align.center);
-        
+
         float loginButtonWidth = loginButton.getPrefWidth();
         float registrationButtonWidth = registrationButton.getPrefWidth();
         float exitButtonWidth = exitButton.getPrefWidth();
@@ -99,7 +93,7 @@ public class MainMenuScreen implements Screen {
         loginButton.setPosition((viewport.getWorldWidth() - loginButtonWidth) / 2, bstartY + (buttonHeight + buttonSpacing) * 2);
         registrationButton.setPosition((viewport.getWorldWidth() - registrationButtonWidth) / 2, bstartY + (buttonHeight + buttonSpacing));
         exitButton.setPosition((viewport.getWorldWidth() - exitButtonWidth) / 2, bstartY);
-        
+
         loginButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -120,9 +114,9 @@ public class MainMenuScreen implements Screen {
                 Gdx.app.exit();
             }
         });
-        
+
         // needs listeners for registrationButton and exitButton
-        
+
         stage.addActor(loginButton);
         stage.addActor(registrationButton);
         stage.addActor(exitButton);
@@ -131,40 +125,40 @@ public class MainMenuScreen implements Screen {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
-        
+
         viewport.apply();
         game.batch.setProjectionMatrix(viewport.getCamera().combined);
-        
+
         game.batch.begin();
         game.batch.draw(backgroundImage, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
         game.batch.end();
-        
+
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }
 
-    
+
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
         stage.getViewport().update(width, height, true);
     }
-    
+
     @Override
     public void pause() {
-        
+
     }
-    
+
     @Override
     public void resume() {
-        
+
     }
-    
+
     @Override
     public void hide() {
-        
+
     }
-    
+
     @Override
     public void dispose() {
         stage.dispose();
