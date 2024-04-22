@@ -117,9 +117,8 @@ public class LoginScreen implements Screen, MessageListener {
                if (webSocketClient != null && webSocketClient.isOpen()) {
                    String username = usernameField.getText();
                    String password = passwordField.getText();
-                   System.out.println(" Username: " + username + " Password: " + password);
-
                    HashMap<String, Object> data = new HashMap<>();
+                   
                    data.put("action", "login");
                    data.put("username", username);
                    data.put("password", password);
@@ -189,6 +188,7 @@ public class LoginScreen implements Screen, MessageListener {
     public void dispose() {
         backgroundMusic.stop();
     	webSocketClient.close();
+        stage.dispose();
     }
 
 }
