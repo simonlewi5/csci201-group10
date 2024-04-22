@@ -35,6 +35,5 @@ public class GameWebSocketClient extends WebSocketClient {
     public void onError(Exception ex) {
         ex.printStackTrace();
     }
-
     
 }

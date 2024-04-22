@@ -8,13 +8,11 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -38,8 +36,27 @@ public class LoginScreen implements Screen, MessageListener {
 
     
     public void messageReceived(String message) {
-    	this.serverMessage = message;
-        System.out.println("Message received: " + serverMessage);
+        Gdx.app.postRunnable(new Runnable() {
+            @Override
+            public void run() {
+                serverMessage = message;
+                System.out.println("Message received: " + serverMessage);
+                Gson gson = new Gson();
+                Response response = gson.fromJson(serverMessage, Response.class);
+                String type = response.getType();
+                
+                if (type.equals("AUTH_SUCCESS")) {
+                    JsonObject playerJson = response.getData().getAsJsonObject("player");
+                    Player player = gson.fromJson(playerJson, Player.class);
+                    
+                    game.player1 = player;
+                    System.out.println("Login successful for player: " + player.getUsername());
+                    game.setScreen(new UserMenuScreen(game));
+                } else if (type.equals("AUTH_FAILURE")) {
+                    System.out.println("Authentication failed");
+                }
+            }
+        });
     }
 
     public LoginScreen(final EgyptianRatscrew game) {
@@ -118,7 +135,7 @@ public class LoginScreen implements Screen, MessageListener {
                    String username = usernameField.getText();
                    String password = passwordField.getText();
                    HashMap<String, Object> data = new HashMap<>();
-                   
+
                    data.put("action", "login");
                    data.put("username", username);
                    data.put("password", password);
@@ -152,15 +169,7 @@ public class LoginScreen implements Screen, MessageListener {
         game.batch.setProjectionMatrix(viewport.getCamera().combined);
         game.batch.begin();
         game.batch.draw(backgroundImage, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
-
-//        GlyphLayout layout = new GlyphLayout(fontLarge, "LOGIN SCREEN");
-//        float x = (viewport.getWorldWidth() - layout.width) / 2;
-//        float y = (viewport.getWorldHeight() - layout.height) / 2;
-//        fontLarge.setColor(Color.WHITE);
-//        fontLarge.draw(game.batch, layout, x, y);
-
         game.batch.end();
-
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }
@@ -169,8 +178,6 @@ public class LoginScreen implements Screen, MessageListener {
     public void resize(int width, int height) {
         viewport.update(width, height, true);
     }
-
-
 
     @Override
     public void hide() {
