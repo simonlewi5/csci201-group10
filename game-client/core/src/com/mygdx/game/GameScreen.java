@@ -27,11 +27,14 @@ public class GameScreen implements Screen, MessageListener {
 
     private BitmapFont fontLarge;
     private Texture backgroundImage;
-    private Music mainMenuMusic;
+    private Music backgroundMusic;
 
     private OrthographicCamera camera;
     private Stage stage;
     private Viewport viewport;
+
+    private TextButton playButton;
+    private TextButton slapButton;
 
     private String serverMessage;
     private GameWebSocketClient webSocketClient;
@@ -41,13 +44,13 @@ public class GameScreen implements Screen, MessageListener {
     private String bottomCard;
     private List<String> hand;
 
-    private bool mustFace = false;
+    private Boolean mustFace = false;
     private int turns = 0;
 
     private final float ASPECT_RATIO = 16 / 9f;
 
     private int numPlayers;
-    private List<string> players;
+    private List<String> players;
 
     public void messageReceived(String message) {
         this.serverMessage = message;
@@ -62,9 +65,9 @@ public class GameScreen implements Screen, MessageListener {
         camera.setToOrtho(false, 800, 800 / ASPECT_RATIO);
 
         backgroundImage = game.assetManager.getBackgroundImage();
-        mainMenuMusic = game.assetManager.getBackgroundMusic();
+        backgroundMusic = game.assetManager.getBackgroundMusic();
 
-        mainMenuMusic.setLooping(true);
+        backgroundMusic.setLooping(true);
 
         // Add a resize listener to handle window resizing
         Gdx.graphics.setResizable(true);
@@ -119,11 +122,11 @@ public class GameScreen implements Screen, MessageListener {
         game.batch.end();
 
         // Something like this...
-        if (currentPlayer() == this.username) {
-            duringTurn();
-        } else {
-            offTurn();
-        }
+//        if (currentPlayer() == this.username) {
+//            duringTurn();
+//        } else {
+//            offTurn();
+//        }
     }
 
     private void duringTurn() {
@@ -136,16 +139,16 @@ public class GameScreen implements Screen, MessageListener {
         playButton.getLabel().setAlignment(Align.center);
         slapButton.getLabel().setAlignment(Align.center);
 
-        float playButtonWidth = // do later
-        float slapButtonWidth = // do later
+        float playButtonWidth = 50; // fix later
+        float slapButtonWidth = 50; // fix later
 
-        playButton.setPosition( , );
-        slapButton.setPosition( , );
+        playButton.setPosition(50,50); // fix later
+        slapButton.setPosition(50,50); // fix later
 
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                play();
+                playCard();
             }
         });
 
@@ -156,12 +159,12 @@ public class GameScreen implements Screen, MessageListener {
             }
         });
 
-        if ( ""message received"" == "center grabbed") {
-            mustFace = false;
-            turns = 0;
-            nextTurn();
-            centerPile.clear(); // smth like this
-        }
+//        if ( ""message received"" == "center grabbed") {
+//            mustFace = false;
+//            turns = 0;
+//            nextTurn();
+//            centerPile.clear(); // smth like this
+//        }
 
     }
 
@@ -173,9 +176,9 @@ public class GameScreen implements Screen, MessageListener {
 
         slapButton.getLabel().setAlignment(Align.center);
 
-        float slapButtonWidth = // do later
+        float slapButtonWidth = 50; // do later
 
-        slapButton.setPosition( , );
+        slapButton.setPosition(50,50); // fix later
 
         slapButton.addListener(new ClickListener() {
             @Override
@@ -184,9 +187,9 @@ public class GameScreen implements Screen, MessageListener {
             }
         });
 
-        if ( ""message received"" == "center grabbed") {
-            centerPile.clear(); // smth like this
-        }
+//        if ( ""message received"" == "center grabbed") {
+//            centerPile.clear(); // smth like this
+//        }
     }
 
     private void drawGameElements() {
@@ -222,24 +225,24 @@ public class GameScreen implements Screen, MessageListener {
         // Send new centerPile to all players
         // Send new hand number to all players
 
-        if (mustFace) {
-            if (topCard is a faceCard) {
-                mustFace = false;
-                turns = 0;
-                nextTurn();
-            }
+//        if (mustFace) {
+//            if (topCard is a faceCard) {
+//                mustFace = false;
+//                turns = 0;
+//                nextTurn();
+//            }
+//
+//            else if (turns == 0) {
+//                mustFace = false;
+//                // tell previous to grab center
+//            }
+//        }
 
-            else if (turns == 0) {
-                mustFace = false;
-                // tell previous to grab center
-            }
-        }
-
-        else {
-            if (turns == 0) {
-                nextTurn();
-            }
-        }
+//        else {
+//            if (turns == 0) {
+//                nextTurn();
+//            }
+//        }
     }
 
     private void stashCard() {
@@ -275,8 +278,10 @@ public class GameScreen implements Screen, MessageListener {
         }
     }
 
-    private bool isValidSlap() {
+    // finish later
+    private Boolean isValidSlap() {
         // add different possible combos of first three cards
+        return false;
     }
 
     private void nextTurn() {
