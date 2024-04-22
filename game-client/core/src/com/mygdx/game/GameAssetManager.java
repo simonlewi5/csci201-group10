@@ -32,6 +32,7 @@ public class GameAssetManager {
     private static final String TEXT_CURSOR_IMAGE = "text_cursor.png";
     private static final String TEXT_FIELD_BACKGROUND_UP = "button-up.9.png";
     private static final String TEXT_FIELD_BACKGROUND_DOWN = "button-down.9.png";
+    private static final String TABLE_IMAGE = "game_table.png";
 
     String color = "#e7e5e4";
 
@@ -63,6 +64,7 @@ public class GameAssetManager {
         manager.load(TEXT_CURSOR_IMAGE, Texture.class);
         manager.load(TEXT_FIELD_BACKGROUND_UP, Texture.class);
         manager.load(TEXT_FIELD_BACKGROUND_DOWN, Texture.class);
+        manager.load(TABLE_IMAGE, Texture.class);
     }
 
     // Retrieving assets
@@ -80,6 +82,10 @@ public class GameAssetManager {
 
     public Texture getBackgroundImage() {
         return manager.get(BACKGROUND_IMAGE, Texture.class);
+    }
+
+    public Texture getTableImage() {
+        return manager.get(TABLE_IMAGE, Texture.class);
     }
 
     public Music getBackgroundMusic() {
