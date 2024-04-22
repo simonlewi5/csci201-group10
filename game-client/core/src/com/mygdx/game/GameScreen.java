@@ -90,9 +90,6 @@ public class GameScreen implements Screen, MessageListener {
 
     @Override
     public void show() {
-        mainMenuMusic.setVolume(0.5f);
-        mainMenuMusic.play();
-
         Gdx.input.setInputProcessor(stage);
 
         fontLarge = game.assetManager.getFontLarge();
