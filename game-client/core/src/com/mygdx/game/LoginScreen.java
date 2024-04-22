@@ -1,5 +1,8 @@
 package com.mygdx.game;
 
+import java.net.URISyntaxException;
+import java.util.HashMap;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
@@ -11,6 +14,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.google.gson.Gson;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -19,21 +23,19 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 
 public class LoginScreen implements Screen, MessageListener {
-
-    Viewport viewport;
-
     final EgyptianRatscrew game;
-    private BitmapFont fontLarge;
+    private final float ASPECT_RATIO = 16 / 9f;
     private Texture backgroundImage;
     private Music backgroundMusic;
     private OrthographicCamera camera;
     private String serverMessage;
     private GameWebSocketClient webSocketClient;
+    
     private Stage stage;
     private TextField  usernameField, passwordField;
     private TextButton submitButton, exitButton;
+    Viewport viewport;
 
-    private final float ASPECT_RATIO = 16 / 9f;
     
     public void messageReceived(String message) {
     	this.serverMessage = message;
@@ -42,21 +44,14 @@ public class LoginScreen implements Screen, MessageListener {
 
     public LoginScreen(final EgyptianRatscrew game) {
         this.game = game;
-
         camera = new OrthographicCamera();
-
         camera.setToOrtho(false, 800, 800 / ASPECT_RATIO);
         viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera);
-        camera.setToOrtho(false, 800, 800 / ASPECT_RATIO);
-
-        fontLarge = game.assetManager.getFontLarge();
         backgroundImage = game.assetManager.getBackgroundImage();
         backgroundMusic = game.assetManager.getBackgroundMusic();
-
-        // Add a resize listener to handle window resizing
-        Gdx.graphics.setResizable(true);
-
         stage = new Stage(viewport, game.batch);
+
+        Gdx.graphics.setResizable(true);
     }
     
     @Override
@@ -67,6 +62,15 @@ public class LoginScreen implements Screen, MessageListener {
         Gdx.input.setInputProcessor(stage);
 
         initFormElements();
+
+        try {
+            webSocketClient = new GameWebSocketClient("wss://egyptianratscrew.dev/ws", this);
+            webSocketClient.connect();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void initFormElements() {
@@ -108,28 +112,26 @@ public class LoginScreen implements Screen, MessageListener {
         stage.addActor(exitButton);
 
         submitButton.addListener(new ClickListener() {
-//            @Override
-//            public void clicked(InputEvent event, float x, float y) {
-//                if (webSocketClient != null && webSocketClient.isOpen()) {
-//                    String username = usernameField.getText();
-//                    String password = passwordField.getText();
-//                    System.out.println(" Username: " + username + " Password: " + password);
-//
-//                    HashMap<String, Object> data = new HashMap<>();
-//                    data.put("action", "register");
-//                    data.put("username", username);
-//                    data.put("password", password);
-//
-//                    String json = new Gson().toJson(data);
-//                    webSocketClient.send(json);
-//                    emailField.setText("");
-//                    usernameField.setText("");
-//                    passwordField.setText("");
-//                    confirmPasswordField.setText("");
-//                } else {
-//                    System.out.println("WebSocket is not open");
-//                }
-//            }
+           @Override
+           public void clicked(InputEvent event, float x, float y) {
+               if (webSocketClient != null && webSocketClient.isOpen()) {
+                   String username = usernameField.getText();
+                   String password = passwordField.getText();
+                   System.out.println(" Username: " + username + " Password: " + password);
+
+                   HashMap<String, Object> data = new HashMap<>();
+                   data.put("action", "login");
+                   data.put("username", username);
+                   data.put("password", password);
+
+                   String json = new Gson().toJson(data);
+                   webSocketClient.send(json);
+                   usernameField.setText("");
+                   passwordField.setText("");
+               } else {
+                   System.out.println("WebSocket is not open");
+               }
+           }
         });
 
         exitButton.addListener(new ClickListener() {

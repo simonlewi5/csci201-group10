@@ -38,9 +38,9 @@ func HandleConnections(dbService db.DBService) func(*websocket.Conn) {
 func handleLogin(dbService db.DBService, conn *websocket.Conn, data map[string]interface{}) {
     credentials := models.Credentials{
         Username: data["username"].(string),
-        Email: data["email"].(string),
         Password: data["password"].(string),
     }
+
     player, err := dbService.GetPlayer(&credentials)
     if err != nil {
         sendMessage(conn, models.Message{
@@ -49,6 +49,7 @@ func handleLogin(dbService db.DBService, conn *websocket.Conn, data map[string]i
         })
         return
     }
+    
     sendMessage(conn, models.Message{
         Type: models.MessageTypeAuthSuccess,
         Data: map[string]interface{}{
@@ -59,10 +60,6 @@ func handleLogin(dbService db.DBService, conn *websocket.Conn, data map[string]i
 }
 
 func handleRegistration(dbService db.DBService, conn *websocket.Conn, data map[string]interface{}) {
-    if dbService == nil {
-        log.Println("dbService is nil")
-        return
-    }
     credentials := models.Credentials{
         Username: data["username"].(string),
         Email: data["email"].(string),
