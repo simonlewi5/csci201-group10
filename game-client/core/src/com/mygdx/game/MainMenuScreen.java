@@ -67,7 +67,7 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void show() {
-        mainMenuMusic.setVolume(0.5f);
+        mainMenuMusic.setVolume(game.getMusicVolume());
         mainMenuMusic.play();
 
         Gdx.input.setInputProcessor(stage);
@@ -114,8 +114,6 @@ public class MainMenuScreen implements Screen {
                 Gdx.app.exit();
             }
         });
-
-        // needs listeners for registrationButton and exitButton
 
         stage.addActor(loginButton);
         stage.addActor(registrationButton);

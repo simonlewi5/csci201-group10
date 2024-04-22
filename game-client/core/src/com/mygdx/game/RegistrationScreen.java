@@ -57,6 +57,7 @@ public class RegistrationScreen implements Screen, MessageListener  {
     
     @Override
     public void show() {
+        backgroundMusic.setVolume(game.getMusicVolume());
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
 

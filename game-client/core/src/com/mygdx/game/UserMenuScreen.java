@@ -11,11 +11,13 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
 public class UserMenuScreen implements Screen {
 
@@ -34,9 +36,11 @@ public class UserMenuScreen implements Screen {
     private float buttonSpacing = 40;
     private float bstartY;
 
-    private TextButton loginButton;
-    private TextButton registrationButton;
-    private TextButton exitButton;
+    private TextField codeInputField, volumeField;
+    private TextButton quickPlayButton, codeSubmitButton, settingsButton, exitButton,
+            setVolumeButton, settingsExitButton;
+    private Slider volumeSlider;
+    private Table playMenu, settingsMenu;
 
     String color = "#e7e5e4";
 
@@ -54,7 +58,7 @@ public class UserMenuScreen implements Screen {
 
         backgroundImage = game.assetManager.getBackgroundImage();
         mainMenuMusic = game.assetManager.getBackgroundMusic();
-
+        mainMenuMusic.setVolume(game.getMusicVolume());
         mainMenuMusic.setLooping(true);
 
         // Add a resize listener to handle window resizing
@@ -67,59 +71,17 @@ public class UserMenuScreen implements Screen {
 
     @Override
     public void show() {
-        mainMenuMusic.setVolume(0.5f);
+        mainMenuMusic.setVolume(game.getMusicVolume());
         mainMenuMusic.play();
 
         Gdx.input.setInputProcessor(stage);
 
+        TextField.TextFieldStyle textFieldStyle = game.assetManager.getTextFieldStyle(1.0f);
         TextButton.TextButtonStyle textButtonStyle = game.assetManager.getTextButtonStyle(1.0f);
 
-        loginButton = new TextButton("Stats & Settings", textButtonStyle);
-        registrationButton = new TextButton("Start Game", textButtonStyle);
-        exitButton = new TextButton("Exit", textButtonStyle);
-
-        loginButton.getLabel().setAlignment(Align.center);
-        registrationButton.getLabel().setAlignment(Align.center);
-        exitButton.getLabel().setAlignment(Align.center);
-
-        float loginButtonWidth = loginButton.getPrefWidth();
-        float registrationButtonWidth = registrationButton.getPrefWidth();
-        float exitButtonWidth = exitButton.getPrefWidth();
-
-        loginButton.getLabel().setColor(Color.valueOf(color));
-        registrationButton.getLabel().setColor(Color.valueOf(color));
-        exitButton.getLabel().setColor(Color.valueOf(color));
-
-        loginButton.setPosition((viewport.getWorldWidth() - loginButtonWidth) / 2, bstartY + (buttonHeight + buttonSpacing) * 2);
-        registrationButton.setPosition((viewport.getWorldWidth() - registrationButtonWidth) / 2, bstartY + (buttonHeight + buttonSpacing));
-        exitButton.setPosition((viewport.getWorldWidth() - exitButtonWidth) / 2, bstartY);
-
-        loginButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new LoginScreen(game));
-            }
-        });
-
-        registrationButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new RegistrationScreen(game));
-            }
-        });
-
-        exitButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.exit();
-            }
-        });
-
-        // needs listeners for registrationButton and exitButton
-
-        stage.addActor(loginButton);
-        stage.addActor(registrationButton);
-        stage.addActor(exitButton);
+        loadPlayMenu(textFieldStyle, textButtonStyle);
+        loadSettingsMenu(textFieldStyle, textButtonStyle);
+        settingsMenu.setVisible(false);
     }
 
     @Override
@@ -137,6 +99,103 @@ public class UserMenuScreen implements Screen {
         stage.draw();
     }
 
+    private void loadSettingsMenu(TextField.TextFieldStyle textFieldStyle, TextButton.TextButtonStyle textButtonStyle) {
+        // Create volume slider, exit settings button
+        volumeField = new TextField(String.valueOf((int) (game.getMusicVolume() * 100)), textFieldStyle);
+        setVolumeButton = new TextButton("Set Volume", textButtonStyle);
+        settingsExitButton = new TextButton("Back", textButtonStyle);
+
+        // Add event listeners
+        setVolumeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                try {
+                    int volumeLevel = Integer.parseInt(volumeField.getText());
+                    game.setMusicVolume(volumeLevel);
+                    mainMenuMusic.setVolume(game.getMusicVolume());
+                } catch (NumberFormatException ignore) {}
+                volumeField.setText(String.valueOf((int) (game.getMusicVolume() * 100)));
+            }
+        });
+        settingsExitButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                displaySettings(false);
+            }
+        });
+
+        // Organize as table
+        settingsMenu = new Table();
+        settingsMenu.setFillParent(true);
+        settingsMenu.center();
+        settingsMenu.add(volumeField).expandX().padTop(10).padLeft(-9).width(150).right();
+        settingsMenu.add(setVolumeButton).expandX().padTop(10).padLeft(-5).width(150).left();
+        settingsMenu.row();
+        settingsMenu.add(settingsExitButton).pad(20).colspan(2).expandX().center();
+
+        stage.addActor(settingsMenu);
+    }
+
+    private void displaySettings(boolean showSettings) {
+        if (showSettings) {
+            playMenu.setVisible(false);
+            settingsMenu.setVisible(true);
+        }
+        else {
+            playMenu.setVisible(true);
+            settingsMenu.setVisible(false);
+        }
+    }
+
+    private void loadPlayMenu(TextField.TextFieldStyle textFieldStyle, TextButton.TextButtonStyle textButtonStyle) {
+        // Create text, buttons, input field
+        quickPlayButton = new TextButton("Quick Play", textButtonStyle);
+        codeInputField = new TextField("", textFieldStyle);
+        codeInputField.setMessageText("Enter game code");
+        codeSubmitButton = new TextButton("Submit", textButtonStyle);
+        settingsButton = new TextButton("Stats & Settings", textButtonStyle);
+        exitButton = new TextButton("Exit", textButtonStyle);
+
+        // Button styling
+        settingsButton.getLabel().setColor(Color.valueOf(color));
+        quickPlayButton.getLabel().setColor(Color.valueOf(color));
+        exitButton.getLabel().setColor(Color.valueOf(color));
+
+        // Add button event listeners
+        settingsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                displaySettings(true);
+            }
+        });
+        quickPlayButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new RegistrationScreen(game));
+            }
+        });
+        exitButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Gdx.app.exit();
+            }
+        });
+
+        // Organize the UI elements as a table so that code input/submit can be on the same row
+        playMenu = new Table();
+        playMenu.setFillParent(true);
+        playMenu.center();
+        playMenu.add(quickPlayButton).pad(10).colspan(2).expandX().center();
+        playMenu.row();
+        playMenu.add(codeInputField).expandX().padTop(10).padLeft(-9).width(300).right();
+        playMenu.add(codeSubmitButton).expandX().padTop(10).padLeft(-14).width(125).left();
+        playMenu.row();
+        playMenu.add(settingsButton).padTop(60).colspan(2).expandX().center();
+        playMenu.row();
+        playMenu.add(exitButton).pad(20).colspan(2).expandX().center();
+
+        stage.addActor(playMenu);
+    }
 
     @Override
     public void resize(int width, int height) {

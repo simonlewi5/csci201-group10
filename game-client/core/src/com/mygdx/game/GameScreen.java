@@ -36,6 +36,7 @@ public class GameScreen implements Screen, MessageListener {
         backgroundImage = game.assetManager.getBackgroundImage();
         backgroundMusic = game.assetManager.getBackgroundMusic();
 
+        backgroundMusic.setVolume(game.getMusicVolume());
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
     }
