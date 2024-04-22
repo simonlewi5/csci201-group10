@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class EgyptianRatscrew extends Game {
     public SpriteBatch batch;
     public GameAssetManager assetManager;
+    public Player player1;
+    private float musicVolume = 0.5f;
 
     public void create() {
         batch = new SpriteBatch();
@@ -45,4 +47,13 @@ public class EgyptianRatscrew extends Game {
         assetManager.dispose();
     }
 
+    public float getMusicVolume() {
+        return musicVolume;
+    }
+    public void setMusicVolume(float volume) {
+        volume /= 100.0f;
+        if (volume > 1.0f) musicVolume = 1.0f;
+        else if (volume < 0.0f) musicVolume = 0.0f;
+        else musicVolume = volume;
+    }
 }

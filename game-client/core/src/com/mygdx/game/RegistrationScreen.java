@@ -4,10 +4,8 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.google.gson.Gson;
 import com.badlogic.gdx.graphics.Color;
@@ -48,15 +46,18 @@ public class RegistrationScreen implements Screen, MessageListener  {
     public RegistrationScreen(final EgyptianRatscrew game) {
         this.game = game;
         camera = new OrthographicCamera();
-        viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera);
         camera.setToOrtho(false, 800, 800 / ASPECT_RATIO); 
+        viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera);
         backgroundImage = game.assetManager.getBackgroundImage();
         backgroundMusic = game.assetManager.getBackgroundMusic();
         stage = new Stage(viewport, game.batch);
+
+        Gdx.graphics.setResizable(true);
     }
     
     @Override
     public void show() {
+        backgroundMusic.setVolume(game.getMusicVolume());
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
 

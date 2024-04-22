@@ -96,6 +96,14 @@ public class GameScreen implements Screen, MessageListener {
         Gdx.input.setInputProcessor(stage);
 
         fontLarge = game.assetManager.getFontLarge();
+
+        backgroundImage = game.assetManager.getBackgroundImage();
+        backgroundMusic = game.assetManager.getBackgroundMusic();
+
+        backgroundMusic.setVolume(game.getMusicVolume());
+        backgroundMusic.setLooping(true);
+        backgroundMusic.play();
+
     }
 
     @Override
