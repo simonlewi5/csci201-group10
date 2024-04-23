@@ -1,10 +1,10 @@
 name: Build and Deploy
 
 on:
-  # push:
-  #   branches:
-  #     - main
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+  # workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -29,9 +29,11 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '1.22'
+
       - name: "Install dependencies"
         run: go mod download
         working-directory: ./game-server
+
       - name: "Build the go executable"
         run: |
           go build -o bin/game-server cmd/server/main.go
@@ -41,21 +43,11 @@ jobs:
           DB_HOST: ${{ env.DB_HOST }}
           DB_USER: admin
           DB_NAME: game-db
-      - name: 'Get game-server IP'
-        run: |
-          echo "GAME_SERVER_IP=$(gcloud compute instances describe game-server --zone=us-west1-a --format='value(networkInterfaces[0].accessConfigs[0].natIP)')" >> $GITHUB_ENV
-      - name: 'Test ssh connection'
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ env.GAME_SERVER_IP }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "SSH connection successful"
+
       - name: 'Prepare server'
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ env.GAME_SERVER_IP }}
+          host: ${{ secrets.GAME_SERVER_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
@@ -63,18 +55,29 @@ jobs:
             sudo chown -R ${{ secrets.SSH_USERNAME }} /opt/game-server
             sudo mkdir -p /var/log/game-server
             sudo chown ${{ secrets.SSH_USERNAME }}: /var/log/game-server
+
       - name: 'Copy game-server binary to game-server'
         uses: appleboy/scp-action@master
         with:
-          host: ${{ env.GAME_SERVER_IP }}
+          host: ${{ secrets.GAME_SERVER_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: './game-server/bin/game-server'
           target: '/opt/game-server'
+
+      - name: 'Kill existing game-server process'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.GAME_SERVER_IP }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            pkill -f /opt/game-server/game-server/bin/game-server || true
+
       - name: 'Execute game-server binary'
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ env.GAME_SERVER_IP }}
+          host: ${{ secrets.GAME_SERVER_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
@@ -87,7 +90,7 @@ jobs:
       - name: 'Give actions user permissions for static content'
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ env.GAME_SERVER_IP }}
+          host: ${{ secrets.GAME_SERVER_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
@@ -96,7 +99,7 @@ jobs:
       - name: 'Copy static content to server'
         uses: appleboy/scp-action@master
         with:
-          host: ${{ env.GAME_SERVER_IP }}
+          host: ${{ secrets.GAME_SERVER_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: './game-server/www/*'
@@ -106,7 +109,7 @@ jobs:
       - name: 'Restart Nginx'
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ env.GAME_SERVER_IP }}
+          host: ${{ secrets.GAME_SERVER_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
