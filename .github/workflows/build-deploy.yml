@@ -83,7 +83,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            bash /opt/game-server/kill.sh
+            bash /opt/game-server/scripts/kill.sh
 
       - name: 'Execute game-server binary'
         uses: appleboy/ssh-action@master
