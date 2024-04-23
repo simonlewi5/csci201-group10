@@ -52,6 +52,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             echo "SSH connection successful"
+            
       - name: 'Prepare server'
         uses: appleboy/ssh-action@master
         with:
@@ -63,6 +64,12 @@ jobs:
             sudo chown -R ${{ secrets.SSH_USERNAME }} /opt/game-server
             sudo mkdir -p /var/log/game-server
             sudo chown ${{ secrets.SSH_USERNAME }}: /var/log/game-server
+            sudo chown -R ${{ secrets.SSH_USERNAME }} /var/www/html
+            sudo chmod -R 755 /var/www/html
+            sudo chown -R ${{ secrets.SSH_USERNAME }} /etc/systemd/system
+            sudo chown -R ${{ secrets.SSH_USERNAME }} /etc/nginx/sites-available
+            sudo chown -R ${{ secrets.SSH_USERNAME }} /etc/nginx/sites-enabled
+
       - name: 'Copy game-server binary to game-server'
         uses: appleboy/scp-action@master
         with:
@@ -71,6 +78,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: './game-server/bin/game-server'
           target: '/opt/game-server'
+
       - name: 'Copy game-server service definition'
         uses: appleboy/scp-action@master
         with:
@@ -80,23 +88,7 @@ jobs:
           source: './game-server/service/game-server.service'
           target: '/etc/systemd/system/'
           strip_components: 2
-      - name: 'Reload systemd'
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ env.GAME_SERVER_IP }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            sudo systemctl daemon-reload
-      - name: 'Give actions user permissions for static content'
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ env.GAME_SERVER_IP }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            sudo chown -R ${{ secrets.SSH_USERNAME }} /var/www/html
-            sudo chmod -R 755 /var/www/html
+
       - name: 'Copy static content to server'
         uses: appleboy/scp-action@master
         with:
@@ -107,6 +99,16 @@ jobs:
           target: '/var/www/html'
           overwrite: true
           strip_components: 2
+
+      - name: 'Reload systemd'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.GAME_SERVER_IP }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo systemctl daemon-reload
+  
       - name: 'Restart Nginx and Game Server'
         uses: appleboy/ssh-action@master
         with:
