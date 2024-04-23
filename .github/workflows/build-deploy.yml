@@ -72,13 +72,10 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            if pkill -f /opt/game-server/game-server/bin/game-server; then
-              echo "Existing game-server process terminated."
-            else
-              echo "No existing game-server process found or already terminated."
-            fi
+            pkill -f /opt/game-server/game-server/bin/game-server > /dev/null 2>&1 || true
+            echo "Attempted to terminate existing game-server processes."
             exit 0
-            
+
       - name: 'Execute game-server binary'
         uses: appleboy/ssh-action@master
         with:
