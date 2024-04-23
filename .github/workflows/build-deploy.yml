@@ -52,7 +52,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             echo "SSH connection successful"
-            
+
       - name: 'Prepare server'
         uses: appleboy/ssh-action@master
         with:
@@ -100,14 +100,17 @@ jobs:
           overwrite: true
           strip_components: 2
 
-      - name: 'Reload systemd'
+      - name: 'Ensure correct permissions and ownership'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ env.GAME_SERVER_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            sudo chown root:root /etc/systemd/system/game-server.service
+            sudo chmod 644 /etc/systemd/system/game-server.service
             sudo systemctl daemon-reload
+            sudo systemctl enable game-server.service
   
       - name: 'Restart Nginx and Game Server'
         uses: appleboy/ssh-action@master
