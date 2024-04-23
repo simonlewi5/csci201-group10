@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 User=ubuntu
-WorkingDirectory=/opt/game-server
-ExecStart=/opt/game-server/bin/game-server
+WorkingDirectory=/opt/game-server/game-server
+ExecStart=/opt/game-server/game-server/bin/game-server
 Restart=always
 Environment="DB_PASS=${DB_PASSWORD}"
 Environment="DB_HOST=${DB_HOST}"
