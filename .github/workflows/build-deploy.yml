@@ -71,19 +71,23 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: './game-server/bin/game-server'
           target: '/opt/game-server'
-      - name: 'Execute game-server binary'
+      - name: 'Copy game-server service definition'
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ env.GAME_SERVER_IP }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: './game-server/service/game-server.service'
+          target: '/etc/systemd/system/'
+          strip_components: 2
+      - name: 'Reload systemd'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ env.GAME_SERVER_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            export DB_PASS=${{ env.DB_PASSWORD }}
-            export DB_HOST=${{ env.DB_HOST }}
-            export DB_USER=admin
-            export DB_NAME=game-db
-            chmod +x /opt/game-server/game-server/bin/game-server
-            nohup /opt/game-server/game-server/bin/game-server > /var/log/game-server/game-server.log 2>&1 &
+            sudo systemctl daemon-reload
       - name: 'Give actions user permissions for static content'
         uses: appleboy/ssh-action@master
         with:
@@ -103,11 +107,11 @@ jobs:
           target: '/var/www/html'
           overwrite: true
           strip_components: 2
-      - name: 'Restart Nginx'
+      - name: 'Restart Nginx and Game Server'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ env.GAME_SERVER_IP }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            sudo systemctl restart nginx
+            sudo systemctl restart nginx game-server.service
