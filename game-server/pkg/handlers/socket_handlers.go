@@ -23,13 +23,16 @@ func HandleConnections(dbService db.DBService) func(*websocket.Conn) {
                 continue
             }
             switch data["action"] {
-            case "login":
-                handleLogin(dbService, conn, data)
-            case "register":
-                handleRegistration(dbService, conn, data)
-            case "slap":
-            default:
-                log.Println("Unknown action:", data["action"])
+                case "login":
+                    handleLogin(dbService, conn, data)
+                case "register":
+                    handleRegistration(dbService, conn, data)
+                case "slap":
+                    log.Println("Slap action received")
+                case "joinMatchmakingQueue":
+                    log.Println("Join matchmaking queue action received")
+                default:
+                    log.Println("Unknown action:", data["action"])
             }
         }
     }
@@ -81,6 +84,8 @@ func handleRegistration(dbService db.DBService, conn *websocket.Conn, data map[s
         },
     })
 }
+
+
 
 
 func sendMessage(conn *websocket.Conn, msg models.Message) {
