@@ -87,7 +87,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: './game-server/service/game-server.service'
           target: '/etc/systemd/system/'
-          strip_components: 2
+          strip_components: 3
 
       - name: 'Copy static content to server'
         uses: appleboy/scp-action@master
