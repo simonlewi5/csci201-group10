@@ -1,1 +1,1 @@
-public_key_paths = [ "../../.pub-keys/simonlew.pub", "../../.pub-keys/githubactions.pub", "../../.pub-keys/simonlew-mbp.pub" ]
+public_key_paths = [ "../../.pub-keys/simonlew.pub", "../../.pub-keys/githubactions.pub", "../../.pub-keys/simonlew-mbp.pub", "../../.pub-keys/alicesun.pub"  ]
