@@ -16,7 +16,7 @@ buildscript {
 
     }
 }
-
+ 
 allprojects {
     apply plugin: "eclipse"
 
