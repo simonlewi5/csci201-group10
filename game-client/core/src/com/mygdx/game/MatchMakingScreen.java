@@ -57,20 +57,8 @@ public class MatchMakingScreen implements Screen, MessageListener {
                 String type = response.getType();
                 
                 if (type.equals("QUEUE_UPDATE")) {
-                    System.out.println("Queue update received");
-                    String message = response.getData().getAsString();
-                    System.out.println(message);
-                }
-
-                if (type.equals("AUTH_SUCCESS")) {
-                    JsonObject playerJson = response.getData().getAsJsonObject("player");
-                    Player player = gson.fromJson(playerJson, Player.class);
-                    
-                    game.player1 = player;
-                    System.out.println("Login successful for player: " + player.getUsername());
-                    game.setScreen(new UserMenuScreen(game));
-                } else if (type.equals("AUTH_FAILURE")) {
-                    System.out.println("Authentication failed");
+                    String queueMessage = response.getData().getAsString();
+                    System.out.println(queueMessage);
                 }
             }
         });

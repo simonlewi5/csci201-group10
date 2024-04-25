@@ -1,13 +1,14 @@
 package matchmaking
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/simonlewi5/csci201-group10/game-server/pkg/models"
 	"github.com/simonlewi5/csci201-group10/game-server/pkg/db"
+	"github.com/simonlewi5/csci201-group10/game-server/pkg/models"
 )
 
 type Matcher struct {
@@ -37,7 +38,7 @@ func (m *Matcher) QueuePlayer(p *models.Player, conn *websocket.Conn) {
 	queueLength := len(m.QueuedPlayers)
 	conn.WriteJSON(models.Message{
 		Type: "QUEUE_UPDATE",
-		Data: "Queue size: " + string(queueLength),
+		Data: fmt.Sprintf("Queue size: %d", queueLength),
 	})
 }
 
