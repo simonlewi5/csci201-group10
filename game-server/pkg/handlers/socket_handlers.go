@@ -87,19 +87,28 @@ func handleRegistration(dbService db.DBService, conn *websocket.Conn, data map[s
 }
 
 func handleSearchForMatch(dbService db.DBService, matcher *matchmaking.Matcher, conn *websocket.Conn, data map[string]interface{}) {
-    playerID := data["player_id"].(string)
+    playerID, ok := data["player_id"].(string)
+    if !ok || playerID == "" {
+        log.Println("player_id is missing or not a string")
+        sendMessage(conn, models.Message{
+            Type: models.MessageTypeAuthError,
+            Data: "player_id is required and must be a string",
+        })
+        return
+    }
+
     player, err := dbService.GetPlayerByID(playerID)
     if err != nil {
+        log.Printf("Error retrieving player with ID %s: %v", playerID, err)
         sendMessage(conn, models.Message{
             Type: models.MessageTypeAuthError,
             Data: "Error searching for match: " + err.Error(),
         })
         return
     }
+
     matcher.QueuePlayer(player, conn)
 }
-
-
 
 func sendMessage(conn *websocket.Conn, msg models.Message) {
 	msgJSON, err := json.Marshal(msg)

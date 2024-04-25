@@ -73,16 +73,16 @@ public class MatchMakingScreen implements Screen, MessageListener {
         Gdx.input.setInputProcessor(stage);
 
         initScreenElements();
-        searchForMatch();
-
         try {
             webSocketClient = new GameWebSocketClient("wss://egyptianratscrew.dev/ws", this);
-            webSocketClient.connect();
+            webSocketClient.connectBlocking();
+            searchForMatch();
         } catch (URISyntaxException e) {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
     }
 
     private void initScreenElements() {
@@ -98,11 +98,11 @@ public class MatchMakingScreen implements Screen, MessageListener {
     }
 
     private void searchForMatch() {
-        String userId = game.player1.getId();
+        String playerId = game.player1.getId();
         HashMap<String, Object> data = new HashMap<>();
 
         data.put("action", "search_for_match");
-        data.put("user_id", userId);
+        data.put("player_id", playerId);
 
         String json = new Gson().toJson(data);
         webSocketClient.send(json);
