@@ -16,6 +16,16 @@ func (s *serviceImpl) NewPlayer(player *models.Player) error {
 	return err
 }
 
+func (s *serviceImpl) GetPlayerByID(id string) (*models.Player, error) {
+    player := &models.Player{}
+    err := s.db.QueryRow(`
+        SELECT id, username, firebase_uid, email, games_played, games_won, games_lost, total_score
+        FROM players
+        WHERE id = ?
+    `, id).Scan(&player.ID, &player.Username, &player.FirebaseUID, &player.Email, &player.GamesPlayed, &player.GamesWon, &player.GamesLost, &player.TotalScore)
+    return player, err
+}
+
 func (s *serviceImpl) GetPlayer(credentials *models.Credentials) (*models.Player, error) {
     if credentials.Token != "" {
         return s.getPlayerByToken(credentials.Token)

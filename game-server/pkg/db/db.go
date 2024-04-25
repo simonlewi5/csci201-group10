@@ -14,6 +14,7 @@ type DBService interface {
     RecordMatchEnd(match *models.Match) error
     NewPlayer(player *models.Player) error
     GetPlayer(credentials *models.Credentials) (*models.Player, error)
+    GetPlayerByID(id string) (*models.Player, error)
     HandleRegisterEmailAndPassword(credentials *models.Credentials) (*models.Player, error)
 }
 

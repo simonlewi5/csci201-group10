@@ -1,6 +1,5 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.Color;
@@ -13,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader.FreeTypeFontLoaderParameter;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -36,9 +36,7 @@ public class GameAssetManager {
 
     String color = "#e7e5e4";
 
-    // Loading assets
     public void loadAssets() {
-        // Set loaders for the FreeTypeFont
         FreeTypeFontLoaderParameter fontParams = new FreeTypeFontLoaderParameter();
         fontParams.fontFileName = FONT_PATH;
 
@@ -148,6 +146,13 @@ public class GameAssetManager {
         textFieldStyle.cursor = new TextureRegionDrawable(new TextureRegion(manager.get(TEXT_CURSOR_IMAGE, Texture.class)));
     
         return textFieldStyle;
+    }
+
+    public Label.LabelStyle getLabelStyle(float scale) {
+        BitmapFont buttonFont = getFontMedium();
+        buttonFont.getData().setScale(scale);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(buttonFont, Color.valueOf(color));
+        return labelStyle;
     }
 
     public Texture getCursorImage() {

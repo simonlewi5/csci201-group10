@@ -7,7 +7,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/simonlewi5/csci201-group10/game-server/pkg/db"
-
+    "github.com/simonlewi5/csci201-group10/game-server/pkg/matchmaking"
 	"github.com/simonlewi5/csci201-group10/game-server/pkg/handlers"
 
 )
@@ -18,6 +18,7 @@ var (
         WriteBufferSize: 1024,
     }
     dbService db.DBService
+    matcher *matchmaking.Matcher
 )
 
 func websocketHandler(dbService db.DBService) http.HandlerFunc {
@@ -33,12 +34,13 @@ func websocketHandler(dbService db.DBService) http.HandlerFunc {
         }
         defer conn.Close()
 
-        handlers.HandleConnections(dbService)(conn)
+        handlers.HandleConnections(dbService, matcher)(conn)
     }
 }
 
 func main() {
     dbService = db.SetupDatabase()
+    matcher = matchmaking.NewMatcher(dbService)
     
     http.HandleFunc("/ws", websocketHandler(dbService))
     fmt.Println("WebSocket server starting on port 8080...")

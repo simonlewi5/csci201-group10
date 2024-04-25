@@ -10,17 +10,15 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
-
+// needs cleanup
 public class MainMenuScreen implements Screen {
-
     final EgyptianRatscrew game;
-    private BitmapFont fontMedium;
+
 
     OrthographicCamera camera;
     Viewport viewport;
@@ -46,7 +44,6 @@ public class MainMenuScreen implements Screen {
 
     public MainMenuScreen(final EgyptianRatscrew game) {
         this.game = game;
-        fontMedium = game.assetManager.getFontMedium();
 
         camera = new OrthographicCamera();
         viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera);

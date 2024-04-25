@@ -7,9 +7,10 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/simonlewi5/csci201-group10/game-server/pkg/db"
 	"github.com/simonlewi5/csci201-group10/game-server/pkg/models"
+    "github.com/simonlewi5/csci201-group10/game-server/pkg/matchmaking"
 )
 
-func HandleConnections(dbService db.DBService) func(*websocket.Conn) {
+func HandleConnections(dbService db.DBService, matcher *matchmaking.Matcher) func(*websocket.Conn) {
     return func(conn *websocket.Conn) {
         for {
             _, msg, err := conn.ReadMessage()
@@ -29,8 +30,8 @@ func HandleConnections(dbService db.DBService) func(*websocket.Conn) {
                     handleRegistration(dbService, conn, data)
                 case "slap":
                     log.Println("Slap action received")
-                case "joinMatchmakingQueue":
-                    log.Println("Join matchmaking queue action received")
+                case "search_for_match":
+                    handleSearchForMatch(dbService, matcher, conn, data)
                 default:
                     log.Println("Unknown action:", data["action"])
             }
@@ -85,6 +86,18 @@ func handleRegistration(dbService db.DBService, conn *websocket.Conn, data map[s
     })
 }
 
+func handleSearchForMatch(dbService db.DBService, matcher *matchmaking.Matcher, conn *websocket.Conn, data map[string]interface{}) {
+    playerID := data["player_id"].(string)
+    player, err := dbService.GetPlayerByID(playerID)
+    if err != nil {
+        sendMessage(conn, models.Message{
+            Type: models.MessageTypeAuthError,
+            Data: "Error searching for match: " + err.Error(),
+        })
+        return
+    }
+    matcher.QueuePlayer(player, conn)
+}
 
 
 

@@ -1,72 +1,60 @@
 package com.mygdx.game;
 
+import java.net.URISyntaxException;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
-public class UserMenuScreen implements Screen {
-
+public class UserMenuScreen implements Screen, MessageListener {
     final EgyptianRatscrew game;
-    private BitmapFont fontMedium;
-
-    OrthographicCamera camera;
-    Viewport viewport;
-
-    Texture backgroundImage;
-    Music mainMenuMusic;
-
     private final float ASPECT_RATIO = 16 / 9f;
-
-    private float buttonHeight = 50;
-    private float buttonSpacing = 40;
-    private float bstartY;
-
+    private Texture backgroundImage;
+    private Music mainMenuMusic;
+    private OrthographicCamera camera;
+    private String serverMessage;
+    private GameWebSocketClient webSocketClient;
+    private Viewport viewport;
+    private Stage stage;
+    
     private TextField codeInputField, volumeField;
     private TextButton quickPlayButton, codeSubmitButton, settingsButton, exitButton,
             setVolumeButton, settingsExitButton;
-    private Slider volumeSlider;
     private Table playMenu, settingsMenu;
-
     String color = "#e7e5e4";
-
-    private Stage stage;
-
-    // BitmapFont font;
 
     public UserMenuScreen(final EgyptianRatscrew game) {
         this.game = game;
-        fontMedium = game.assetManager.getFontMedium();
-
         camera = new OrthographicCamera();
-        viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera);
         camera.setToOrtho(false, 800, 800 / ASPECT_RATIO);
-
+        viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera);
         backgroundImage = game.assetManager.getBackgroundImage();
+
+
         mainMenuMusic = game.assetManager.getBackgroundMusic();
         mainMenuMusic.setVolume(game.getMusicVolume());
         mainMenuMusic.setLooping(true);
 
-        // Add a resize listener to handle window resizing
         Gdx.graphics.setResizable(true);
 
-        bstartY = (viewport.getWorldHeight() - (buttonHeight * 3 + buttonSpacing * 2)) / 2;
 
         stage = new Stage(viewport, game.batch);
+    }
+
+    @Override
+    public void messageReceived(String message) {
+        serverMessage = message;
+        System.out.println("Message received: " + serverMessage);
     }
 
     @Override
@@ -82,6 +70,15 @@ public class UserMenuScreen implements Screen {
         loadPlayMenu(textFieldStyle, textButtonStyle);
         loadSettingsMenu(textFieldStyle, textButtonStyle);
         settingsMenu.setVisible(false);
+
+        try {
+            webSocketClient = new GameWebSocketClient("wss://egyptianratscrew.dev/ws", this);
+            webSocketClient.connect();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -100,12 +97,10 @@ public class UserMenuScreen implements Screen {
     }
 
     private void loadSettingsMenu(TextField.TextFieldStyle textFieldStyle, TextButton.TextButtonStyle textButtonStyle) {
-        // Create volume slider, exit settings button
         volumeField = new TextField(String.valueOf((int) (game.getMusicVolume() * 100)), textFieldStyle);
         setVolumeButton = new TextButton("Set Volume", textButtonStyle);
         settingsExitButton = new TextButton("Back", textButtonStyle);
 
-        // Add event listeners
         setVolumeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -124,7 +119,6 @@ public class UserMenuScreen implements Screen {
             }
         });
 
-        // Organize as table
         settingsMenu = new Table();
         settingsMenu.setFillParent(true);
         settingsMenu.center();
@@ -148,30 +142,27 @@ public class UserMenuScreen implements Screen {
     }
 
     private void loadPlayMenu(TextField.TextFieldStyle textFieldStyle, TextButton.TextButtonStyle textButtonStyle) {
-        // Create text, buttons, input field
         quickPlayButton = new TextButton("Quick Play", textButtonStyle);
-        codeInputField = new TextField("", textFieldStyle);
-        codeInputField.setMessageText("Enter game code");
-        codeSubmitButton = new TextButton("Submit", textButtonStyle);
         settingsButton = new TextButton("Stats & Settings", textButtonStyle);
         exitButton = new TextButton("Exit", textButtonStyle);
 
-        // Button styling
         settingsButton.getLabel().setColor(Color.valueOf(color));
         quickPlayButton.getLabel().setColor(Color.valueOf(color));
         exitButton.getLabel().setColor(Color.valueOf(color));
 
-        // Add button event listeners
+        quickPlayButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (webSocketClient != null) {
+                    System.out.println("Closing connection");
+                }
+                game.setScreen(new MatchMakingScreen(game));
+            }
+        });
         settingsButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 displaySettings(true);
-            }
-        });
-        quickPlayButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new RegistrationScreen(game));
             }
         });
         exitButton.addListener(new ClickListener() {
@@ -181,7 +172,6 @@ public class UserMenuScreen implements Screen {
             }
         });
 
-        // Organize the UI elements as a table so that code input/submit can be on the same row
         playMenu = new Table();
         playMenu.setFillParent(true);
         playMenu.center();

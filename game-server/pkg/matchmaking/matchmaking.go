@@ -28,15 +28,16 @@ func NewMatcher(dbService db.DBService) *Matcher {
 }
 
 // enqueues a player to be matched
-func (m *Matcher) AddPlayer(p *models.Player, conn *websocket.Conn) {
+func (m *Matcher) QueuePlayer(p *models.Player, conn *websocket.Conn) {
 	m.MatchLock.Lock()
 	defer m.MatchLock.Unlock()
 	m.QueuedPlayers = append(m.QueuedPlayers, p)
 	m.PlayerConns[p.ID] = conn
 	// notify the player they've been added to the queue
+	queueLength := len(m.QueuedPlayers)
 	conn.WriteJSON(models.Message{
 		Type: "QUEUE_UPDATE",
-		Data: "queued",
+		Data: "Queue size: " + string(queueLength),
 	})
 }
 

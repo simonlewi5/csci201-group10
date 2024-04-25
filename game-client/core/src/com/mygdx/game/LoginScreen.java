@@ -28,13 +28,25 @@ public class LoginScreen implements Screen, MessageListener {
     private OrthographicCamera camera;
     private String serverMessage;
     private GameWebSocketClient webSocketClient;
+    private Viewport viewport;
     
     private Stage stage;
     private TextField  usernameField, passwordField;
     private TextButton submitButton, exitButton;
-    Viewport viewport;
 
-    
+    public LoginScreen(final EgyptianRatscrew game) {
+        this.game = game;
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, 800, 800 / ASPECT_RATIO);
+        viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera);
+        backgroundImage = game.assetManager.getBackgroundImage();
+        backgroundMusic = game.assetManager.getBackgroundMusic();
+        stage = new Stage(viewport, game.batch);
+
+        Gdx.graphics.setResizable(true);
+    }
+
+    @Override
     public void messageReceived(String message) {
         Gdx.app.postRunnable(new Runnable() {
             @Override
@@ -58,18 +70,6 @@ public class LoginScreen implements Screen, MessageListener {
             }
         });
     }
-
-    public LoginScreen(final EgyptianRatscrew game) {
-        this.game = game;
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 800 / ASPECT_RATIO);
-        viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera);
-        backgroundImage = game.assetManager.getBackgroundImage();
-        backgroundMusic = game.assetManager.getBackgroundMusic();
-        stage = new Stage(viewport, game.batch);
-
-        Gdx.graphics.setResizable(true);
-    }
     
     @Override
     public void show() {
@@ -79,7 +79,7 @@ public class LoginScreen implements Screen, MessageListener {
 
         Gdx.input.setInputProcessor(stage);
 
-        initFormElements();
+        initScreenElements();
 
         try {
             webSocketClient = new GameWebSocketClient("wss://egyptianratscrew.dev/ws", this);
@@ -91,7 +91,7 @@ public class LoginScreen implements Screen, MessageListener {
         }
     }
 
-    private void initFormElements() {
+    private void initScreenElements() {
         TextField.TextFieldStyle textFieldStyle = game.assetManager.getTextFieldStyle(1.0f);
         TextButtonStyle buttonStyle = game.assetManager.getTextButtonStyle(1.0f);
 
