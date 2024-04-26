@@ -57,4 +57,12 @@ public class EgyptianRatscrew extends Game {
         else if (volume < 0.0f) musicVolume = 0.0f;
         else musicVolume = volume;
     }
+    
+    public Match getCurrentMatch() {
+        return currentMatch;
+    }
+
+    public void setCurrentMatch(Match currentMatch) {
+        this.currentMatch = currentMatch;
+    }
 }

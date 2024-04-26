@@ -6,6 +6,7 @@ import java.util.HashMap;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -60,6 +61,10 @@ public class MatchMakingScreen implements Screen, MessageListener {
                     JsonElement dataElement = response.getData();
                     String dataString = dataElement.getAsString();
                     System.out.println(dataString);
+                } else if (type.equals("MATCH_FOUND")) {
+                    game.setCurrentMatch(gson.fromJson(response.getData(), Match.class));
+                    System.out.println("Match found: " + game.getCurrentMatch().getId());
+                    System.out.println("Match: " + game.getCurrentMatch().toString());
                 }
             }
         });
@@ -90,6 +95,7 @@ public class MatchMakingScreen implements Screen, MessageListener {
 
         Label.LabelStyle labelStyle = game.assetManager.getLabelStyle(2.0f);
         searchingLabel = new Label("Searching for a match", labelStyle);
+        searchingLabel.setColor(Color.valueOf("#0f172a"));
 
         searchingLabel.setPosition(viewport.getWorldWidth() / 2 - searchingLabel.getWidth() / 2,
                 viewport.getWorldHeight() / 2 - searchingLabel.getHeight() / 2);
