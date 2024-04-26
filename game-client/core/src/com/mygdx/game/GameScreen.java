@@ -14,12 +14,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class GameScreen implements Screen, MessageListener {
     final EgyptianRatscrew game;
     private final float ASPECT_RATIO = 16 / 9f;
     private Texture backgroundImage;
-    private Music backgroundMusic;
+    private ArrayList<Music> matchMusic;
+    private int currentTrackIndex = 0;
     private OrthographicCamera camera;
     private String serverMessage;
     private GameWebSocketClient webSocketClient;
@@ -31,10 +33,7 @@ public class GameScreen implements Screen, MessageListener {
     private Label gameLabel;
     private Deck deck;
     private Match match;
-    private ArrayList<Card> player1Hand;
-    private ArrayList<Card> player2Hand;
-    private ArrayList<Card> player3Hand;
-    private ArrayList<Card> player4Hand;
+    private Map<String, Hand> hands; // player username -> hand
     private ArrayList<Card> centerPile;
     private int playerTurn;
     // private Boolean mustFace = false;
@@ -44,30 +43,16 @@ public class GameScreen implements Screen, MessageListener {
 
     public GameScreen(final EgyptianRatscrew game) {
         this.game = game;
-
         camera = new OrthographicCamera();
-        viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera);
         camera.setToOrtho(false, 800, 800 / ASPECT_RATIO);
-
-        backgroundImage = game.assetManager.getBackgroundImage();
-        backgroundMusic = game.assetManager.getBackgroundMusic();
-
-        backgroundMusic.setLooping(true);
+        viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera);
+        backgroundImage = game.assetManager.getBackgroundMatch();
+        loadMatchMusic();
 
         // Add a resize listener to handle window resizing
         Gdx.graphics.setResizable(true);
 
         stage = new Stage(viewport, game.batch);
-
-        // initialize hand using server info
-
-        // numPlayers should be gotten from server
-
-        // initialize players list using server info
-
-        // numCards for each player = 52 / numPlayers
-
-        // if numplayers = 3, add extra card to caenterPile (handled from server side I guess)
     }
 
     @Override
@@ -80,15 +65,6 @@ public class GameScreen implements Screen, MessageListener {
     public void show() {
         Gdx.input.setInputProcessor(stage);
 
-        // fontLarge = game.assetManager.getFontLarge();
-
-        backgroundImage = game.assetManager.getBackgroundImage();
-        backgroundMusic = game.assetManager.getBackgroundMusic();
-
-        backgroundMusic.setVolume(game.getMusicVolume());
-        backgroundMusic.setLooping(true);
-        backgroundMusic.play();
-
         initScreenElements();
         try {
             webSocketClient = new GameWebSocketClient("wss://egyptianratscrew.dev/ws", this);
@@ -100,19 +76,6 @@ public class GameScreen implements Screen, MessageListener {
         }
     }
 
-    private void initScreenElements() {
-
-        Label.LabelStyle labelStyle = game.assetManager.getLabelStyle(2.0f);
-        gameLabel = new Label("Game screen", labelStyle);
-        gameLabel.setColor(Color.valueOf("#0f172a"));
-
-        gameLabel.setPosition(viewport.getWorldWidth() / 2 - gameLabel.getWidth() / 2,
-                viewport.getWorldHeight() / 2 - gameLabel.getHeight() / 2);
-
-        // add all of it to the stage
-        stage.addActor(gameLabel);
-    }
-
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
@@ -122,6 +85,9 @@ public class GameScreen implements Screen, MessageListener {
 
         // Draw background image
         game.batch.draw(backgroundImage, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+        if (!matchMusic.get(currentTrackIndex).isPlaying()) {
+            playNextTrack();
+        }
 
         game.batch.end();
     }
@@ -146,5 +112,40 @@ public class GameScreen implements Screen, MessageListener {
     @Override
     public void dispose() {
         stage.dispose();
+    }
+
+    private void initScreenElements() {
+
+        Label.LabelStyle labelStyle = game.assetManager.getLabelStyle(2.0f);
+        gameLabel = new Label("Game screen", labelStyle);
+        gameLabel.setColor(Color.valueOf("#0f172a"));
+
+        gameLabel.setPosition(viewport.getWorldWidth() / 2 - gameLabel.getWidth() / 2,
+                viewport.getWorldHeight() / 2 - gameLabel.getHeight() / 2);
+
+        // add all of it to the stage
+        stage.addActor(gameLabel);
+    }
+
+    public void loadMatchMusic() {
+        matchMusic = new ArrayList<Music>();
+        for (int i = 1; i <= 3; i++) {
+            matchMusic.add(game.assetManager.getMatchMusic(i));
+        }
+    }
+    public void playNextTrack() {
+        if (matchMusic.get(currentTrackIndex).isPlaying()) {
+            return;
+        }
+        if (matchMusic.get(currentTrackIndex) != null) {
+            matchMusic.get(currentTrackIndex).stop();
+        }
+        
+        currentTrackIndex = (currentTrackIndex + 1) % matchMusic.size();
+        Music nextTrack = matchMusic.get(currentTrackIndex);
+        if (nextTrack != null) {
+            nextTrack.setLooping(false);
+            nextTrack.play();
+        }
     }
 }

@@ -26,6 +26,7 @@ public class GameAssetManager {
     // Paths to resources
     private static final String FONT_PATH = "AlegreyaSans-Bold.ttf";
     private static final String BACKGROUND_IMAGE = "main_menu_background.png";
+    private static final String BACKGROUND_MATCH = "match_bg.png";
     private static final String BACKGROUND_MUSIC = "Taj_Mahal.ogg";
     private static final String BUTTON_IMAGE = "buttons.png";
     private static final String CURSOR_IMAGE = "cursor.png";
@@ -33,6 +34,9 @@ public class GameAssetManager {
     private static final String TEXT_FIELD_BACKGROUND_UP = "button-up.9.png";
     private static final String TEXT_FIELD_BACKGROUND_DOWN = "button-down.9.png";
     private static final String TABLE_IMAGE = "game_table.png";
+    private static final String MATCH_MUSIC_1 = "egypt_theme.ogg";
+    private static final String MATCH_MUSIC_2 = "egyptian_dune.ogg";
+    private static final String MATCH_MUSIC_3 = "pyramid.mp3";
 
     String color = "#e7e5e4";
 
@@ -56,6 +60,7 @@ public class GameAssetManager {
 
         // Load other assets
         manager.load(BACKGROUND_IMAGE, Texture.class);
+        manager.load(BACKGROUND_MATCH, Texture.class);
         manager.load(BACKGROUND_MUSIC, Music.class);
         manager.load(BUTTON_IMAGE, Texture.class);
         manager.load(CURSOR_IMAGE, Texture.class);
@@ -63,6 +68,10 @@ public class GameAssetManager {
         manager.load(TEXT_FIELD_BACKGROUND_UP, Texture.class);
         manager.load(TEXT_FIELD_BACKGROUND_DOWN, Texture.class);
         manager.load(TABLE_IMAGE, Texture.class);
+        manager.load(MATCH_MUSIC_1, Music.class);
+        manager.load(MATCH_MUSIC_2, Music.class);
+        manager.load(MATCH_MUSIC_3, Music.class);
+
     }
 
     // Retrieving assets
@@ -82,12 +91,41 @@ public class GameAssetManager {
         return manager.get(BACKGROUND_IMAGE, Texture.class);
     }
 
+    public Texture getBackgroundMatch() {
+        return manager.get(BACKGROUND_MATCH, Texture.class);
+    }
+
     public Texture getTableImage() {
         return manager.get(TABLE_IMAGE, Texture.class);
     }
 
     public Music getBackgroundMusic() {
         return manager.get(BACKGROUND_MUSIC, Music.class);
+    }
+
+    private Music getMatchMusic1() {
+        return manager.get(MATCH_MUSIC_1, Music.class);
+    }
+
+    private Music getMatchMusic2() {
+        return manager.get(MATCH_MUSIC_2, Music.class);
+    }
+
+    private Music getMatchMusic3() {
+        return manager.get(MATCH_MUSIC_3, Music.class);
+    }
+
+    public Music getMatchMusic(int index) {
+        switch (index) {
+            case 1:
+                return getMatchMusic1();
+            case 2:
+                return getMatchMusic2();
+            case 3:
+                return getMatchMusic3();
+            default:
+                return getMatchMusic1();
+        }
     }
 
     public Button.ButtonStyle getButtonStyle() {
