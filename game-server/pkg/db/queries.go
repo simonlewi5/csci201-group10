@@ -19,10 +19,10 @@ func (s *serviceImpl) NewPlayer(player *models.Player) error {
 func (s *serviceImpl) GetPlayerByID(id string) (*models.Player, error) {
     player := &models.Player{}
     err := s.db.QueryRow(`
-        SELECT id, username, firebase_uid, email, games_played, games_won, games_lost, total_score
+        SELECT id, username, firebase_uid, email, games_played, games_won, games_lost
         FROM players
         WHERE id = ?
-    `, id).Scan(&player.ID, &player.Username, &player.FirebaseUID, &player.Email, &player.GamesPlayed, &player.GamesWon, &player.GamesLost, &player.TotalScore)
+    `, id).Scan(&player.ID, &player.Username, &player.FirebaseUID, &player.Email, &player.GamesPlayed, &player.GamesWon, &player.GamesLost)
     return player, err
 }
 
@@ -42,10 +42,10 @@ func (s *serviceImpl) GetPlayer(credentials *models.Credentials) (*models.Player
 func (s *serviceImpl) getPlayerByToken(token string) (*models.Player, error) {
     player := &models.Player{}
     err := s.db.QueryRow(`
-        SELECT id, username, firebase_uid, email, games_played, games_won, games_lost, total_score
+        SELECT id, username, firebase_uid, email, games_played, games_won, games_lost
         FROM players
         WHERE firebase_uid = ?
-    `, token).Scan(&player.ID, &player.Username, &player.FirebaseUID, &player.Email, &player.GamesPlayed, &player.GamesWon, &player.GamesLost, &player.TotalScore)
+    `, token).Scan(&player.ID, &player.Username, &player.FirebaseUID, &player.Email, &player.GamesPlayed, &player.GamesWon, &player.GamesLost)
     return player, err
 }
 
@@ -53,10 +53,10 @@ func (s *serviceImpl) getPlayerByUsernameAndPassword(username, password string) 
     player := &models.Player{}
     var passwordHash string
     err := s.db.QueryRow(`
-        SELECT id, username, firebase_uid, email, games_played, games_won, games_lost, total_score, password_hash
+        SELECT id, username, firebase_uid, email, games_played, games_won, games_lost, password_hash
         FROM players
         WHERE username = ?
-    `, username).Scan(&player.ID, &player.Username, &player.FirebaseUID, &player.Email, &player.GamesPlayed, &player.GamesWon, &player.GamesLost, &player.TotalScore, &passwordHash)
+    `, username).Scan(&player.ID, &player.Username, &player.FirebaseUID, &player.Email, &player.GamesPlayed, &player.GamesWon, &player.GamesLost, &passwordHash)
     if err != nil {
         return nil, err
     }
@@ -70,10 +70,10 @@ func (s *serviceImpl) getPlayerByEmailAndPassword(email, password string) (*mode
     player := &models.Player{}
     var passwordHash string
     err := s.db.QueryRow(`
-        SELECT id, username, firebase_uid, email, games_played, games_won, games_lost, total_score, password_hash
+        SELECT id, username, firebase_uid, email, games_played, games_won, games_lost, password_hash
         FROM players
         WHERE email = ?
-    `, email).Scan(&player.ID, &player.Username, &player.FirebaseUID, &player.Email, &player.GamesPlayed, &player.GamesWon, &player.GamesLost, &player.TotalScore, &passwordHash)
+    `, email).Scan(&player.ID, &player.Username, &player.FirebaseUID, &player.Email, &player.GamesPlayed, &player.GamesWon, &player.GamesLost, &passwordHash)
     if err != nil {
         return nil, err
     }
@@ -123,7 +123,6 @@ func (s *serviceImpl) HandleRegisterEmailAndPassword(credentials *models.Credent
         GamesPlayed: 0,
         GamesWon:    0,
         GamesLost:   0,
-        TotalScore:  0,
     }
 
     return player, nil
@@ -145,8 +144,7 @@ func (s *serviceImpl) RecordMatchEnd(match *models.Match) error {
         UPDATE players SET
         games_played = games_played + 1,
         games_won = games_won + ?,
-        games_lost = games_lost + ?,
-        total_score = total_score + ?
+        games_lost = games_lost + ?
         WHERE id = ?
     `)
     if err != nil {
@@ -156,8 +154,7 @@ func (s *serviceImpl) RecordMatchEnd(match *models.Match) error {
 
     for _, player := range match.Players {
         won := player.ID == match.Winner.ID
-        playerScore := match.PlayerScores[player.ID]
-        _, err = updateStmt.Exec(boolToInt(won), boolToInt(!won), playerScore, player.ID)
+        _, err = updateStmt.Exec(boolToInt(won), boolToInt(!won), player.ID)
         if err != nil {
             return err
         }

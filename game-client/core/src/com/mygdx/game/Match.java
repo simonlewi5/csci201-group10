@@ -1,14 +1,13 @@
 package com.mygdx.game;
 
 import com.google.gson.annotations.SerializedName;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class Match {
     private String id;
-    private List<Player> players;
-    @SerializedName("player_scores")
-    private Map<String, Integer> playerScores;
+    private ArrayList<Player> players;
+    private Map<String, Hand> hands; // map of player username to hand
     @SerializedName("match_state")
     private MatchState matchState;
     @SerializedName("turn_index")
@@ -19,20 +18,23 @@ public class Match {
     @SerializedName("end_time")
     private long endTime;
     private Deck deck;
+    @SerializedName("center_pile")
+    private CenterPile centerPile;
 
     public Match() {
     }
 
-    public Match(String id, List<Player> players, Map<String, Integer> playerScores, MatchState matchState, int turnIndex, Player winner, long startTime, long endTime, Deck deck) {
+    public Match(String id, ArrayList<Player> players, Map<String, Hand> hands, MatchState matchState, int turnIndex, Player winner, long startTime, long endTime, Deck deck, CenterPile centerPile) {
         this.id = id;
         this.players = players;
-        this.playerScores = playerScores;
+        this.hands = hands;
         this.matchState = matchState;
         this.turnIndex = turnIndex;
         this.winner = winner;
         this.startTime = startTime;
         this.endTime = endTime;
         this.deck = deck;
+        this.centerPile = centerPile;
     }
 
     public String getId() {
@@ -43,20 +45,12 @@ public class Match {
         this.id = id;
     }
 
-    public List<Player> getPlayers() {
+    public ArrayList<Player> getPlayers() {
         return players;
     }
 
-    public void setPlayers(List<Player> players) {
+    public void setPlayers(ArrayList<Player> players) {
         this.players = players;
-    }
-
-    public Map<String, Integer> getPlayerScores() {
-        return playerScores;
-    }
-
-    public void setPlayerScores(Map<String, Integer> playerScores) {
-        this.playerScores = playerScores;
     }
 
     public MatchState getMatchState() {

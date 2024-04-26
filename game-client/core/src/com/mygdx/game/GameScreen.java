@@ -14,7 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Map;
 
 public class GameScreen implements Screen, MessageListener {
     final EgyptianRatscrew game;
@@ -31,15 +30,7 @@ public class GameScreen implements Screen, MessageListener {
     private TextButton playButton;
     private TextButton slapButton;
     private Label gameLabel;
-    private Deck deck;
     private Match match;
-    private Map<String, Hand> hands; // player username -> hand
-    private ArrayList<Card> centerPile;
-    private int playerTurn;
-    // private Boolean mustFace = false;
-    // private int turns = 0;
-    // private int numPlayers;
-    // private List<String> players;
 
     public GameScreen(final EgyptianRatscrew game) {
         this.game = game;

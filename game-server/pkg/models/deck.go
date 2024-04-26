@@ -13,6 +13,14 @@ type Card struct {
 	Suit  Suit   `json:"suit"`
 }
 
+type Hand struct {
+	Cards []Card `json:"cards"`
+}
+
+type CenterPile struct {
+	Cards []Card `json:"cards"`
+}
+
 type Suit string
 
 const (

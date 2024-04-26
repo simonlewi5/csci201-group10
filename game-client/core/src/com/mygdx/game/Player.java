@@ -12,21 +12,18 @@ public class Player {
     private int gamesWon;
     @SerializedName("games_lost")
     private int gamesLost;
-    @SerializedName("total_score")
-    private int totalScore;
     private boolean currentPlayer;
 
     public Player() {
     }
 
-    public Player(String id, String username, String email, int gamesPlayed, int gamesWon, int gamesLost, int totalScore, boolean currentPlayer) {
+    public Player(String id, String username, String email, int gamesPlayed, int gamesWon, int gamesLost, boolean currentPlayer) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.gamesPlayed = gamesPlayed;
         this.gamesWon = gamesWon;
         this.gamesLost = gamesLost;
-        this.totalScore = totalScore;
         this.currentPlayer = currentPlayer;
     }
 
@@ -52,10 +49,6 @@ public class Player {
 
     public int getGamesLost() {
         return gamesLost;
-    }
-
-    public int getTotalScore() {
-        return totalScore;
     }
 
     public boolean currentPlayer() {
@@ -84,10 +77,6 @@ public class Player {
 
     public void setGamesLost(int gamesLost) {
         this.gamesLost = gamesLost;
-    }
-
-    public void setTotalScore(int totalScore) {
-        this.totalScore = totalScore;
     }
 
     public void setCurrentPlayer(boolean currPlayer) {
