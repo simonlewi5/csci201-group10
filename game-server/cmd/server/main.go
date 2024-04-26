@@ -16,6 +16,7 @@ var (
     upgrader = websocket.Upgrader{
         ReadBufferSize:  1024,
         WriteBufferSize: 1024,
+        HandshakeTimeout: 30 * time.Second,
     }
     dbService db.DBService
     matcher *matchmaking.Matcher
@@ -34,6 +35,7 @@ func websocketHandler(dbService db.DBService) http.HandlerFunc {
         }
         defer conn.Close()
         go startPingRoutine(conn)
+
         handlers.HandleConnections(dbService, matcher)(conn)
     }
 }

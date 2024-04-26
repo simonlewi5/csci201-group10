@@ -15,6 +15,7 @@ func HandleConnections(dbService db.DBService, matcher *matchmaking.Matcher) fun
         for {
             _, msg, err := conn.ReadMessage()
             if err != nil {
+                go matcher.DequeuePlayerByConn(conn)
                 log.Println("Error reading message:", err)
                 break
             }

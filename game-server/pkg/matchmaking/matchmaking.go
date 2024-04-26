@@ -57,6 +57,20 @@ func (m *Matcher) QueuePlayer(p *models.Player, conn *websocket.Conn) {
     })
 }
 
+func (m *Matcher) DequeuePlayerByConn(conn *websocket.Conn) {
+	m.MatchLock.Lock()
+	defer m.MatchLock.Unlock()
+	for i, player := range m.QueuedPlayers {
+		if _, ok := m.PlayerConns[player.ID]; ok {
+			if m.PlayerConns[player.ID] == conn {
+				m.QueuedPlayers = append(m.QueuedPlayers[:i], m.QueuedPlayers[i+1:]...)
+				delete(m.PlayerConns, player.ID)
+				break
+			}
+		}
+	}
+}
+
 // dequeues a player from the queue
 func (m *Matcher) DequeuePlayer(p *models.Player, conn *websocket.Conn) {
 	m.MatchLock.Lock()
