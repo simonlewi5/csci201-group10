@@ -8,6 +8,7 @@ import (
 	"github.com/simonlewi5/csci201-group10/game-server/pkg/db"
 	"github.com/simonlewi5/csci201-group10/game-server/pkg/models"
     "github.com/simonlewi5/csci201-group10/game-server/pkg/matchmaking"
+    
 )
 
 func HandleConnections(dbService db.DBService, matcher *matchmaking.Matcher) func(*websocket.Conn) {

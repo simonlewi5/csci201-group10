@@ -55,6 +55,7 @@ func startPingRoutine(conn *websocket.Conn) {
 func main() {
     dbService = db.SetupDatabase()
     matcher = matchmaking.NewMatcher(dbService)
+    matcher.StartMatching()
     
     http.HandleFunc("/ws", websocketHandler(dbService))
     fmt.Println("WebSocket server starting on port 8080...")
