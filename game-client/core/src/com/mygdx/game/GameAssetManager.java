@@ -1,5 +1,8 @@
 package com.mygdx.game;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.Color;
@@ -37,6 +40,7 @@ public class GameAssetManager {
     private static final String MATCH_MUSIC_1 = "egypt_theme.ogg";
     private static final String MATCH_MUSIC_2 = "egyptian_dune.ogg";
     private static final String MATCH_MUSIC_3 = "pyramid.mp3";
+    private static final String CARD_ASSETS_PATH = "cards/";
 
     String color = "#e7e5e4";
 
@@ -71,6 +75,8 @@ public class GameAssetManager {
         manager.load(MATCH_MUSIC_1, Music.class);
         manager.load(MATCH_MUSIC_2, Music.class);
         manager.load(MATCH_MUSIC_3, Music.class);
+
+        loadCardAssets();
 
     }
 
@@ -200,6 +206,49 @@ public class GameAssetManager {
     public Texture getTextCursorImage() {
         return manager.get(TEXT_CURSOR_IMAGE, Texture.class);
     }
+
+    public void loadCardAssets() {
+        String[] suits = {"clubs", "diamonds", "hearts", "spades"};
+        String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king", "ace"};
+
+        // Load numbered cards
+        for (String suit : suits) {
+            for (String rank : ranks) {
+                String fileName = CARD_ASSETS_PATH + rank + "_of_" + suit + ".png";
+                manager.load(fileName, Texture.class);
+            }
+        }
+
+        manager.load(CARD_ASSETS_PATH + "card_back_orange.png", Texture.class);
+    }
+
+    private String formatCardKey(String rank, String suit) {
+        rank = rank.replace("jack", "11")
+                   .replace("queen", "12")
+                   .replace("king", "13")
+                   .replace("ace", "1");
+        return rank + "_" + suit.toUpperCase();
+    }
+
+    public Map<String, Texture> getCardTextures() {
+        Map<String, Texture> cardTextures = new HashMap<>();
+        String[] suits = {"clubs", "diamonds", "hearts", "spades"};
+        String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king", "ace"};
+
+        for (String suit : suits) {
+            for (String rank : ranks) {
+                String key = formatCardKey(rank, suit);
+                String fileName = CARD_ASSETS_PATH + rank + "_of_" + suit + ".png";
+                Texture cardTexture = manager.get(fileName, Texture.class);
+                cardTextures.put(key, cardTexture);
+            }
+        }
+        cardTextures.put("card_back", manager.get(CARD_ASSETS_PATH + "card_back_orange.png", Texture.class));
+
+        return cardTextures;
+    }
+
+
 
     // Dispose of assets and manager
     public void dispose() {
