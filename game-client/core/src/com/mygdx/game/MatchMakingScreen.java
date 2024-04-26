@@ -10,12 +10,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 
 public class MatchMakingScreen implements Screen, MessageListener {
@@ -49,25 +50,23 @@ public class MatchMakingScreen implements Screen, MessageListener {
     }
 
     public void messageReceived(String message) {
-        Gdx.app.postRunnable(new Runnable() {
-            @Override
-            public void run() {
-                serverMessage = message;
-                System.out.println("Message received: " + serverMessage);
-                Gson gson = new Gson();
-                Response response = gson.fromJson(serverMessage, Response.class);
-                String type = response.getType();
-                if (type.equals("QUEUE_UPDATE")) {
-                    JsonElement dataElement = response.getData();
-                    String dataString = dataElement.getAsString();
-                    System.out.println(dataString);
-                } else if (type.equals("MATCH_FOUND")) {
-                    game.setCurrentMatch(gson.fromJson(response.getData(), Match.class));
-                    System.out.println("Match found: " + game.getCurrentMatch().getId());
-                    System.out.println("Match: " + game.getCurrentMatch().toString());
-                }
+        serverMessage = message;
+        System.out.println("Message received: " + serverMessage);
+        Gson gson = new Gson();
+        Response response = gson.fromJson(serverMessage, Response.class);
+        String type = response.getType();
+        if (type.equals("QUEUE_UPDATE")) {
+            JsonElement dataElement = response.getData();
+            String dataString = dataElement.getAsString();
+            System.out.println(dataString);
+        } else if (type.equals("MATCH_FOUND")) {
+            try {
+                game.setCurrentMatch(gson.fromJson(response.getData(), Match.class));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        });
+            fadeOut();
+        }
     }
     
     @Override
@@ -115,6 +114,38 @@ public class MatchMakingScreen implements Screen, MessageListener {
         webSocketClient.send(json);
     }
 
+    private void fadeOut() {
+        final float fadeOutDuration = 1f;
+        final float fadeOutStep = 0.01f;
+        final float initialVolume = backgroundMusic.getVolume();
+
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                float volume = backgroundMusic.getVolume();
+                volume -= fadeOutStep;
+                if (volume <= 0) {
+                    volume = 0;
+                    backgroundMusic.stop();
+                    this.cancel(); 
+                }
+                backgroundMusic.setVolume(volume);
+            }
+        }, 0, fadeOutDuration / (initialVolume / fadeOutStep));
+
+
+        stage.addAction(Actions.sequence(
+            Actions.fadeOut(fadeOutDuration),
+            Actions.run(new Runnable() {
+                @Override
+                public void run() {
+                    game.setScreen(new GameScreen(game));
+                }
+            })
+        ));
+    }
+
+
 
     @Override
     public void render(float delta) {
@@ -133,11 +164,13 @@ public class MatchMakingScreen implements Screen, MessageListener {
 
         viewport.apply();
         game.batch.setProjectionMatrix(viewport.getCamera().combined);
+        game.batch.setColor(1, 1, 1, stage.getRoot().getColor().a);
         game.batch.begin();
         game.batch.draw(backgroundImage, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
         game.batch.end();
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.act(delta);
         stage.draw();
+        game.batch.setColor(1, 1, 1, 1);
     }
 
     @Override

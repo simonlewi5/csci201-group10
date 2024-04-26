@@ -13,7 +13,6 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -24,20 +23,17 @@ import com.badlogic.gdx.utils.Timer;
 
 public class GameScreen implements Screen, MessageListener {
     final EgyptianRatscrew game;
-
-    private BitmapFont fontLarge;
+    private final float ASPECT_RATIO = 16 / 9f;
     private Texture backgroundImage;
     private Music backgroundMusic;
-
     private OrthographicCamera camera;
-    private Stage stage;
+    private String serverMessage;
+    private GameWebSocketClient webSocketClient;
     private Viewport viewport;
-
+    private Stage stage;
     private TextButton playButton;
     private TextButton slapButton;
 
-    private String serverMessage;
-    private GameWebSocketClient webSocketClient;
 
     private List<String> slapHistory;
     private List<String> centerPile;
@@ -47,15 +43,10 @@ public class GameScreen implements Screen, MessageListener {
     private Boolean mustFace = false;
     private int turns = 0;
 
-    private final float ASPECT_RATIO = 16 / 9f;
-
     private int numPlayers;
     private List<String> players;
 
-    public void messageReceived(String message) {
-        this.serverMessage = message;
-        System.out.println("Message received: " + serverMessage);
-    }
+
 
     public GameScreen(final EgyptianRatscrew game) {
         this.game = game;
@@ -92,10 +83,16 @@ public class GameScreen implements Screen, MessageListener {
     }
 
     @Override
+    public void messageReceived(String message) {
+        this.serverMessage = message;
+        System.out.println("Message received: " + serverMessage);
+    }
+
+    @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
 
-        fontLarge = game.assetManager.getFontLarge();
+        // fontLarge = game.assetManager.getFontLarge();
 
         backgroundImage = game.assetManager.getBackgroundImage();
         backgroundMusic = game.assetManager.getBackgroundMusic();
