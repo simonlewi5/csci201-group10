@@ -56,11 +56,12 @@ public class LoginScreen implements Screen, MessageListener {
                 Gson gson = new Gson();
                 Response response = gson.fromJson(serverMessage, Response.class);
                 String type = response.getType();
-                
+    
                 if (type.equals("AUTH_SUCCESS")) {
-                    JsonObject playerJson = response.getData().getAsJsonObject("player");
+                    JsonObject dataObject = response.getData().getAsJsonObject();
+                    JsonObject playerJson = dataObject.getAsJsonObject("player");
                     Player player = gson.fromJson(playerJson, Player.class);
-                    
+    
                     game.player1 = player;
                     System.out.println("Login successful for player: " + player.getUsername());
                     game.setScreen(new UserMenuScreen(game));
@@ -70,6 +71,7 @@ public class LoginScreen implements Screen, MessageListener {
             }
         });
     }
+    
     
     @Override
     public void show() {

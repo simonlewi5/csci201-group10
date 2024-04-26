@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.framing.PingFrame;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
@@ -12,6 +13,7 @@ public class GameWebSocketClient extends WebSocketClient {
     public GameWebSocketClient(String uri, MessageListener listener) throws URISyntaxException {
         super(new URI(uri));
         this.listener = listener;
+        setConnectionLostTimeout(60);
     }
 
     @Override
@@ -34,6 +36,12 @@ public class GameWebSocketClient extends WebSocketClient {
     @Override
     public void onError(Exception ex) {
         ex.printStackTrace();
+    }
+
+    @Override
+    public void sendPing() {
+        sendFrame(new PingFrame());
+        System.out.println("Ping sent");
     }
     
 }

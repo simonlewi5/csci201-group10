@@ -40,6 +40,37 @@ func (m *Matcher) QueuePlayer(p *models.Player, conn *websocket.Conn) {
 		Type: "QUEUE_UPDATE",
 		Data: fmt.Sprintf("Queue size: %d", queueLength),
 	})
+
+	// handle ungraceful disconnects
+	conn.SetCloseHandler(func(code int, text string) error {
+        m.MatchLock.Lock()
+        defer m.MatchLock.Unlock()
+        for i, queuedPlayer := range m.QueuedPlayers {
+            if queuedPlayer.ID == p.ID {
+                m.QueuedPlayers = append(m.QueuedPlayers[:i], m.QueuedPlayers[i+1:]...)
+                break
+            }
+        }
+        delete(m.PlayerConns, p.ID)
+        log.Printf("Player %s disconnected and removed from the queue", p.ID)
+        return nil
+    })
+}
+
+// dequeues a player from the queue
+func (m *Matcher) DequeuePlayer(p *models.Player, conn *websocket.Conn) {
+	m.MatchLock.Lock()
+	defer m.MatchLock.Unlock()
+	for i, player := range m.QueuedPlayers {
+		if player.ID == p.ID {
+			m.QueuedPlayers = append(m.QueuedPlayers[:i], m.QueuedPlayers[i+1:]...)
+			break
+		}
+	}
+	if _, ok := m.PlayerConns[p.ID]; ok {
+		conn.Close()
+		delete(m.PlayerConns, p.ID)
+	}
 }
 
 func (m *Matcher) StartMatching() {

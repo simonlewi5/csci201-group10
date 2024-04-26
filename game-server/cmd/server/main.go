@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/simonlewi5/csci201-group10/game-server/pkg/db"
-    "github.com/simonlewi5/csci201-group10/game-server/pkg/matchmaking"
 	"github.com/simonlewi5/csci201-group10/game-server/pkg/handlers"
-
+	"github.com/simonlewi5/csci201-group10/game-server/pkg/matchmaking"
 )
 
 var (
@@ -33,10 +33,22 @@ func websocketHandler(dbService db.DBService) http.HandlerFunc {
             return
         }
         defer conn.Close()
-
+        go startPingRoutine(conn)
         handlers.HandleConnections(dbService, matcher)(conn)
     }
 }
+
+func startPingRoutine(conn *websocket.Conn) {
+    ticker := time.NewTicker(30 * time.Second)
+    defer ticker.Stop()
+    for range ticker.C {
+        if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+            log.Printf("ping failed: %s", err)
+            return  // maybe reconnect here
+        }
+    }
+}
+
 
 func main() {
     dbService = db.SetupDatabase()

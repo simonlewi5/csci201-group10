@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -55,10 +56,10 @@ public class MatchMakingScreen implements Screen, MessageListener {
                 Gson gson = new Gson();
                 Response response = gson.fromJson(serverMessage, Response.class);
                 String type = response.getType();
-                
                 if (type.equals("QUEUE_UPDATE")) {
-                    String queueMessage = response.getData().getAsString();
-                    System.out.println(queueMessage);
+                    JsonElement dataElement = response.getData();
+                    String dataString = dataElement.getAsString();
+                    System.out.println(dataString);
                 }
             }
         });

@@ -1,16 +1,16 @@
 package com.mygdx.game;
 
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 
 public class Response {
     private String type;
-    private JsonObject data;
+    private JsonElement data;
 
     public String getType() {
         return type;
     }
 
-    public JsonObject getData() {
+    public JsonElement getData() {
         return data;
     }
 }
