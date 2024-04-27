@@ -15,6 +15,7 @@ type Matcher struct {
 	QueuedPlayers []*models.Player         // players waiting to be matched
 	Matches       []*models.Match          // matches that have been created
 	PlayerConns   map[string]*websocket.Conn // map of player IDs to their connections
+	PlayerMatches map[string]*models.Match  // map of player IDs to their matches
 	MatchLock     sync.Mutex               // lock for queue and matches
 	DBService     db.DBService
 }
@@ -24,6 +25,7 @@ func NewMatcher(dbService db.DBService) *Matcher {
 		QueuedPlayers: make([]*models.Player, 0),
 		Matches:       make([]*models.Match, 0),
 		PlayerConns:   make(map[string]*websocket.Conn),
+		PlayerMatches: make(map[string]*models.Match),
 		DBService:     dbService,
 	}
 }
@@ -128,6 +130,9 @@ func (m *Matcher) StartMatching() {
 
 			newMatch := models.NewMatch(matchPlayers)
 			m.Matches = append(m.Matches, newMatch)
+			for _, player := range matchPlayers {
+				m.PlayerMatches[player.ID] = newMatch
+			}
 			m.sendMatchFound(newMatch)
 			m.QueuedPlayers = m.QueuedPlayers[targetLength:]
 		}
@@ -151,6 +156,13 @@ func (m *Matcher) GetPlayerConns() map[string]*websocket.Conn {
 	m.MatchLock.Lock()
 	defer m.MatchLock.Unlock()
 	return m.PlayerConns
+}
+
+// player id to match object
+func (m *Matcher) GetMatchByPlayerID(playerID string) *models.Match {
+	m.MatchLock.Lock()
+	defer m.MatchLock.Unlock()
+	return m.PlayerMatches[playerID]
 }
 
 func (m *Matcher) GetMatchByID(matchID string) *models.Match {
@@ -214,4 +226,3 @@ func (m *Matcher) sendMatchEnd(match *models.Match) {
 		}
 	}
 }
-

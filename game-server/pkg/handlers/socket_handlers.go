@@ -30,7 +30,7 @@ func HandleConnections(dbService db.DBService, matcher *matchmaking.Matcher) fun
                     handleLogin(dbService, conn, data)
                 case "register":
                     handleRegistration(dbService, conn, data)
-                case "place_card":
+                case "play_card":
                     log.Println("Place card action received")
                 case "slap":
                     log.Println("Slap action received")
@@ -123,6 +123,51 @@ func sendMessage(conn *websocket.Conn, msg models.Message) {
 	if err := conn.WriteMessage(websocket.TextMessage, msgJSON); err != nil {
 		log.Println("Error sending message:", err)
 	}
+}
+
+func handlePlayCard(conn *websocket.Conn, matcher *matchmaking.Matcher, data map[string]interface{}) {
+    playerID, ok := data["player_id"].(string)
+    if !ok || playerID == "" {
+        log.Println("player_id is missing or not a string")
+        sendMessage(conn, models.Message{
+            Type: models.MessageTypeAuthError,
+            Data: "player_id is required and must be a string",
+        })
+        return
+    }
+
+    match := matcher.GetMatchByPlayerID(playerID)
+    if match == nil {
+        log.Println("Player is not in a match")
+        sendMessage(conn, models.Message{
+            Type: models.MessageTypeAuthError,
+            Data: "Player is not in a match",
+        })
+        return
+    }
+
+    err := match.PlayCard(playerID)
+    if err != nil {
+        log.Println("Error playing card:", err)
+        sendMessage(conn, models.Message{
+            Type: models.MessageTypeAuthError,
+            Data: "Error playing card: " + err.Error(),
+        })
+        return
+    }
+
+    matchUpdate := models.MatchUpdate{
+        Match: *match,
+    }
+
+    for _, player := range match.Players {
+        if conn, ok := matcher.GetPlayerConns()[player.ID]; ok {
+            sendMessage(conn, models.Message{
+                Type: models.MessageTypeMatchUpdate,
+                Data: matchUpdate,
+            })
+        }
+    }
 }
 
 func handleSlap( ) {

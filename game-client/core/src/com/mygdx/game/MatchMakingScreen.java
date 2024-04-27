@@ -49,6 +49,7 @@ public class MatchMakingScreen implements Screen, MessageListener {
         Gdx.graphics.setResizable(true);
     }
 
+    @Override
     public void messageReceived(String message) {
         serverMessage = message;
         System.out.println("Message received: " + serverMessage);

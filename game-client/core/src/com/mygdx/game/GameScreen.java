@@ -10,6 +10,8 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -59,8 +61,19 @@ public class GameScreen implements Screen, MessageListener {
 
     @Override
     public void messageReceived(String message) {
-        this.serverMessage = message;
+        serverMessage = message;
         System.out.println("Message received: " + serverMessage);
+        Gson gson = new Gson();
+        Response response = gson.fromJson(serverMessage, Response.class);
+        String type = response.getType();
+        if (type.equals("MATCH_UPDATE")) {
+            JsonElement dataElement = response.getData();
+            String dataString = dataElement.getAsString();
+            System.out.println(dataString);
+            
+        } else if (type.equals("MATCH_FOUND")) {
+
+        }
     }
 
     @Override

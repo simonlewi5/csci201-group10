@@ -118,3 +118,44 @@ func getRandomIndex(n int) (int, error) {
 	}
 	return int(bigIdx.Int64()), nil
 }
+
+func (m *Match) GetPlayerByID(playerID string) *Player {
+	for _, player := range m.Players {
+		if player.ID == playerID {
+			return player
+		}
+	}
+	return nil
+}
+
+func (m *Match) PlayCard(playerID string) error {
+	player := m.GetPlayerByID(playerID)
+	if player == nil {
+		return fmt.Errorf("player with ID %s not found in match", playerID)
+	}
+
+	if m.MatchState != MatchStateInProgress {
+		return fmt.Errorf("match is not in progress")
+	}
+
+	if m.Players[m.TurnIndex].ID != player.ID {
+		return fmt.Errorf("it is not player %s's turn", player.Username)
+	}
+
+	hand := m.Hands[player.Username]
+	if len(hand.Cards) == 0 {
+		return fmt.Errorf("Player %s has no cards to play", player.Username)
+	}
+
+	card := hand.Cards[0]
+	hand.Cards = hand.Cards[1:]
+	m.Hands[player.Username] = hand
+
+	// put it in the center pile
+	m.CenterPile.Cards = append(m.CenterPile.Cards, card)
+
+	// update turn index
+	m.TurnIndex = (m.TurnIndex + 1) % len(m.Players)
+
+	return nil
+}
