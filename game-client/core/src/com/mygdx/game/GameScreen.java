@@ -160,7 +160,7 @@ public class GameScreen implements Screen, MessageListener {
                 HashMap<String, Object> data = new HashMap<>();
 
                 data.put("action", "play_card");
-                data.put("playerId", playerId);
+                data.put("player_id", playerId);
 
                 String json = new Gson().toJson(data);
                 webSocketClient.send(json);

@@ -71,7 +71,7 @@ func NewMatch(players []*Player) *Match {
 		ID:         matchID,
 		Players:    players,
 		Hands:      playerHands,
-		MatchState: MatchStateInit,
+		MatchState: MatchStateInProgress,
 		TurnIndex:  firstPlayerIdx,
 		//Winner is set to an empty player to indicate that the match is still in progress
 		Winner:    Player{},
