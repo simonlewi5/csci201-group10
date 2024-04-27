@@ -1,5 +1,6 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -46,8 +47,9 @@ public class GameScreen implements Screen, MessageListener {
     private Match match;
     private Map<String, Texture> cardTextures;
 
-    public GameScreen(final EgyptianRatscrew game) {
+    public GameScreen(final EgyptianRatscrew game, GameWebSocketClient webSocketClient) {
         this.game = game;
+        this.webSocketClient = webSocketClient;
         this.match = game.getCurrentMatch();
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 800 / ASPECT_RATIO);
@@ -65,10 +67,13 @@ public class GameScreen implements Screen, MessageListener {
     @Override
     public void messageReceived(String message) {
         serverMessage = message;
-        System.out.println("Message received: " + serverMessage);
+        // System.out.println("Message received: " + serverMessage);
+        System.out.println(serverMessage);
         Gson gson = new Gson();
         Response response = gson.fromJson(serverMessage, Response.class);
+        System.out.println("Response: " + response.toString());
         String type = response.getType();
+        System.out.println("Type: " + type);
         if ("MATCH_UPDATE".equals(type)) {
             System.out.println("Match update received");
             JsonElement dataElement = response.getData();
@@ -88,15 +93,6 @@ public class GameScreen implements Screen, MessageListener {
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
-        try {
-            webSocketClient = new GameWebSocketClient("wss://egyptianratscrew.dev/ws", this);
-            webSocketClient.connectBlocking();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         initScreenElements();
     }
 

@@ -16,6 +16,10 @@ public class GameWebSocketClient extends WebSocketClient {
         setConnectionLostTimeout(60);
     }
 
+    public void setListener(MessageListener listener) {
+        this.listener = listener;
+    }
+
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
         System.out.println("Connection opened");
@@ -23,8 +27,12 @@ public class GameWebSocketClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
+        System.out.println("Received message: " + message);
         if (listener != null) {
+            System.out.println("Forwarding to listener: " + listener.getClass().getSimpleName());
             listener.messageReceived(message);
+        } else {
+            System.out.println("No listener attached");
         }
     }
 

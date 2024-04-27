@@ -140,7 +140,9 @@ public class MatchMakingScreen implements Screen, MessageListener {
             Actions.run(new Runnable() {
                 @Override
                 public void run() {
-                    game.setScreen(new GameScreen(game));
+                    GameScreen gameScreen = new GameScreen(game, webSocketClient);
+                    webSocketClient.setListener(gameScreen);
+                    game.setScreen(new GameScreen(game, webSocketClient));
                 }
             })
         ));
@@ -194,7 +196,6 @@ public class MatchMakingScreen implements Screen, MessageListener {
     @Override
     public void dispose() {
         backgroundMusic.stop();
-    	webSocketClient.close();
         stage.dispose();
     }
 
