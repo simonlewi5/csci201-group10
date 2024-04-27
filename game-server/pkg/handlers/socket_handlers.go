@@ -32,6 +32,7 @@ func HandleConnections(dbService db.DBService, matcher *matchmaking.Matcher) fun
                     handleRegistration(dbService, conn, data)
                 case "play_card":
                     log.Println("Place card action received")
+                    handlePlayCard(conn, matcher, data)
                 case "slap":
                     log.Println("Slap action received")
                 case "search_for_match":

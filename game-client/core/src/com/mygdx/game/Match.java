@@ -101,5 +101,21 @@ public class Match {
         this.deck = deck;
     }
 
+    public CenterPile getCenterPile() {
+        return centerPile;
+    }
+
+    public void setCenterPile(CenterPile centerPile) {
+        this.centerPile = centerPile;
+    }
+
+    public Map<String, Hand> getHands() {
+        return hands;
+    }
+
+    public void setHands(Map<String, Hand> hands) {
+        this.hands = hands;
+    }
+
     
 }

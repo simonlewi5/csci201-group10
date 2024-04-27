@@ -66,5 +66,13 @@ public class EgyptianRatscrew extends Game {
     public void setCurrentMatch(Match currentMatch) {
         this.currentMatch = currentMatch;
     }
+
+    public Player getPlayer1() {
+        return player1;
+    }
+
+    public void setPlayer1(Player player1) {
+        this.player1 = player1;
+    }
 }
 

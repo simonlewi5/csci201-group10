@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -23,6 +24,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class GameScreen implements Screen, MessageListener {
@@ -70,9 +72,12 @@ public class GameScreen implements Screen, MessageListener {
             JsonElement dataElement = response.getData();
             String dataString = dataElement.getAsString();
             System.out.println(dataString);
-            
-        } else if (type.equals("MATCH_FOUND")) {
 
+
+        } else if (type.equals("AUTH_FAILURE")) {
+            JsonElement dataElement = response.getData();
+            String dataString = dataElement.getAsString();
+            System.out.println(dataString);
         }
     }
 
@@ -148,9 +153,18 @@ public class GameScreen implements Screen, MessageListener {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Play button clicked");
-                String cardKey = debugRandomCard();
-                updateCenterPile(cardKey, centerPile);
-                gameBoard.invalidateHierarchy();
+                // String cardKey = debugRandomCard();
+                // updateCenterPile(cardKey, centerPile);
+                // gameBoard.invalidateHierarchy();
+                String playerId = game.getPlayer1().getId();
+                HashMap<String, Object> data = new HashMap<>();
+
+                data.put("action", "play_card");
+                data.put("playerId", playerId);
+
+                String json = new Gson().toJson(data);
+                webSocketClient.send(json);
+
             }
         });
         slapButton.addListener(new ClickListener() {
@@ -160,20 +174,22 @@ public class GameScreen implements Screen, MessageListener {
             }
         });
 
-        // int numPlayers = match.getPlayers().size();
-        int numPlayers = 2;
+        int numPlayers = match.getPlayers().size();
+        Map <String, Hand> hands = match.getHands();
 
-        ArrayList<String> debugPlayerNames = new ArrayList<String>();
-        debugPlayerNames.add("Player 1");
-        debugPlayerNames.add("Player 2");
-        debugPlayerNames.add("Player 3");
-        debugPlayerNames.add("Player 4");
+        // int numPlayers = 2;
 
-        ArrayList<Integer> debugCardsRemaining = new ArrayList<Integer>();
-        debugCardsRemaining.add(7);
-        debugCardsRemaining.add(11);
-        debugCardsRemaining.add(12);
-        debugCardsRemaining.add(4);
+        // ArrayList<String> debugPlayerNames = new ArrayList<String>();
+        // debugPlayerNames.add("Player 1");
+        // debugPlayerNames.add("Player 2");
+        // debugPlayerNames.add("Player 3");
+        // debugPlayerNames.add("Player 4");
+
+        // ArrayList<Integer> debugCardsRemaining = new ArrayList<Integer>();
+        // debugCardsRemaining.add(7);
+        // debugCardsRemaining.add(11);
+        // debugCardsRemaining.add(12);
+        // debugCardsRemaining.add(4);
 
 
         Image cardBackImage1 = new Image(cardTextures.get("card_back"));
@@ -181,14 +197,30 @@ public class GameScreen implements Screen, MessageListener {
         Image cardBackImage3 = new Image(cardTextures.get("card_back"));
         Image cardBackImage4 = new Image(cardTextures.get("card_back"));
 
+        String player1Username = match.getPlayers().get(0).getUsername();
+        int player1CardsRemaining = hands.get(player1Username).getCards().size();
+        String player2Username = match.getPlayers().get(1).getUsername();
+        int player2CardsRemaining = hands.get(player2Username).getCards().size();
+        String player3Username = "";
+        int player3CardsRemaining = 0;
+        String player4Username = "";
+        int player4CardsRemaining = 0;
+        if (numPlayers >= 3) {
+            player3Username = match.getPlayers().get(2).getUsername();
+            player3CardsRemaining = hands.get(player3Username).getCards().size();
+        }
+        if (numPlayers >= 4) {
+            player4Username = match.getPlayers().get(3).getUsername();
+            player4CardsRemaining = hands.get(player4Username).getCards().size();
+        }
 
         //top row
         gameBoard.add().uniform().fill();
         if (numPlayers >= 3) {
-            Table playerTable3 = createPlayerTable(debugPlayerNames.get(2), debugCardsRemaining.get(2), 3, numPlayers, cardBackImage3);
+            Table playerTable3 = createPlayerTable(player3Username, player3CardsRemaining, 3, numPlayers, cardBackImage3);
             gameBoard.add(playerTable3).uniform().fill();
         } else {
-            Table playerTable2 = createPlayerTable(debugPlayerNames.get(1), debugCardsRemaining.get(1), 2, numPlayers, cardBackImage2);
+            Table playerTable2 = createPlayerTable(player2Username, player2CardsRemaining, 2, numPlayers, cardBackImage2);
             gameBoard.add(playerTable2).uniform().fill();
         }
         gameBoard.add().uniform().fill();
@@ -196,7 +228,7 @@ public class GameScreen implements Screen, MessageListener {
         
         // middle row - only show card backs if there are 3 or 4 players
         if (numPlayers >= 3) {
-            Table playerTable2 = createPlayerTable(debugPlayerNames.get(1), debugCardsRemaining.get(1), 2, numPlayers, cardBackImage2);
+            Table playerTable2 = createPlayerTable(player2Username, player2CardsRemaining, 2, numPlayers, cardBackImage2);
             gameBoard.add(playerTable2).uniform().fill();
         } else {
             gameBoard.add().uniform().fill();
@@ -204,7 +236,7 @@ public class GameScreen implements Screen, MessageListener {
         gameBoard.add(centerPile).size(120,200).uniform().fill();
 
         if (numPlayers >= 4) {
-            Table playerTable4 = createPlayerTable(debugPlayerNames.get(3), debugCardsRemaining.get(3), 4, numPlayers, cardBackImage4);
+            Table playerTable4 = createPlayerTable(player4Username, player4CardsRemaining, 4, numPlayers, cardBackImage4);
             gameBoard.add(playerTable4).uniform().fill();
         } else {
             gameBoard.add().uniform().fill();
@@ -213,7 +245,7 @@ public class GameScreen implements Screen, MessageListener {
         
         // bottom row
         gameBoard.add(playButton).uniform();
-        Table playerTable1 = createPlayerTable(debugPlayerNames.get(0), debugCardsRemaining.get(0), 1, numPlayers, cardBackImage1);
+        Table playerTable1 = createPlayerTable(player1Username, player1CardsRemaining, 1, numPlayers, cardBackImage1);
         gameBoard.add(playerTable1).uniform().fill();
         gameBoard.add(slapButton).uniform();
         gameBoard.row();
