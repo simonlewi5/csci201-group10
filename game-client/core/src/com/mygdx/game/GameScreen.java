@@ -1,6 +1,5 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -8,7 +7,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -23,7 +21,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,8 +37,7 @@ public class GameScreen implements Screen, MessageListener {
     private Viewport viewport;
     private Stage stage;
     
-    private Stack centerPile;
-    private Table gameBoard;
+    private Table gameBoard, centerPile;
     private TextButton playButton;
     private TextButton slapButton;
     private Match match;
@@ -57,52 +53,41 @@ public class GameScreen implements Screen, MessageListener {
         backgroundImage = game.assetManager.getBackgroundMatch();
         loadMatchMusic();
         cardTextures = game.assetManager.getCardTextures();
-        centerPile = new Stack();
+        centerPile = new Table();
         gameBoard = new Table();
-
-
-        // Add a resize listener to handle window resizing
-        Gdx.graphics.setResizable(true);
-
         stage = new Stage(viewport, game.batch);
+        Gdx.input.setInputProcessor(stage);
+        Gdx.graphics.setResizable(true);
+        initScreenElements();
     }
 
     @Override
     public void messageReceived(String message) {
-        Gdx.app.postRunnable(new Runnable() {
-            @Override
-            public void run() {
-                serverMessage = message;
-                System.out.println("Message received: " + serverMessage);
-                Gson gson = new Gson();
-                Response response = gson.fromJson(serverMessage, Response.class);
-                String type = response.getType();
-                if ("MATCH_UPDATE".equals(type)) {
-                    System.out.println("Match update received");
-                    JsonElement dataElement = response.getData();
-                    Match updatedMatch = gson.fromJson(dataElement, Match.class);
-                    match = updatedMatch;
-        
-                    Card lastCardPlayed = match.getCenterPile().getCards().get(match.getCenterPile().getCards().size() - 1);
-                    String cardKey = lastCardPlayed.getValue() + "_" + lastCardPlayed.getSuit();
-                    updateCenterPile(cardKey, centerPile);
-                    gameBoard.invalidateHierarchy();
-                    // gameBoard.invalidateHierarchy();
-        
-                } else if ("AUTH_ERROR".equals(type)) {
-                    JsonElement dataElement = response.getData();
-                    String dataString = dataElement.getAsString();
-                    System.out.println(dataString);
-                }
-            }
-        });
+        serverMessage = message;
+        System.out.println("Message received: " + serverMessage);
+        Gson gson = new Gson();
+        Response response = gson.fromJson(serverMessage, Response.class);
+        String type = response.getType();
+        if ("MATCH_UPDATE".equals(type)) {
+            System.out.println("Match update received");
+            JsonElement dataElement = response.getData();
+            Match updatedMatch = gson.fromJson(dataElement, Match.class);
+            match.setCenterPile(updatedMatch.getCenterPile());
+            System.out.println("Updated center pile: " + match.getCenterPile().getCards());
+            System.out.println("Updated pile count: " + match.getCenterPile().getCards().size());
+            System.out.println("centerPile size: " + centerPile.getChildren().size);
 
+        } else if ("AUTH_ERROR".equals(type)) {
+            JsonElement dataElement = response.getData();
+            String dataString = dataElement.getAsString();
+            System.out.println(dataString);
+        }
     }
+
 
     @Override
     public void show() {
-        Gdx.input.setInputProcessor(stage);
-        initScreenElements();
+
     }
 
     @Override
@@ -114,42 +99,23 @@ public class GameScreen implements Screen, MessageListener {
         game.batch.begin();
         game.batch.draw(backgroundImage, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
         game.batch.end();
-    
         if (!matchMusic.get(currentTrackIndex).isPlaying()) {
             playNextTrack();
         }
-    
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+            if (centerPile.getChildren().size != this.match.getCenterPile().getCards().size()) {
+                Card lastCardPlayed = match.getCenterPile().getCards().get(match.getCenterPile().getCards().size() - 1);
+                String cardKey = lastCardPlayed.getValue() + "_" + lastCardPlayed.getSuit();
+                Image cardImage = new Image(cardTextures.get(cardKey));
+                centerPile.add(cardImage).size(120, 200).uniform().fill();
+            }
         stage.draw();
     }
-    
 
-    @Override
-    public void resize(int width, int height) {
-        viewport.update(width, height);
-    }
-
-    @Override
-    public void pause() {
-    }
-
-    @Override
-    public void resume() {
-    }
-
-    @Override
-    public void hide() {
-    }
-
-    @Override
-    public void dispose() {
-        stage.dispose();
-    }
 
     private void initScreenElements() {
         gameBoard.setFillParent(true);
         gameBoard.defaults().expand();
-        // gameBoard.setDebug(true);
 
         TextButtonStyle buttonStyle = game.assetManager.getTextButtonStyle(2.0f);
         playButton = new TextButton("Play", buttonStyle);
@@ -159,9 +125,6 @@ public class GameScreen implements Screen, MessageListener {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Play button clicked");
-                // String cardKey = debugRandomCard();
-                // updateCenterPile(cardKey, centerPile);
-                // gameBoard.invalidateHierarchy();
                 String playerId = game.getPlayer1().getId();
                 HashMap<String, Object> data = new HashMap<>();
 
@@ -181,21 +144,6 @@ public class GameScreen implements Screen, MessageListener {
 
         int numPlayers = match.getPlayers().size();
         Map <String, Hand> hands = match.getHands();
-
-        // int numPlayers = 2;
-
-        // ArrayList<String> debugPlayerNames = new ArrayList<String>();
-        // debugPlayerNames.add("Player 1");
-        // debugPlayerNames.add("Player 2");
-        // debugPlayerNames.add("Player 3");
-        // debugPlayerNames.add("Player 4");
-
-        // ArrayList<Integer> debugCardsRemaining = new ArrayList<Integer>();
-        // debugCardsRemaining.add(7);
-        // debugCardsRemaining.add(11);
-        // debugCardsRemaining.add(12);
-        // debugCardsRemaining.add(4);
-
 
         Image cardBackImage1 = new Image(cardTextures.get("card_back"));
         Image cardBackImage2 = new Image(cardTextures.get("card_back"));
@@ -240,8 +188,9 @@ public class GameScreen implements Screen, MessageListener {
         }
 
         // the center pile of cards
-        // gameBoard.add(centerPile).size(120,200).uniform().fill();
-        gameBoard.add(centerPile).size(240,240).expand().center();
+        // Image testCard = new Image(cardTextures.get("2_CLUBS"));
+        // centerPile.add(testCard).size(120,200).uniform().fill();
+        gameBoard.add(centerPile).size(120,200).uniform().fill();
         centerPile.setDebug(true);
         
 
@@ -291,47 +240,6 @@ public class GameScreen implements Screen, MessageListener {
         return playerTable;
     }
 
-    private void updateCenterPile(String cardKey, Stack centerPile) {
-        Image cardImage = new Image(cardTextures.get(cardKey));
-        cardImage.setSize(120, 200);
-        centerPile.add(cardImage);
-    }
-
-    // private void updateCenterPile() {
-    //     ArrayList<Card> centerPileCards = match.getCenterPile().getCards();
-    //     centerPile.clear();
-    
-    //     float offset = 0;
-    //     for (Card card : centerPileCards) {
-    //         String cardKey = card.getValue() + "_" + card.getSuit();
-    //         System.out.println("Adding card to center pile: " + cardKey);
-    //         Image cardImage = new Image(cardTextures.get(cardKey));
-    //         cardImage.setSize(120,200);
-
-    //         if (centerPileCards.size() > 1) {
-    //             cardImage.setOrigin(Align.center);
-    //             cardImage.setRotation((float) (Math.random() * 10 - 5));
-    //         }
-    //         if (cardImage.getDrawable() == null) {
-    //             System.out.println("Card image failed to load for key: " + cardKey);
-    //         }
-    //         cardImage.setSize(120, 200);
-    //         cardImage.setPosition(offset, offset);
-    //         centerPile.add(cardImage);
-    //         offset += 10;
-    //     }
-    //     centerPile.invalidateHierarchy();
-    //     // gameBoard.invalidateHierarchy();
-    // }
-
-    // private String debugRandomCard() {
-    //     String[] suits = {"hearts", "diamonds", "clubs", "spades"};
-    //     String[] values = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"};
-    //     int suitIndex = (int) (Math.random() * 4);
-    //     int valueIndex = (int) (Math.random() * 13);
-    //     return values[valueIndex] + "_" + suits[suitIndex].toUpperCase();
-    // }
-
     public void loadMatchMusic() {
         matchMusic = new ArrayList<Music>();
         for (int i = 1; i <= 3; i++) {
@@ -353,4 +261,28 @@ public class GameScreen implements Screen, MessageListener {
             nextTrack.play();
         }
     }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height);
+    }
+
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
+    }
+
+    @Override
+    public void hide() {
+    }
+
+    @Override
+    public void dispose() {
+        stage.dispose();
+        webSocketClient.close();
+    }
+
 }
