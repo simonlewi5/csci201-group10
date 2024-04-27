@@ -199,6 +199,20 @@ public class GameAssetManager {
         return labelStyle;
     }
 
+    public Label.LabelStyle getSmallLabelStyle(float scale) {
+        BitmapFont buttonFont = getFontSmall();
+        buttonFont.getData().setScale(scale);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(buttonFont, Color.valueOf(color));
+        return labelStyle;
+    }
+
+    public Label.LabelStyle getLargeLabelStyle(float scale) {
+        BitmapFont buttonFont = getFontLarge();
+        buttonFont.getData().setScale(scale);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(buttonFont, Color.valueOf(color));
+        return labelStyle;
+    }
+
     public Texture getCursorImage() {
         return manager.get(CURSOR_IMAGE, Texture.class);
     }
@@ -222,14 +236,6 @@ public class GameAssetManager {
         manager.load(CARD_ASSETS_PATH + "card_back_orange.png", Texture.class);
     }
 
-    // Map<String, Texture> cardTextures = new HashMap<>();
-    // cardTextures = getCardTextures();
-    // int rank = player1.Hand.get(0).getRank()
-    // String suit = player1.Hand.get(0).getSuit()
-    // String key = rank + "_" + suit;
-    // Texture cardTexture = cardTextures.get("2_CLUBS");
-
-
     private String formatCardKey(String rank, String suit) {
         rank = rank.replace("jack", "11")
                    .replace("queen", "12")
@@ -248,6 +254,7 @@ public class GameAssetManager {
                 String key = formatCardKey(rank, suit);
                 String fileName = CARD_ASSETS_PATH + rank + "_of_" + suit + ".png";
                 Texture cardTexture = manager.get(fileName, Texture.class);
+                
                 cardTextures.put(key, cardTexture);
             }
         }
