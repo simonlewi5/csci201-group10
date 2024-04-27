@@ -26,19 +26,21 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 import com.badlogic.gdx.Gdx;
 
 
 public class RegistrationScreen implements Screen, MessageListener  {
     final EgyptianRatscrew game;
+    public static boolean registerFormatCheck = false;
     private final float ASPECT_RATIO = 16 / 9f;
     private Texture backgroundImage;
     private Music backgroundMusic;
     private OrthographicCamera camera;
     private String serverMessage;
     private GameWebSocketClient webSocketClient;
-    private Label messageLabel;
+    private static Label messageLabel;
     private Stage stage;
     private TextField emailField, usernameField, passwordField, confirmPasswordField;
     private TextButton submitButton, exitButton;
@@ -157,40 +159,56 @@ public class RegistrationScreen implements Screen, MessageListener  {
         messageLabel.setSize(300, 100);
         messageLabel.setPosition(700, 600); //positioning the message 
         stage.addActor(messageLabel); //adding label to the stage
-
+        
         submitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                
                 if (webSocketClient != null && webSocketClient.isOpen()) {
                     String email = emailField.getText();
                     String username = usernameField.getText();
                     String password = passwordField.getText();
                     String confirmPassword = confirmPasswordField.getText();
                     System.out.println("Email: " + email + " Username: " + username + " Password: " + password + " Confirm Password: " + confirmPassword);
+                    registerFormatCheck = true;
 
+                    //check null inputs
                     if (email.isEmpty() || username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
                         showMessage("All fields are required."); //if any data is empty
+                        registerFormatCheck = false;
                         return;
                     }
 
+                    //email format check
+                    Pattern emailPattern = Pattern.compile("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$");
+                    if(!emailPattern.matcher(email).matches()) {
+                        showMessage("Invalid email format.");
+                        registerFormatCheck = false;
+                        return;
+                    }
+                    //pw check
                     if (!password.equals(confirmPassword)) {
                         System.out.println("Passwords do not match");
-                        showMessage("Passwords do not match."); //show the error to the user
+                        showMessage("Passwords do not match."); 
+                        registerFormatCheck = false;
                         return;
                     }
+                    
+                    if (registerFormatCheck) {
+                        HashMap<String, Object> data = new HashMap<>();
+                        data.put("action", "register");
+                        data.put("email", email);
+                        data.put("username", username);
+                        data.put("password", password);
 
-                    HashMap<String, Object> data = new HashMap<>();
-                    data.put("action", "register");
-                    data.put("email", email);
-                    data.put("username", username);
-                    data.put("password", password);
-
-                    String json = new Gson().toJson(data);
-                    webSocketClient.send(json);
-                    emailField.setText("");
-                    usernameField.setText("");
-                    passwordField.setText("");
-                    confirmPasswordField.setText("");
+                        String json = new Gson().toJson(data);
+                        webSocketClient.send(json);
+                        emailField.setText("");
+                        usernameField.setText("");
+                        passwordField.setText("");
+                        confirmPasswordField.setText("");
+                        game.setScreen(new MainMenuScreen(game));
+                    }
                 } else {
                     System.out.println("WebSocket is not open");
                 }
@@ -206,7 +224,7 @@ public class RegistrationScreen implements Screen, MessageListener  {
 
         
     }
-    public void showMessage(String text){
+    public static void showMessage(String text){
         messageLabel.setText(text);
         messageLabel.setVisible(true);
 
