@@ -2,18 +2,22 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class GameScreen implements Screen, MessageListener {
     final EgyptianRatscrew game;
@@ -27,18 +31,21 @@ public class GameScreen implements Screen, MessageListener {
     private Viewport viewport;
     private Stage stage;
 
+    private Table gameBoard;
     private TextButton playButton;
     private TextButton slapButton;
-    private Label gameLabel;
     private Match match;
+    private Map<String, Texture> cardTextures;
 
     public GameScreen(final EgyptianRatscrew game) {
         this.game = game;
+        this.match = game.getCurrentMatch();
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 800 / ASPECT_RATIO);
         viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera);
         backgroundImage = game.assetManager.getBackgroundMatch();
         loadMatchMusic();
+        cardTextures = game.assetManager.getCardTextures();
 
         // Add a resize listener to handle window resizing
         Gdx.graphics.setResizable(true);
@@ -72,16 +79,19 @@ public class GameScreen implements Screen, MessageListener {
         ScreenUtils.clear(0, 0, 0, 1);
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
+    
         game.batch.begin();
-
-        // Draw background image
         game.batch.draw(backgroundImage, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+        game.batch.end();
+    
         if (!matchMusic.get(currentTrackIndex).isPlaying()) {
             playNextTrack();
         }
-
-        game.batch.end();
+    
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.draw();
     }
+    
 
     @Override
     public void resize(int width, int height) {
@@ -106,16 +116,34 @@ public class GameScreen implements Screen, MessageListener {
     }
 
     private void initScreenElements() {
+        gameBoard = new Table();
+        gameBoard.setFillParent(true);
 
-        Label.LabelStyle labelStyle = game.assetManager.getLabelStyle(2.0f);
-        gameLabel = new Label("Game screen", labelStyle);
-        gameLabel.setColor(Color.valueOf("#0f172a"));
 
-        gameLabel.setPosition(viewport.getWorldWidth() / 2 - gameLabel.getWidth() / 2,
-                viewport.getWorldHeight() / 2 - gameLabel.getHeight() / 2);
+        TextButtonStyle buttonStyle = game.assetManager.getTextButtonStyle(2.0f);
+        
+        playButton = new TextButton("Play", buttonStyle);
+        playButton.setPosition(800, 800 / ASPECT_RATIO - 100);
 
-        // add all of it to the stage
-        stage.addActor(gameLabel);
+        
+        slapButton = new TextButton("Slap", buttonStyle);
+        slapButton.setPosition(800, 800 / ASPECT_RATIO - 150);
+
+        playButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                System.out.println("Play button clicked");
+            }
+        });
+        slapButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                System.out.println("Slap button clicked");
+            }
+        });
+        gameBoard.add(playButton).expand().bottom().pad(20).left().pad(40);
+        gameBoard.add(slapButton).expand().bottom().pad(20).right().pad(40);
+        stage.addActor(gameBoard);
     }
 
     public void loadMatchMusic() {
