@@ -30,6 +30,8 @@ func HandleConnections(dbService db.DBService, matcher *matchmaking.Matcher) fun
                     handleLogin(dbService, conn, data)
                 case "register":
                     handleRegistration(dbService, conn, data)
+                case "place_card":
+                    log.Println("Place card action received")
                 case "slap":
                     log.Println("Slap action received")
                 case "search_for_match":
@@ -121,4 +123,13 @@ func sendMessage(conn *websocket.Conn, msg models.Message) {
 	if err := conn.WriteMessage(websocket.TextMessage, msgJSON); err != nil {
 		log.Println("Error sending message:", err)
 	}
+}
+
+func handleSlap( ) {
+    // TODO: Implement slap handling
+    // 1. Check if the player is allowed to slap
+    // 2. Check if the slap is valid
+    // 3. Update the match state
+    // 4. Send the updated match state to all players
+    
 }

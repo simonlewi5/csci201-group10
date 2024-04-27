@@ -61,3 +61,16 @@ func (d *Deck) DrawCards(n int) []Card {
 	}
 	return cards
 }
+
+func (c *CenterPile) VerifyPattern () bool {
+	if len(c.Cards) < 3 {
+		return false
+	}
+	if c.Cards[len(c.Cards) - 1].Value == c.Cards[len(c.Cards) - 2].Value && c.Cards[len(c.Cards) - 2].Value == c.Cards[len(c.Cards) - 3].Value {
+		return true
+	}
+	if c.Cards[len(c.Cards) - 1].Value != c.Cards[len(c.Cards) - 2].Value && c.Cards[len(c.Cards) - 2].Value != c.Cards[len(c.Cards) - 3].Value && c.Cards[len(c.Cards) - 1].Value != c.Cards[len(c.Cards) - 3].Value {
+		return true
+	}
+	return false
+}
