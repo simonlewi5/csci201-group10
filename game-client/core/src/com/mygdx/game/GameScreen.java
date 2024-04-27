@@ -38,7 +38,8 @@ public class GameScreen implements Screen, MessageListener {
     private GameWebSocketClient webSocketClient;
     private Viewport viewport;
     private Stage stage;
-
+    
+    private Stack centerPile;
     private Table gameBoard;
     private TextButton playButton;
     private TextButton slapButton;
@@ -68,13 +69,16 @@ public class GameScreen implements Screen, MessageListener {
         Gson gson = new Gson();
         Response response = gson.fromJson(serverMessage, Response.class);
         String type = response.getType();
-        if (type.equals("MATCH_UPDATE")) {
+        if ("MATCH_UPDATE".equals(type)) {
+            System.out.println("Match update received");
             JsonElement dataElement = response.getData();
-            String dataString = dataElement.getAsString();
-            System.out.println(dataString);
+            Match updatedMatch = gson.fromJson(dataElement, Match.class);
+            game.setCurrentMatch(updatedMatch);
+            System.out.println("Center pile: " + match.getCenterPile().getCards().toString());
+            updateCenterPile();
+            gameBoard.invalidateHierarchy();
 
-
-        } else if (type.equals("AUTH_FAILURE")) {
+        } else if ("AUTH_ERROR".equals(type)) {
             JsonElement dataElement = response.getData();
             String dataString = dataElement.getAsString();
             System.out.println(dataString);
@@ -143,7 +147,7 @@ public class GameScreen implements Screen, MessageListener {
         gameBoard.defaults().expand();
         // gameBoard.setDebug(true);
 
-        Stack centerPile = createCenterPile();
+        centerPile = createCenterPile();
 
         TextButtonStyle buttonStyle = game.assetManager.getTextButtonStyle(2.0f);
         playButton = new TextButton("Play", buttonStyle);
@@ -286,7 +290,14 @@ public class GameScreen implements Screen, MessageListener {
         return centerPile;
     }
 
-    private void updateCenterPile(String cardKey, Stack centerPile) {
+    private void updateCenterPile() {
+        ArrayList<Card> centerPileCards = match.getCenterPile().getCards();
+        if (centerPileCards.size() == 0) {
+            centerPile.clear();
+            return;
+        }
+        Card lastCard = centerPileCards.get(centerPileCards.size() - 1);
+        String cardKey = lastCard.getValue() + "_" + lastCard.getSuit();
         Image cardImage = new Image(cardTextures.get(cardKey));
         cardImage.setSize(120, 200);
         centerPile.add(cardImage);

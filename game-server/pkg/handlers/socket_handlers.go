@@ -157,15 +157,11 @@ func handlePlayCard(conn *websocket.Conn, matcher *matchmaking.Matcher, data map
         return
     }
 
-    matchUpdate := models.MatchUpdate{
-        Match: *match,
-    }
-
     for _, player := range match.Players {
         if conn, ok := matcher.GetPlayerConns()[player.ID]; ok {
             sendMessage(conn, models.Message{
                 Type: models.MessageTypeMatchUpdate,
-                Data: matchUpdate,
+                Data: match,
             })
         }
     }
