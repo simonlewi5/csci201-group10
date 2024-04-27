@@ -116,6 +116,5 @@ public class Match {
     public void setHands(Map<String, Hand> hands) {
         this.hands = hands;
     }
-
     
 }

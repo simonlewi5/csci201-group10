@@ -57,6 +57,9 @@ public class GameScreen implements Screen, MessageListener {
         backgroundImage = game.assetManager.getBackgroundMatch();
         loadMatchMusic();
         cardTextures = game.assetManager.getCardTextures();
+        centerPile = new Stack();
+        gameBoard = new Table();
+
 
         // Add a resize listener to handle window resizing
         Gdx.graphics.setResizable(true);
@@ -66,28 +69,34 @@ public class GameScreen implements Screen, MessageListener {
 
     @Override
     public void messageReceived(String message) {
-        serverMessage = message;
-        // System.out.println("Message received: " + serverMessage);
-        System.out.println(serverMessage);
-        Gson gson = new Gson();
-        Response response = gson.fromJson(serverMessage, Response.class);
-        System.out.println("Response: " + response.toString());
-        String type = response.getType();
-        System.out.println("Type: " + type);
-        if ("MATCH_UPDATE".equals(type)) {
-            System.out.println("Match update received");
-            JsonElement dataElement = response.getData();
-            Match updatedMatch = gson.fromJson(dataElement, Match.class);
-            game.setCurrentMatch(updatedMatch);
-            System.out.println("Center pile: " + match.getCenterPile().getCards().toString());
-            updateCenterPile();
-            gameBoard.invalidateHierarchy();
+        Gdx.app.postRunnable(new Runnable() {
+            @Override
+            public void run() {
+                serverMessage = message;
+                System.out.println("Message received: " + serverMessage);
+                Gson gson = new Gson();
+                Response response = gson.fromJson(serverMessage, Response.class);
+                String type = response.getType();
+                if ("MATCH_UPDATE".equals(type)) {
+                    System.out.println("Match update received");
+                    JsonElement dataElement = response.getData();
+                    Match updatedMatch = gson.fromJson(dataElement, Match.class);
+                    match = updatedMatch;
+        
+                    Card lastCardPlayed = match.getCenterPile().getCards().get(match.getCenterPile().getCards().size() - 1);
+                    String cardKey = lastCardPlayed.getValue() + "_" + lastCardPlayed.getSuit();
+                    updateCenterPile(cardKey, centerPile);
+                    gameBoard.invalidateHierarchy();
+                    // gameBoard.invalidateHierarchy();
+        
+                } else if ("AUTH_ERROR".equals(type)) {
+                    JsonElement dataElement = response.getData();
+                    String dataString = dataElement.getAsString();
+                    System.out.println(dataString);
+                }
+            }
+        });
 
-        } else if ("AUTH_ERROR".equals(type)) {
-            JsonElement dataElement = response.getData();
-            String dataString = dataElement.getAsString();
-            System.out.println(dataString);
-        }
     }
 
     @Override
@@ -138,12 +147,9 @@ public class GameScreen implements Screen, MessageListener {
     }
 
     private void initScreenElements() {
-        gameBoard = new Table();
         gameBoard.setFillParent(true);
         gameBoard.defaults().expand();
         // gameBoard.setDebug(true);
-
-        centerPile = createCenterPile();
 
         TextButtonStyle buttonStyle = game.assetManager.getTextButtonStyle(2.0f);
         playButton = new TextButton("Play", buttonStyle);
@@ -164,7 +170,6 @@ public class GameScreen implements Screen, MessageListener {
 
                 String json = new Gson().toJson(data);
                 webSocketClient.send(json);
-
             }
         });
         slapButton.addListener(new ClickListener() {
@@ -233,7 +238,12 @@ public class GameScreen implements Screen, MessageListener {
         } else {
             gameBoard.add().uniform().fill();
         }
-        gameBoard.add(centerPile).size(120,200).uniform().fill();
+
+        // the center pile of cards
+        // gameBoard.add(centerPile).size(120,200).uniform().fill();
+        gameBoard.add(centerPile).size(240,240).expand().center();
+        centerPile.setDebug(true);
+        
 
         if (numPlayers >= 4) {
             Table playerTable4 = createPlayerTable(player4Username, player4CardsRemaining, 4, numPlayers, cardBackImage4);
@@ -251,6 +261,7 @@ public class GameScreen implements Screen, MessageListener {
         gameBoard.row();
 
         stage.addActor(gameBoard);
+        stage.setDebugAll(true);
     }
 
     // playerNumber is the index of the player in the match.getPlayers() list, except you start with 
@@ -280,32 +291,46 @@ public class GameScreen implements Screen, MessageListener {
         return playerTable;
     }
 
-    private Stack createCenterPile() {
-        Stack centerPile = new Stack();
-        // centerPile.setDebug(true);
-        return centerPile;
-    }
-
-    private void updateCenterPile() {
-        ArrayList<Card> centerPileCards = match.getCenterPile().getCards();
-        if (centerPileCards.size() == 0) {
-            centerPile.clear();
-            return;
-        }
-        Card lastCard = centerPileCards.get(centerPileCards.size() - 1);
-        String cardKey = lastCard.getValue() + "_" + lastCard.getSuit();
+    private void updateCenterPile(String cardKey, Stack centerPile) {
         Image cardImage = new Image(cardTextures.get(cardKey));
         cardImage.setSize(120, 200);
         centerPile.add(cardImage);
     }
 
-    private String debugRandomCard() {
-        String[] suits = {"hearts", "diamonds", "clubs", "spades"};
-        String[] values = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"};
-        int suitIndex = (int) (Math.random() * 4);
-        int valueIndex = (int) (Math.random() * 13);
-        return values[valueIndex] + "_" + suits[suitIndex].toUpperCase();
-    }
+    // private void updateCenterPile() {
+    //     ArrayList<Card> centerPileCards = match.getCenterPile().getCards();
+    //     centerPile.clear();
+    
+    //     float offset = 0;
+    //     for (Card card : centerPileCards) {
+    //         String cardKey = card.getValue() + "_" + card.getSuit();
+    //         System.out.println("Adding card to center pile: " + cardKey);
+    //         Image cardImage = new Image(cardTextures.get(cardKey));
+    //         cardImage.setSize(120,200);
+
+    //         if (centerPileCards.size() > 1) {
+    //             cardImage.setOrigin(Align.center);
+    //             cardImage.setRotation((float) (Math.random() * 10 - 5));
+    //         }
+    //         if (cardImage.getDrawable() == null) {
+    //             System.out.println("Card image failed to load for key: " + cardKey);
+    //         }
+    //         cardImage.setSize(120, 200);
+    //         cardImage.setPosition(offset, offset);
+    //         centerPile.add(cardImage);
+    //         offset += 10;
+    //     }
+    //     centerPile.invalidateHierarchy();
+    //     // gameBoard.invalidateHierarchy();
+    // }
+
+    // private String debugRandomCard() {
+    //     String[] suits = {"hearts", "diamonds", "clubs", "spades"};
+    //     String[] values = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"};
+    //     int suitIndex = (int) (Math.random() * 4);
+    //     int valueIndex = (int) (Math.random() * 13);
+    //     return values[valueIndex] + "_" + suits[suitIndex].toUpperCase();
+    // }
 
     public void loadMatchMusic() {
         matchMusic = new ArrayList<Music>();
