@@ -3,18 +3,26 @@ package com.mygdx.game;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.google.gson.Gson;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+
 
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -30,7 +38,7 @@ public class RegistrationScreen implements Screen, MessageListener  {
     private OrthographicCamera camera;
     private String serverMessage;
     private GameWebSocketClient webSocketClient;
-
+    private Label messageLabel;
     private Stage stage;
     private TextField emailField, usernameField, passwordField, confirmPasswordField;
     private TextButton submitButton, exitButton;
@@ -76,6 +84,7 @@ public class RegistrationScreen implements Screen, MessageListener  {
     }
 
     private void initFormElements() {
+
         TextField.TextFieldStyle textFieldStyle = game.assetManager.getTextFieldStyle(1.0f);
         TextButtonStyle buttonStyle = game.assetManager.getTextButtonStyle(1.0f);
     
@@ -131,6 +140,24 @@ public class RegistrationScreen implements Screen, MessageListener  {
         stage.addActor(submitButton);
         stage.addActor(exitButton);
 
+        //for error message on the screen
+        //text setting
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("AlegreyaSans-Bold.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter params = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        params.size = 40; 
+        BitmapFont font = generator.generateFont(params);
+        generator.dispose(); 
+        
+
+        Label.LabelStyle style = new Label.LabelStyle();
+        style.font = font;
+        style.fontColor = Color.RED;
+
+        messageLabel = new Label("",style);
+        messageLabel.setSize(300, 100);
+        messageLabel.setPosition(700, 600); //positioning the message 
+        stage.addActor(messageLabel); //adding label to the stage
+
         submitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -141,8 +168,14 @@ public class RegistrationScreen implements Screen, MessageListener  {
                     String confirmPassword = confirmPasswordField.getText();
                     System.out.println("Email: " + email + " Username: " + username + " Password: " + password + " Confirm Password: " + confirmPassword);
 
+                    if (email.isEmpty() || username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                        showMessage("All fields are required."); //if any data is empty
+                        return;
+                    }
+
                     if (!password.equals(confirmPassword)) {
                         System.out.println("Passwords do not match");
+                        showMessage("Passwords do not match."); //show the error to the user
                         return;
                     }
 
@@ -173,7 +206,25 @@ public class RegistrationScreen implements Screen, MessageListener  {
 
         
     }
+    public void showMessage(String text){
+        messageLabel.setText(text);
+        messageLabel.setVisible(true);
 
+        float fadeInDuration = 0.5f;
+        float visibleDuration = 1f;
+        float fadeOutDuration = 0.5f;
+
+        messageLabel.addAction(Actions.sequence(
+                Actions.fadeIn(fadeInDuration),
+                Actions.delay(visibleDuration),
+                Actions.fadeOut(fadeOutDuration),
+                Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        messageLabel.setVisible(false);
+                    }
+                })));
+    }
 
     @Override
     public void render(float delta) {
