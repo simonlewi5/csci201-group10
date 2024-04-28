@@ -36,7 +36,7 @@ jobs:
         with:
           credentials: ${{ secrets.GCP_CREDENTIALS }}
           path: ${{ env.FILENAME }}
-          destination: game-assets-bucket-egyptian-ratscrew/game-dl/mac/EgyptianRatscrew-1.0.dmg
+          destination: game-assets-bucket-egyptian-ratscrew/game-dl/mac
   build-windows:
     permissions:
         id-token: write
@@ -62,14 +62,16 @@ jobs:
         working-directory: ./game-client
       - name: 'Get the filename of the game executable'
         run: |
-          echo "Game executable filename: $(ls ./game-client/desktop/build/distribution/*.exe)"
-          echo "FILENAME=\"$(ls ./game-client/desktop/build/distribution/*.exe)\"" >> $GITHUB_ENV
+          EXE_PATH=$(ls ./game-client/desktop/build/distribution/*.exe)
+          echo "Game executable filename: $EXE_PATH"
+          EXE_PATH="${EXE_PATH//\\//}"  # Convert backslashes to forward slashes if necessary
+          echo "FILENAME=$EXE_PATH" >> $GITHUB_ENV
       - name: 'Upload game executable to storage bucket'
         uses: google-github-actions/upload-cloud-storage@v0.3.0
         with:
           credentials: ${{ secrets.GCP_CREDENTIALS }}
           path: ${{ env.FILENAME }}
-          destination: game-assets-bucket-egyptian-ratscrew/game-dl/win/EgyptianRatscrew-1.0.exe
+          destination: game-assets-bucket-egyptian-ratscrew/game-dl/win
   build-linux:
     permissions:
         id-token: write
@@ -97,4 +99,4 @@ jobs:
         with:
           credentials: ${{ secrets.GCP_CREDENTIALS }}
           path: ${{ env.FILENAME }}
-          destination: game-assets-bucket-egyptian-ratscrew/game-dl/linux/EgyptianRatscrew-1.0.deb
+          destination: game-assets-bucket-egyptian-ratscrew/game-dl/linux
