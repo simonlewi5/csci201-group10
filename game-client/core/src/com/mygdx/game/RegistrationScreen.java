@@ -139,7 +139,7 @@ public class RegistrationScreen implements Screen, MessageListener  {
         errorMessageLabel = new Label("", labelStyle);
         // TODO: fix label position, it is currently off center (too far right)
         errorMessageLabel.setSize(300, 100);
-        errorMessageLabel.setPosition(700, 600);
+        errorMessageLabel.setPosition(650, 600);
         
         // add all of it to the stage
         stage.addActor(emailField);
