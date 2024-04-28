@@ -187,6 +187,8 @@ public class UserMenuScreen implements Screen, MessageListener {
         playMenu.add(codeInputField).expandX().padTop(10).padLeft(-9).width(300).right();
         playMenu.add(codeSubmitButton).expandX().padTop(10).padLeft(-14).width(125).left();
         playMenu.row();
+        playMenu.add(statsButton).padTop(60).colspan(2).expandX().center();
+        playMenu.row();
         playMenu.add(settingsButton).padTop(60).colspan(2).expandX().center();
         playMenu.row();
         playMenu.add(exitButton).pad(20).colspan(2).expandX().center();
