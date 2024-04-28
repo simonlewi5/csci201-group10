@@ -14,7 +14,6 @@ import (
 	"github.com/simonlewi5/csci201-group10/game-server/pkg/db"
 	"github.com/simonlewi5/csci201-group10/game-server/pkg/handlers"
 	"github.com/simonlewi5/csci201-group10/game-server/pkg/matchmaking"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 )
 
@@ -66,45 +65,49 @@ func getSignedURLHandler(w http.ResponseWriter, r *http.Request) {
     ctx := context.Background()
     bucketName := "game-assets-bucket-egyptian-ratscrew"
     objectName := r.URL.Query().Get("file")
-    log.Printf("Request for signed URL of file: %s", objectName) // Log the requested file name
+    log.Printf("Request for signed URL of file: %s", objectName)
 
-    creds, err := google.CredentialsFromJSON(ctx, []byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")), storage.ScopeReadOnly)
+    credsPath := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    credsBytes, err := os.ReadFile(credsPath)
     if err != nil {
-        log.Printf("Error loading credentials: %v", err) // Log this error
-        http.Error(w, "Cannot load credentials from environment", http.StatusInternalServerError)
+        log.Printf("Error reading credentials file: %v", err)
+        http.Error(w, "Failed to read credentials file", http.StatusInternalServerError)
         return
     }
 
-    var credsData credentials
-    err = json.Unmarshal(creds.JSON, &credsData)
-    if err != nil {
-        log.Printf("Error parsing credentials JSON: %v", err) // Log parsing error
+    var creds credentials
+    if err := json.Unmarshal(credsBytes, &creds); err != nil {
+        log.Printf("Error parsing credentials JSON: %v", err)
         http.Error(w, "Failed to parse credentials", http.StatusInternalServerError)
         return
     }
 
-    client, err := storage.NewClient(ctx, option.WithCredentials(creds))
+    // Use parsed credentials to create a Google Cloud storage client
+    client, err := storage.NewClient(ctx, option.WithCredentialsJSON(credsBytes))
     if err != nil {
-        log.Printf("Error creating storage client: %v", err) // Log client creation error
+        log.Printf("Error creating storage client: %v", err)
         http.Error(w, "Cannot create storage client", http.StatusInternalServerError)
         return
     }
     defer client.Close()
 
-    url, err := client.Bucket(bucketName).SignedURL(objectName, &storage.SignedURLOptions{
-        GoogleAccessID: credsData.ClientEmail,
-        PrivateKey:     []byte(credsData.PrivateKey),
+    // Generate the signed URL
+    signedURLOptions := &storage.SignedURLOptions{
+        GoogleAccessID: creds.ClientEmail,
+        PrivateKey:     []byte(creds.PrivateKey),
         Method:         "GET",
         Expires:        time.Now().Add(15 * time.Minute),
-    })
+    }
+    url, err := client.Bucket(bucketName).SignedURL(objectName, signedURLOptions)
     if err != nil {
-        log.Printf("Error creating signed URL: %v", err) // Log URL creation error
+        log.Printf("Error creating signed URL: %v", err)
         http.Error(w, "Cannot create signed URL", http.StatusInternalServerError)
         return
     }
 
     http.Redirect(w, r, url, http.StatusFound)
 }
+
 
 
 func main() {
