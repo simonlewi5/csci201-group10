@@ -21,10 +21,6 @@ public class CenterPile {
         cards.add(card);
     }
 
-    public void addCards(ArrayList<Card> cards) {
-        this.cards.addAll(cards);
-    }
-
     public Card removeCard(int index) {
         return cards.remove(index);
     }

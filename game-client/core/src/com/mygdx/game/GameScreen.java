@@ -36,12 +36,16 @@ public class GameScreen implements Screen, MessageListener {
     private GameWebSocketClient webSocketClient;
     private Viewport viewport;
     private Stage stage;
-    
-    private Table gameBoard, centerPile;
+    private Table gameBoard; 
+    // private Table centerPile;
     private TextButton playButton;
     private TextButton slapButton;
     private Match match;
     private Map<String, Texture> cardTextures;
+    private CenterPile centerPile;
+
+    // size of custom pixel art assets
+    private final float CARD_SIZE_X = 154f, CARD_SIZE_Y = 212f;
 
     public GameScreen(final EgyptianRatscrew game, GameWebSocketClient webSocketClient) {
         this.game = game;
@@ -53,7 +57,8 @@ public class GameScreen implements Screen, MessageListener {
         backgroundImage = game.assetManager.getBackgroundMatch();
         loadMatchMusic();
         cardTextures = game.assetManager.getCardTextures();
-        centerPile = new Table();
+        // centerPile = new Table();
+        centerPile = new CenterPile();
         gameBoard = new Table();
         stage = new Stage(viewport, game.batch);
         Gdx.input.setInputProcessor(stage);
@@ -72,11 +77,11 @@ public class GameScreen implements Screen, MessageListener {
             System.out.println("Match update received");
             JsonElement dataElement = response.getData();
             Match updatedMatch = gson.fromJson(dataElement, Match.class);
-            match.setCenterPile(updatedMatch.getCenterPile());
+            updateCenterPile(updatedMatch.getCenterPile());
+
             System.out.println("Updated center pile: " + match.getCenterPile().getCards());
             System.out.println("Updated pile count: " + match.getCenterPile().getCards().size());
-            System.out.println("centerPile size: " + centerPile.getChildren().size);
-
+            System.out.println("centerPile size: " + centerPile.getCards().size());
         } else if ("AUTH_ERROR".equals(type)) {
             JsonElement dataElement = response.getData();
             String dataString = dataElement.getAsString();
@@ -84,6 +89,27 @@ public class GameScreen implements Screen, MessageListener {
         }
     }
 
+    private void updateCenterPile(CenterPile updatedPile) {
+        // if updated size bigger, cards were added to existing pile -> set random rotation only for new cards
+        // if updated size smaller, the pile was reset -> set all cards
+        // TODO: ideally, the server message will differentiate between a pile update vs a pile reset
+
+        int i = 0;
+        if (centerPile.getCards().size() < updatedPile.getCards().size()) {
+            i = centerPile.getCards().size();
+        }
+        
+        while (i < updatedPile.getCards().size()) {
+            Card c = updatedPile.getCards().get(i);
+            c.rotateRandomly();
+            c.offsetRandomly(Gdx.graphics.getWidth() / 2 - CARD_SIZE_X / 2,
+                             Gdx.graphics.getHeight() / 2 - CARD_SIZE_Y / 2);
+            centerPile.addCard(updatedPile.getCards().get(i));
+            i++;
+        }
+    
+        match.setCenterPile(centerPile);
+    }
 
     @Override
     public void show() {
@@ -99,19 +125,32 @@ public class GameScreen implements Screen, MessageListener {
         game.batch.begin();
         game.batch.draw(backgroundImage, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
         game.batch.end();
+
         if (!matchMusic.get(currentTrackIndex).isPlaying()) {
             playNextTrack();
         }
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
-            if (centerPile.getChildren().size != this.match.getCenterPile().getCards().size()) {
-                Card lastCardPlayed = match.getCenterPile().getCards().get(match.getCenterPile().getCards().size() - 1);
-                String cardKey = lastCardPlayed.getValue() + "_" + lastCardPlayed.getSuit();
-                Image cardImage = new Image(cardTextures.get(cardKey));
-                centerPile.add(cardImage).size(120, 200).uniform().fill();
-            }
-        stage.draw();
-    }
 
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.draw();
+
+        // draw center pile separately from stage and stage.draw()
+        game.batch.begin();
+        for (Card card : match.getCenterPile().getCards()) {
+            String key = card.getValue() + "_" + card.getSuit();
+
+            // parameters: Texture texture, float x, float y,
+            //             float originX, float originY, float width, float height,
+            //             float scaleX, float scaleY, float rotation,
+            //             int srcX, int srcY, int srcWidth, int srcHeight,
+            //             boolean flipX, boolean flipY
+            game.batch.draw(game.assetManager.getCardTextures().get(key), card.getX(), card.getY(),
+                            CARD_SIZE_X / 2, CARD_SIZE_Y / 2, CARD_SIZE_X, CARD_SIZE_Y,
+                            1, 1, card.getRotation(),
+                            0, 0, 500, 726, // later, change srcWidth/Height to match pixel asset dimensions
+                            false, false);
+        }
+        game.batch.end();
+    }
 
     private void initScreenElements() {
         gameBoard.setFillParent(true);
@@ -144,12 +183,12 @@ public class GameScreen implements Screen, MessageListener {
 
         int numPlayers = match.getPlayers().size();
         Map <String, Hand> hands = match.getHands();
-
         Image cardBackImage1 = new Image(cardTextures.get("card_back"));
         Image cardBackImage2 = new Image(cardTextures.get("card_back"));
         Image cardBackImage3 = new Image(cardTextures.get("card_back"));
         Image cardBackImage4 = new Image(cardTextures.get("card_back"));
 
+        // grab player usernames and cards remaining (TODO?)
         String player1Username = match.getPlayers().get(0).getUsername();
         int player1CardsRemaining = hands.get(player1Username).getCards().size();
         String player2Username = match.getPlayers().get(1).getUsername();
@@ -158,6 +197,7 @@ public class GameScreen implements Screen, MessageListener {
         int player3CardsRemaining = 0;
         String player4Username = "";
         int player4CardsRemaining = 0;
+
         if (numPlayers >= 3) {
             player3Username = match.getPlayers().get(2).getUsername();
             player3CardsRemaining = hands.get(player3Username).getCards().size();
@@ -167,7 +207,7 @@ public class GameScreen implements Screen, MessageListener {
             player4CardsRemaining = hands.get(player4Username).getCards().size();
         }
 
-        //top row
+        // top row
         gameBoard.add().uniform().fill();
         if (numPlayers >= 3) {
             Table playerTable3 = createPlayerTable(player3Username, player3CardsRemaining, 3, numPlayers, cardBackImage3);
@@ -190,23 +230,22 @@ public class GameScreen implements Screen, MessageListener {
         // the center pile of cards
         // Image testCard = new Image(cardTextures.get("2_CLUBS"));
         // centerPile.add(testCard).size(120,200).uniform().fill();
-        gameBoard.add(centerPile).size(120,200).uniform().fill();
-        centerPile.setDebug(true);
-        
-
-        if (numPlayers >= 4) {
-            Table playerTable4 = createPlayerTable(player4Username, player4CardsRemaining, 4, numPlayers, cardBackImage4);
-            gameBoard.add(playerTable4).uniform().fill();
-        } else {
-            gameBoard.add().uniform().fill();
-        }
+//        gameBoard.add(centerPile).size(CARD_SIZE_X, CARD_SIZE_Y).uniform().fill();
+//        centerPile.setDebug(true);
+//
+//        if (numPlayers >= 4) {
+//            Table playerTable4 = createPlayerTable(player4Username, player4CardsRemaining, 4, numPlayers, cardBackImage4);
+//            gameBoard.add(playerTable4).uniform().fill();
+//        } else {
+//            gameBoard.add().uniform().fill();
+//        }
         gameBoard.row();
         
         // bottom row
-        gameBoard.add(playButton).uniform();
+        gameBoard.add(playButton).uniform().right();
         Table playerTable1 = createPlayerTable(player1Username, player1CardsRemaining, 1, numPlayers, cardBackImage1);
         gameBoard.add(playerTable1).uniform().fill();
-        gameBoard.add(slapButton).uniform();
+        gameBoard.add(slapButton).uniform().left();
         gameBoard.row();
 
         stage.addActor(gameBoard);
@@ -226,15 +265,15 @@ public class GameScreen implements Screen, MessageListener {
         playerTable.row();
         playerTable.add(new Label("Cards remaining: " + cardsRemaining, cardLabelStyle));
         playerTable.row();
-        if (numPlayers >=3) {
+        if (numPlayers >= 3) {
             if (playerNumber == 2 || playerNumber == 4) {
                 cardBackImage.setOrigin(Align.center);
-                playerTable.add(cardBackImage).size(200, 120).uniform().fill();
+                playerTable.add(cardBackImage).size(CARD_SIZE_Y, CARD_SIZE_X).uniform().fill();
             }
             else
-                playerTable.add(cardBackImage).size(120, 200).uniform().fill();    
+                playerTable.add(cardBackImage).size(CARD_SIZE_X, CARD_SIZE_Y).uniform().fill();
         } else {
-            playerTable.add(cardBackImage).size(120, 200).uniform().fill();
+            playerTable.add(cardBackImage).size(CARD_SIZE_X, CARD_SIZE_Y).uniform().fill();
         }
         playerTable.row();
         return playerTable;
@@ -258,6 +297,7 @@ public class GameScreen implements Screen, MessageListener {
         Music nextTrack = matchMusic.get(currentTrackIndex);
         if (nextTrack != null) {
             nextTrack.setLooping(false);
+            nextTrack.setVolume(game.getMusicVolume());
             nextTrack.play();
         }
     }

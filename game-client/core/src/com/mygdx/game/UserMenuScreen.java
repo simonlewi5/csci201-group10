@@ -96,11 +96,25 @@ public class UserMenuScreen implements Screen, MessageListener {
         stage.draw();
     }
 
+    private void displaySettings(boolean showSettings) {
+        // toggle which menu is displayed
+        if (showSettings) {
+            playMenu.setVisible(false);
+            settingsMenu.setVisible(true);
+        }
+        else {
+            playMenu.setVisible(true);
+            settingsMenu.setVisible(false);
+        }
+    }
+
     private void loadSettingsMenu(TextField.TextFieldStyle textFieldStyle, TextButton.TextButtonStyle textButtonStyle) {
+        // volume and back buttons
         volumeField = new TextField(String.valueOf((int) (game.getMusicVolume() * 100)), textFieldStyle);
         setVolumeButton = new TextButton("Set Volume", textButtonStyle);
         settingsExitButton = new TextButton("Back", textButtonStyle);
 
+        // event listeners
         setVolumeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -119,6 +133,7 @@ public class UserMenuScreen implements Screen, MessageListener {
             }
         });
 
+        // structure elements as table
         settingsMenu = new Table();
         settingsMenu.setFillParent(true);
         settingsMenu.center();
@@ -126,30 +141,19 @@ public class UserMenuScreen implements Screen, MessageListener {
         settingsMenu.add(setVolumeButton).expandX().padTop(10).padLeft(-5).width(150).left();
         settingsMenu.row();
         settingsMenu.add(settingsExitButton).pad(20).colspan(2).expandX().center();
-
         stage.addActor(settingsMenu);
     }
 
-    private void displaySettings(boolean showSettings) {
-        if (showSettings) {
-            playMenu.setVisible(false);
-            settingsMenu.setVisible(true);
-        }
-        else {
-            playMenu.setVisible(true);
-            settingsMenu.setVisible(false);
-        }
-    }
-
     private void loadPlayMenu(TextField.TextFieldStyle textFieldStyle, TextButton.TextButtonStyle textButtonStyle) {
+        // buttons
         quickPlayButton = new TextButton("Quick Play", textButtonStyle);
-        settingsButton = new TextButton("Stats & Settings", textButtonStyle);
-        exitButton = new TextButton("Exit", textButtonStyle);
-
-        settingsButton.getLabel().setColor(Color.valueOf(color));
         quickPlayButton.getLabel().setColor(Color.valueOf(color));
+        settingsButton = new TextButton("Stats & Settings", textButtonStyle);
+        settingsButton.getLabel().setColor(Color.valueOf(color));
+        exitButton = new TextButton("Exit", textButtonStyle);
         exitButton.getLabel().setColor(Color.valueOf(color));
 
+        // event listeners
         quickPlayButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -172,6 +176,7 @@ public class UserMenuScreen implements Screen, MessageListener {
             }
         });
 
+        // structure elements as table
         playMenu = new Table();
         playMenu.setFillParent(true);
         playMenu.center();
@@ -183,7 +188,6 @@ public class UserMenuScreen implements Screen, MessageListener {
         playMenu.add(settingsButton).padTop(60).colspan(2).expandX().center();
         playMenu.row();
         playMenu.add(exitButton).pad(20).colspan(2).expandX().center();
-
         stage.addActor(playMenu);
     }
 

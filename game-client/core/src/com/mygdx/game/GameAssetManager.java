@@ -240,7 +240,7 @@ public class GameAssetManager {
             }
         }
 
-        manager.load(CARD_ASSETS_PATH + "card_back_orange.png", Texture.class);
+        manager.load(CARD_ASSETS_PATH + "card_back_pixel.png", Texture.class);
     }
 
     private String formatCardKey(String rank, String suit) {
@@ -252,21 +252,19 @@ public class GameAssetManager {
     }
 
     public Map<String, Texture> getCardTextures() {
-        Map<String, Texture> cardTextures = new HashMap<>();
         String[] suits = {"clubs", "diamonds", "hearts", "spades"};
         String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king", "ace"};
-
+        Map<String, Texture> cardTextures = new HashMap<>();
         for (String suit : suits) {
             for (String rank : ranks) {
                 String key = formatCardKey(rank, suit);
                 String fileName = CARD_ASSETS_PATH + rank + "_of_" + suit + ".png";
                 Texture cardTexture = manager.get(fileName, Texture.class);
-                
+
                 cardTextures.put(key, cardTexture);
             }
         }
-        cardTextures.put("card_back", manager.get(CARD_ASSETS_PATH + "card_back_orange.png", Texture.class));
-
+        cardTextures.put("card_back", manager.get(CARD_ASSETS_PATH + "card_back_pixel.png", Texture.class));
         return cardTextures;
     }
 

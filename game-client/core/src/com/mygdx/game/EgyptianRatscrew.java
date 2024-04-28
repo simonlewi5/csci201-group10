@@ -19,11 +19,11 @@ public class EgyptianRatscrew extends Game {
         assetManager = new GameAssetManager();
         assetManager.loadAssets();
         assetManager.manager.finishLoading();
-        
+
         setCustomCursor();
 
         this.setScreen(new MainMenuScreen(this));
-        // this.setScreen(new GameScreen(this));
+//         this.setScreen(new GameScreen(this));
     }
 
     private void setCustomCursor() {
