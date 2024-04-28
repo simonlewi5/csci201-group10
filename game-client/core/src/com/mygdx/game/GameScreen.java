@@ -85,6 +85,15 @@ public class GameScreen implements Screen, MessageListener {
             JsonElement dataElement = response.getData();
             String dataString = dataElement.getAsString();
             System.out.println(dataString);
+        } else if ("SLAP_FAILURE".equals(type)) {
+            // TODO: display some sort of graphic by the failure of a user, same for slap success
+            JsonElement dataElement = response.getData();
+            String dataString = dataElement.getAsString();
+            System.out.println(dataString + " FAILED");
+        } else if ("SLAP_SUCCESS".equals(type)) {
+            JsonElement dataElement = response.getData();
+            Match updated = gson.fromJson(dataElement, Match.class);
+            System.out.println(updated.getlastSuccessfulSlapper() + " SUCCEEDED");
         }
     }
 
@@ -112,8 +121,7 @@ public class GameScreen implements Screen, MessageListener {
     private void updateCenterPile(CenterPile updatedPile) {
         // if updated size bigger, cards were added to existing pile -> set random rotation only for new cards
         // if updated size smaller, the pile was reset -> set all cards
-        // TODO: once slaps are implemented, ideally, the server message
-        //  will differentiate between a pile update vs a pile reset
+        // TODO: implement a resetCenterPile() for when slaps succeed (not in this func)
         CenterPile centerPile = match.getCenterPile();
 
         int i = 0;

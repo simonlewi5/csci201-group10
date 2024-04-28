@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
+	mrand "math/rand"
 	"time"
 )
 
@@ -17,16 +18,17 @@ const (
 )
 
 type Match struct {
-	ID         string          `json:"id"`
-	Players    []*Player       `json:"players"`
-	Hands      map[string]Hand `json:"hands"` // map of player username to hand
-	MatchState MatchState      `json:"match_state"`
-	TurnIndex  int             `json:"turn_index"`
-	Winner     Player          `json:"winner"`
-	StartTime  int64           `json:"start_time"`
-	EndTime    int64           `json:"end_time"`
-	Deck       Deck            `json:"deck"`
-	CenterPile CenterPile      `json:"center_pile"`
+	ID         				string          `json:"id"`
+	Players    				[]*Player       `json:"players"`
+	Hands      				map[string]Hand `json:"hands"` // map of player username to hand
+	MatchState 				MatchState      `json:"match_state"`
+	TurnIndex  				int             `json:"turn_index"`
+	Winner     				Player          `json:"winner"`
+	StartTime  				int64           `json:"start_time"`
+	EndTime    				int64           `json:"end_time"`
+	Deck      			 	Deck            `json:"deck"`
+	CenterPile 				CenterPile		`json:"center_pile"`
+	LastSuccessfulSlapper 	string 			`json:"last_successful_slapper"` // username of latest successful slapper
 }
 
 type MatchRequest struct {
@@ -82,6 +84,7 @@ func NewMatch(players []*Player) *Match {
 		CenterPile: CenterPile{
 			Cards: []Card{},
 		},
+		LastSuccessfulSlapper: "",
 	}
 
 	for len(match.Deck.Cards) > 0 {
@@ -159,4 +162,23 @@ func (m *Match) PlayCard(playerID string) error {
 	m.TurnIndex = (m.TurnIndex + 1) % len(m.Players)
 
 	return nil
+}
+
+func (m *Match) AddPileToHand(playerID string) {
+	player := m.GetPlayerByID(playerID)
+
+	// shuffle the pile before adding
+	for i := range m.CenterPile.Cards {
+		j := mrand.Intn(i + 1)
+		m.CenterPile.Cards[i], m.CenterPile.Cards[j] = m.CenterPile.Cards[j], m.CenterPile.Cards[i]
+	}
+
+	// add center pile to bottom of hand of player who slapped
+	hand := m.Hands[player.Username]
+	hand.Cards = append(m.Hands[player.Username].Cards, m.CenterPile.Cards...)
+	m.Hands[player.Username] = hand
+	m.LastSuccessfulSlapper = player.Username
+
+	// clear center pile
+	m.CenterPile.Cards = make([]Card, 0)
 }

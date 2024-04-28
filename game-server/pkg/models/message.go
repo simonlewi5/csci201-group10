@@ -12,6 +12,8 @@ const (
 	MessageTypePlayerAction MessageType = "PLAYER_ACTION"
 	MessageTypeAuthSuccess  MessageType = "AUTH_SUCCESS"
 	MessageTypeAuthError    MessageType = "AUTH_ERROR"
+	MessageTypeSlapFail 	MessageType = "SLAP_FAILURE"
+	MessageTypeSlapSuccess 	MessageType = "SLAP_SUCCESS"
 )
 
 type Message struct {

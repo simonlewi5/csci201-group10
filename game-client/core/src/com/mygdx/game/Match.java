@@ -20,6 +20,8 @@ public class Match {
     private Deck deck;
     @SerializedName("center_pile")
     private CenterPile centerPile;
+    @SerializedName("last_successful_slapper")
+    private String lastSuccessfulSlapper;
 
     public Match() {
     }
@@ -116,5 +118,12 @@ public class Match {
     public void setHands(Map<String, Hand> hands) {
         this.hands = hands;
     }
-    
+
+    public String getlastSuccessfulSlapper() {
+        return id;
+    }
+
+    public void setlastSuccessfulSlapper(String lastSuccessfulSlapper) {
+        this.lastSuccessfulSlapper = lastSuccessfulSlapper;
+    }
 }
