@@ -163,7 +163,6 @@ public class LoginScreen implements Screen, MessageListener {
 
     }
 
-
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);

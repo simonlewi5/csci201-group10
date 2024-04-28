@@ -11,7 +11,7 @@ public class EgyptianRatscrew extends Game {
     public SpriteBatch batch;
     public GameAssetManager assetManager;
     public Player player1;
-    private float musicVolume = 0.5f;
+    private float musicVolume = 0.0f;
     private Match currentMatch;
 
     public void create() {

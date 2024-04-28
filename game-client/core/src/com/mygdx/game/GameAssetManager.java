@@ -199,6 +199,13 @@ public class GameAssetManager {
         return labelStyle;
     }
 
+    public Label.LabelStyle getLabelStyle(float scale, String fontColor) {
+        BitmapFont buttonFont = getFontMedium();
+        buttonFont.getData().setScale(scale);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(buttonFont, Color.valueOf(fontColor));
+        return labelStyle;
+    }
+
     public Label.LabelStyle getSmallLabelStyle(float scale) {
         BitmapFont buttonFont = getFontSmall();
         buttonFont.getData().setScale(scale);

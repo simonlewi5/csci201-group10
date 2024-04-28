@@ -33,14 +33,13 @@ import com.badlogic.gdx.Gdx;
 
 public class RegistrationScreen implements Screen, MessageListener  {
     final EgyptianRatscrew game;
-    public static boolean registerFormatCheck = false;
     private final float ASPECT_RATIO = 16 / 9f;
     private Texture backgroundImage;
     private Music backgroundMusic;
     private OrthographicCamera camera;
     private String serverMessage;
     private GameWebSocketClient webSocketClient;
-    private static Label messageLabel;
+    private Label errorMessageLabel;
     private Stage stage;
     private TextField emailField, usernameField, passwordField, confirmPasswordField;
     private TextButton submitButton, exitButton;
@@ -89,7 +88,9 @@ public class RegistrationScreen implements Screen, MessageListener  {
 
         TextField.TextFieldStyle textFieldStyle = game.assetManager.getTextFieldStyle(1.0f);
         TextButtonStyle buttonStyle = game.assetManager.getTextButtonStyle(1.0f);
-    
+        Label.LabelStyle labelStyle = game.assetManager.getLabelStyle(1.0f, "FF0000");
+
+        // set up email/username/password fields and buttons
         emailField = new TextField("", textFieldStyle);
         emailField.setMessageText("Email Address");
         usernameField = new TextField("", textFieldStyle);
@@ -133,6 +134,12 @@ public class RegistrationScreen implements Screen, MessageListener  {
         submitButton.setPosition((viewport.getWorldWidth() - submitButton.getPrefWidth()) / 2, y);
         y -= (submitButton.getHeight() + 20);
         exitButton.setPosition((viewport.getWorldWidth() - exitButton.getPrefWidth()) / 2, y);
+
+        // set up error message display
+        errorMessageLabel = new Label("", labelStyle);
+        // TODO: fix label position, it is currently off center (too far right)
+        errorMessageLabel.setSize(300, 100);
+        errorMessageLabel.setPosition(700, 600);
         
         // add all of it to the stage
         stage.addActor(emailField);
@@ -141,60 +148,19 @@ public class RegistrationScreen implements Screen, MessageListener  {
         stage.addActor(confirmPasswordField);
         stage.addActor(submitButton);
         stage.addActor(exitButton);
-
-        //for error message on the screen
-        //text setting
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("AlegreyaSans-Bold.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter params = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        params.size = 40; 
-        BitmapFont font = generator.generateFont(params);
-        generator.dispose(); 
-        
-
-        Label.LabelStyle style = new Label.LabelStyle();
-        style.font = font;
-        style.fontColor = Color.RED;
-
-        messageLabel = new Label("",style);
-        messageLabel.setSize(300, 100);
-        messageLabel.setPosition(700, 600); //positioning the message 
-        stage.addActor(messageLabel); //adding label to the stage
+        stage.addActor(errorMessageLabel);
         
         submitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                
                 if (webSocketClient != null && webSocketClient.isOpen()) {
                     String email = emailField.getText();
                     String username = usernameField.getText();
                     String password = passwordField.getText();
                     String confirmPassword = confirmPasswordField.getText();
                     System.out.println("Email: " + email + " Username: " + username + " Password: " + password + " Confirm Password: " + confirmPassword);
-                    registerFormatCheck = true;
 
-                    //check null inputs
-                    if (email.isEmpty() || username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                        showMessage("All fields are required."); //if any data is empty
-                        registerFormatCheck = false;
-                        return;
-                    }
-
-                    //email format check
-                    Pattern emailPattern = Pattern.compile("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$");
-                    if(!emailPattern.matcher(email).matches()) {
-                        showMessage("Invalid email format.");
-                        registerFormatCheck = false;
-                        return;
-                    }
-                    //pw check
-                    if (!password.equals(confirmPassword)) {
-                        System.out.println("Passwords do not match");
-                        showMessage("Passwords do not match."); 
-                        registerFormatCheck = false;
-                        return;
-                    }
-                    
-                    if (registerFormatCheck) {
+                    if (inputValidationCheck(email, username, password, confirmPassword)) {
                         HashMap<String, Object> data = new HashMap<>();
                         data.put("action", "register");
                         data.put("email", email);
@@ -221,25 +187,48 @@ public class RegistrationScreen implements Screen, MessageListener  {
                 game.setScreen(new MainMenuScreen(game));
             }
         });
-
-        
     }
-    public static void showMessage(String text){
-        messageLabel.setText(text);
-        messageLabel.setVisible(true);
 
-        float fadeInDuration = 0.5f;
+    private boolean inputValidationCheck(String email, String username, String password, String confirmPassword) {
+        // perform client side input validation
+        // check null inputs
+        if (email.isEmpty() || username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            showErrorMessage("All fields are required.");
+            return false;
+        }
+
+        // email format check
+        Pattern emailPattern = Pattern.compile("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$");
+        if (!emailPattern.matcher(email).matches()) {
+            showErrorMessage("Invalid email format.");
+            return false;
+        }
+
+        // pw check
+        if (!password.equals(confirmPassword)) {
+            showErrorMessage("Passwords do not match.");
+            return false;
+        }
+
+        return true;
+    }
+
+    public void showErrorMessage(String text){
+        errorMessageLabel.setText(text);
+        errorMessageLabel.setVisible(true);
+
+        float fadeInDuration = 0.25f;
         float visibleDuration = 1f;
         float fadeOutDuration = 0.5f;
 
-        messageLabel.addAction(Actions.sequence(
+        errorMessageLabel.addAction(Actions.sequence(
                 Actions.fadeIn(fadeInDuration),
                 Actions.delay(visibleDuration),
                 Actions.fadeOut(fadeOutDuration),
                 Actions.run(new Runnable() {
                     @Override
                     public void run() {
-                        messageLabel.setVisible(false);
+                        errorMessageLabel.setVisible(false);
                     }
                 })));
     }
