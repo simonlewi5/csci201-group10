@@ -115,4 +115,8 @@ func main() {
 	}
 
     http.HandleFunc("/get_signed_url", getSignedURLHandler)
+    fmt.Println("HTTP server starting on port 8081...")
+    if err := http.ListenAndServe(":8081", nil); err != nil {
+        fmt.Printf("Error starting server: %v\n", err)
+    }
 }
