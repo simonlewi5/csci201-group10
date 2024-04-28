@@ -7,6 +7,7 @@ project.ext.assetsDir = new File("../assets")
 
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
+def osName = System.getProperty('os.name').toLowerCase(Locale.ROOT)
 
 tasks.register('run', JavaExec) {
     dependsOn classes
@@ -43,6 +44,66 @@ tasks.register('dist', Jar) {
     with jar
 }
 
+// ...
+
+task createRuntime(type: Exec) {
+    doFirst() {
+        project.delete("${buildDir}/runtime")
+    }
+    String runtimePath = "${buildDir}/runtime"
+
+    workingDir project.projectDir
+    commandLine = [
+            'jlink',
+            '-p', "${project.projectDir}/jmods",
+            '--add-modules', 'java.base,java.desktop,jdk.unsupported',
+            '--strip-debug',
+            '--no-header-files',
+            '--no-man-pages',
+            '--strip-native-commands',
+            "--vm=server",
+            "--compress=2",
+            '--output', runtimePath
+    ]
+}
+
+// creates application bundle (executable + runtime)
+task jpackage(type: Exec, dependsOn: dist) {
+    doFirst() {
+        project.delete("${buildDir}/distribution/$project.appName")
+    }
+    dependsOn createRuntime
+    workingDir project.projectDir
+    def commands = [
+            'jpackage',
+            '--dest', "${buildDir}/distribution",
+            '--input', "${buildDir}/libs",
+            '--name', project.appName,
+            '--main-class', project.mainClassName,
+            '--main-jar', jar.archiveFile.get().asFile.getName(),
+            '--runtime-image', "${buildDir}/runtime",
+            '--app-version', "1.0",
+    ]
+    
+    if (osName.contains('windows')) {
+        commands << '--icon'
+        commands << "${project.projectDir}/logo.ico"
+        commands << '--java-options'
+        commands << "-splash:splash.png"
+    } else if (osName.contains('linux')) {
+        commands << '--icon'
+        commands << "${project.projectDir}/logo.png"
+        commands << '--java-options'
+        commands << "-splash:splash.png"
+    } else if (osName.contains('mac')) {
+        commands << '--icon'
+        commands << "${project.projectDir}/logo.icns"
+        commands << '--java-options'
+        commands << "-XstartOnFirstThread"
+    }
+    
+    commandLine = commands
+}
 
 dist.dependsOn classes
 
