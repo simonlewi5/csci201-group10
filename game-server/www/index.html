@@ -13,15 +13,17 @@
             xhr.open('GET', '/get_signed_url?file=' + file);
             xhr.onload = function() {
                 if (xhr.status === 200) {
-                    document.getElementById(buttonId).href = xhr.responseText;
-                    document.getElementById(buttonId).download = file.split('/').pop();
+                    const downloadLink = document.getElementById(buttonId);
+                    downloadLink.href = xhr.responseText;
+                    downloadLink.download = file.split('/').pop();
+                    downloadLink.click();
                 } else {
                     console.error('Failed to retrieve signed URL');
                 }
             };
             xhr.send();
         }
-    </script>
+            </script>
 </head>
 <body>
     <img src="img/egypt.png" alt="Egyptian Rat Screw Background" id="background-image">
