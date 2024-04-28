@@ -82,6 +82,8 @@ jobs:
           gcloud auth activate-service-account --key-file=${{ secrets.GCP_CREDENTIALS }}
           gsutil cp $sourceUri $destinationUri
           gsutil rm $sourceUri
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
   build-linux:
     permissions:
         id-token: write
