@@ -96,9 +96,11 @@ jobs:
             export DB_HOST=${{ env.DB_HOST }}
             export DB_USER=admin
             export DB_NAME=game-db
-            export GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GCP_CREDENTIALS }}
+            echo "${{ secrets.GCP_CREDENTIALS_BASE64}}" | base64 --decode > /tmp/gcp-credentials.json
+            export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-credentials.json
             chmod +x /opt/game-server/game-server/bin/game-server
             nohup /opt/game-server/game-server/bin/game-server > /var/log/game-server/game-server.log 2>&1 &
+            rm /tmp/gcp-credentials.json
       - name: 'Give actions user permissions for static content'
         uses: appleboy/ssh-action@master
         with:
