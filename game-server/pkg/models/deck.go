@@ -95,8 +95,7 @@ func (c *CenterPile) CheckSlappable() bool {
 	// Tens sandwich: tens but with 1 letter card in between
 	if card.Value + c.Cards[len(c.Cards) - 3].Value == 10 { return true }
 
-	// Jokers: joker = slap
-	// are we using jokers? if so need to implement this
+	// not implemnting jokers
 
 	// Four in a row: 4 ascending in a row (includes wrapping) e.g. Q,K,A,2
 	isFour := true
