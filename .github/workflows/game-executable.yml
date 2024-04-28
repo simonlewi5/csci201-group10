@@ -42,6 +42,8 @@ jobs:
         id-token: write
         contents: write
     runs-on: windows-latest
+    outputs:
+      filename: ${{ steps.set_filename.outputs.filename }}
     steps:
       - name: 'Checkout code'
         uses: actions/checkout@v2
@@ -73,17 +75,31 @@ jobs:
           credentials: ${{ secrets.GCP_CREDENTIALS }}
           path: ${{ env.FILENAME }}
           destination: game-assets-bucket-egyptian-ratscrew/game-dl/win
+  rename-win-build:
+    needs: build-windows
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Install Google Cloud SDK'
+        uses: google-github-actions/setup-gcloud@v0.2.0
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
 
       - name: 'Rename uploaded file'
         run: |
-          $fileNameOnly = [System.IO.Path]::GetFileName($env:FILENAME)
-          $sourceUri = "gs://game-assets-bucket-egyptian-ratscrew/game-dl/win/$env:FILENAME"
-          $destinationUri = "gs://game-assets-bucket-egyptian-ratscrew/game-dl/win/$fileNameOnly"
-          gcloud auth activate-service-account --key-file=${{ secrets.GCP_CREDENTIALS }}
-          gsutil cp $sourceUri $destinationUri
-          gsutil rm $sourceUri
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+          # Extract just the filename from the full path
+          FILENAME="${{ needs.build-windows.outputs.filename }}"
+          BASENAME=$(basename "$FILENAME")
+
+          # Define source and destination URIs
+          SOURCE="gs://game-assets-bucket-egyptian-ratscrew/game-dl/win/$FILENAME"
+          DESTINATION="gs://game-assets-bucket-egyptian-ratscrew/game-dl/win/$BASENAME"
+
+          echo "Copying from $SOURCE to $DESTINATION"
+          gsutil cp "$SOURCE" "$DESTINATION"
+          gsutil rm "$SOURCE"
+
   build-linux:
     permissions:
         id-token: write
