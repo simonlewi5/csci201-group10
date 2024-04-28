@@ -66,9 +66,11 @@ func getSignedURLHandler(w http.ResponseWriter, r *http.Request) {
     ctx := context.Background()
     bucketName := "game-assets-bucket-egyptian-ratscrew"
     objectName := r.URL.Query().Get("file")
+    log.Printf("Request for signed URL of file: %s", objectName) // Log the requested file name
 
     creds, err := google.CredentialsFromJSON(ctx, []byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")), storage.ScopeReadOnly)
     if err != nil {
+        log.Printf("Error loading credentials: %v", err) // Log this error
         http.Error(w, "Cannot load credentials from environment", http.StatusInternalServerError)
         return
     }
@@ -76,12 +78,14 @@ func getSignedURLHandler(w http.ResponseWriter, r *http.Request) {
     var credsData credentials
     err = json.Unmarshal(creds.JSON, &credsData)
     if err != nil {
+        log.Printf("Error parsing credentials JSON: %v", err) // Log parsing error
         http.Error(w, "Failed to parse credentials", http.StatusInternalServerError)
         return
     }
 
     client, err := storage.NewClient(ctx, option.WithCredentials(creds))
     if err != nil {
+        log.Printf("Error creating storage client: %v", err) // Log client creation error
         http.Error(w, "Cannot create storage client", http.StatusInternalServerError)
         return
     }
@@ -94,13 +98,13 @@ func getSignedURLHandler(w http.ResponseWriter, r *http.Request) {
         Expires:        time.Now().Add(15 * time.Minute),
     })
     if err != nil {
+        log.Printf("Error creating signed URL: %v", err) // Log URL creation error
         http.Error(w, "Cannot create signed URL", http.StatusInternalServerError)
         return
     }
 
     http.Redirect(w, r, url, http.StatusFound)
 }
-
 
 
 func main() {
