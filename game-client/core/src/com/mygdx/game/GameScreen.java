@@ -90,8 +90,8 @@ public class GameScreen implements Screen, MessageListener {
             System.out.println(dataString + " FAILED");
         } else if ("SLAP_SUCCESS".equals(type)) {
             JsonElement dataElement = response.getData();
-            Match updated = gson.fromJson(dataElement, Match.class);
-            System.out.println(updated.getlastSuccessfulSlapper() + " SUCCEEDED");
+            String dataString = dataElement.getAsString();
+            System.out.println(dataString + " SUCCEEDED");
         }
     }
 

@@ -277,7 +277,7 @@ func handleSlap(conn *websocket.Conn, matcher *matchmaking.Matcher, data map[str
     for _, player := range match.Players {
         if conn, ok := matcher.GetPlayerConns()[player.ID]; ok {
             sendMessage(conn, models.Message{
-                Type: models.MessageTypeSlapSuccess,
+                Type: models.MessageTypeMatchUpdate,
                 Data: match,
             })
         }
