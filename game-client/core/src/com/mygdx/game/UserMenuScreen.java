@@ -29,7 +29,7 @@ public class UserMenuScreen implements Screen, MessageListener {
     
     private TextField codeInputField, volumeField;
     private TextButton quickPlayButton, codeSubmitButton, settingsButton, exitButton,
-            setVolumeButton, settingsExitButton;
+            setVolumeButton, settingsExitButton, statsButton;
     private Table playMenu, settingsMenu;
     String color = "#e7e5e4";
 
@@ -148,7 +148,9 @@ public class UserMenuScreen implements Screen, MessageListener {
         // buttons
         quickPlayButton = new TextButton("Quick Play", textButtonStyle);
         quickPlayButton.getLabel().setColor(Color.valueOf(color));
-        settingsButton = new TextButton("Stats & Settings", textButtonStyle);
+        statsButton = new TextButton("Player Stats", textButtonStyle);
+        statsButton.getLabel().setColor(Color.valueOf(color));
+        settingsButton = new TextButton("Settings", textButtonStyle);
         settingsButton.getLabel().setColor(Color.valueOf(color));
         exitButton = new TextButton("Exit", textButtonStyle);
         exitButton.getLabel().setColor(Color.valueOf(color));
