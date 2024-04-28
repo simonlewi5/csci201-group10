@@ -2,11 +2,11 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -15,13 +15,10 @@ import com.google.gson.JsonElement;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,13 +37,15 @@ public class GameScreen implements Screen, MessageListener {
     private GameWebSocketClient webSocketClient;
     private Viewport viewport;
     private Stage stage;
-    private Table gameBoard;
+    private Table gameBoard, playerTop, playerLeft, playerRight, playerBottom;
     private TextButton playButton;
     private TextButton slapButton;
     private Match match;
     private Map<String, Texture> cardTextures;
-    private int playerIndex;
     private Map<String, Label> cardCountLabels = new HashMap<>(); // map username to cardsRemaining labels
+    private int playerIndex;
+    private String color = "#e7e5e4";
+    private String currentTurnColor = "#fde047";
 
     public GameScreen(final EgyptianRatscrew game, GameWebSocketClient webSocketClient) {
         this.game = game;
@@ -66,14 +65,13 @@ public class GameScreen implements Screen, MessageListener {
         stage = new Stage(viewport, game.batch);
         Gdx.input.setInputProcessor(stage);
         Gdx.graphics.setResizable(true);
-
         initScreenElements();
     }
 
     @Override
     public void messageReceived(String message) {
         serverMessage = message;
-        System.out.println("Message received: " + serverMessage);
+        // System.out.println("Message received: " + serverMessage);
         Gson gson = new Gson();
         Response response = gson.fromJson(serverMessage, Response.class);
         String type = response.getType();
@@ -100,6 +98,7 @@ public class GameScreen implements Screen, MessageListener {
     private void updateMatch(Match m) {
         updateCenterPile(m.getCenterPile());
         match.setHands(m.getHands());
+        match.setTurnIndex(m.getTurnIndex());
 
 //        System.out.println("Updated center pile: " + match.getCenterPile().getCards());
 //        System.out.println("Updated pile count: " + match.getCenterPile().getCards().size());
@@ -115,6 +114,23 @@ public class GameScreen implements Screen, MessageListener {
         for (String username : match.getHands().keySet()) {
             Label l = cardCountLabels.get(username);
             l.setText("Cards remaining: " + match.getHands().get(username).getCards().size());
+        }
+    }
+
+    private void updateTurnIndicator() {
+        // update the turn indicator to reflect the current player's turn
+        int turnIndex = match.getTurnIndex();
+        if (turnIndex == playerIndex) {
+            playButton.setDisabled(false);
+        } else {
+            playButton.setDisabled(true);
+        }
+        for (int i = 0; i < match.getPlayers().size(); i++) {
+            if (i == turnIndex) 
+                // highlight the current player's turn
+                cardCountLabels.get(match.getPlayers().get(i).getUsername()).setColor(Color.valueOf(currentTurnColor));
+            else 
+                cardCountLabels.get(match.getPlayers().get(i).getUsername()).setColor(Color.valueOf(color));
         }
     }
 
@@ -163,6 +179,8 @@ public class GameScreen implements Screen, MessageListener {
 
         // update stage actors
         updateHandCountLabels();
+        updateTurnIndicator();
+
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
 
@@ -243,7 +261,7 @@ public class GameScreen implements Screen, MessageListener {
         }
 
         // create top row
-        Table playerTop = createPlayerTable(playerTopUsername, hands.get(playerTopUsername).getCards().size(), 3);
+        playerTop = createPlayerTable(playerTopUsername, hands.get(playerTopUsername).getCards().size(), 3);
         gameBoard.add().uniform().fill();
         gameBoard.add(playerTop).uniform().fill();
         gameBoard.add().uniform().fill();
@@ -252,13 +270,13 @@ public class GameScreen implements Screen, MessageListener {
         // create middle row
         if (numPlayers >= 3) {
             // left player to left col, empty middle col
-            Table playerLeft = createPlayerTable(playerLeftUsername, hands.get(playerLeftUsername).getCards().size(), 2);
+            playerLeft = createPlayerTable(playerLeftUsername, hands.get(playerLeftUsername).getCards().size(), 2);
             gameBoard.add(playerLeft).uniform().fill();
             gameBoard.add().uniform().fill();
 
             // right player to right col
             if (numPlayers == 4) {
-                Table playerRight = createPlayerTable(playerRightUsername, hands.get(playerRightUsername).getCards().size(), 4);
+                playerRight = createPlayerTable(playerRightUsername, hands.get(playerRightUsername).getCards().size(), 4);
                 gameBoard.add(playerRight).uniform().fill();
             }
             else gameBoard.add().uniform().fill();
@@ -273,14 +291,14 @@ public class GameScreen implements Screen, MessageListener {
         }
 
         // create bottom row
-        Table playerBottom = createPlayerTable(game.player.getUsername(), hands.get(game.player.getUsername()).getCards().size(), 1);
+        playerBottom = createPlayerTable(game.player.getUsername(), hands.get(game.player.getUsername()).getCards().size(), 1);
         gameBoard.add(playButton).uniform().right();
         gameBoard.add(playerBottom).uniform().fill();
         gameBoard.add(slapButton).uniform().left();
         gameBoard.row();
 
         stage.addActor(gameBoard);
-        stage.setDebugAll(true);
+        // stage.setDebugAll(true);
     }
 
     private Table createPlayerTable(String username, int cardsRemaining, int playerPosition) {

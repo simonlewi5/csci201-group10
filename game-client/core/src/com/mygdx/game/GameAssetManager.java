@@ -166,6 +166,8 @@ public class GameAssetManager {
         textButtonStyle.font.getData().padBottom = -10;
         textButtonStyle.font.getData().padLeft = -50;
         textButtonStyle.font.getData().padRight = -50;
+
+        textButtonStyle.disabled = downDrawable;
         
         return textButtonStyle;
     }
