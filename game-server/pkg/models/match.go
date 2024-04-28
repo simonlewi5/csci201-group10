@@ -19,7 +19,7 @@ const (
 type Match struct {
 	ID         string          `json:"id"`
 	Players    []*Player       `json:"players"`
-	Hands      map[string]Hand `json:"hands"` //map of player username to hand
+	Hands      map[string]Hand `json:"hands"` // map of player username to hand
 	MatchState MatchState      `json:"match_state"`
 	TurnIndex  int             `json:"turn_index"`
 	Winner     Player          `json:"winner"`
@@ -144,9 +144,10 @@ func (m *Match) PlayCard(playerID string) error {
 
 	hand := m.Hands[player.Username]
 	if len(hand.Cards) == 0 {
-		return fmt.Errorf("Player %s has no cards to play", player.Username)
+		return fmt.Errorf("player %s has no cards to play", player.Username)
 	}
 
+	// update player's hand
 	card := hand.Cards[0]
 	hand.Cards = hand.Cards[1:]
 	m.Hands[player.Username] = hand

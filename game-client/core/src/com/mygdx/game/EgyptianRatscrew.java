@@ -10,7 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class EgyptianRatscrew extends Game {
     public SpriteBatch batch;
     public GameAssetManager assetManager;
-    public Player player1;
+    public Player player;
     private float musicVolume = 0.0f;
     private Match currentMatch;
 
@@ -67,12 +67,12 @@ public class EgyptianRatscrew extends Game {
         this.currentMatch = currentMatch;
     }
 
-    public Player getPlayer1() {
-        return player1;
+    public Player getPlayer() {
+        return player;
     }
 
-    public void setPlayer1(Player player1) {
-        this.player1 = player1;
+    public void setPlayer(Player player) {
+        this.player = player;
     }
 }
 

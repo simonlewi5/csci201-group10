@@ -105,7 +105,7 @@ public class MatchMakingScreen implements Screen, MessageListener {
     }
 
     private void searchForMatch() {
-        String playerId = game.player1.getId();
+        String playerId = game.player.getId();
         HashMap<String, Object> data = new HashMap<>();
 
         data.put("action", "search_for_match");

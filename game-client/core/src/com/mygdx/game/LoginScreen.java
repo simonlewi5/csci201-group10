@@ -62,7 +62,7 @@ public class LoginScreen implements Screen, MessageListener {
                     JsonObject playerJson = dataObject.getAsJsonObject("player");
                     Player player = gson.fromJson(playerJson, Player.class);
     
-                    game.player1 = player;
+                    game.player = player;
                     System.out.println("Login successful for player: " + player.getUsername());
                     game.setScreen(new UserMenuScreen(game));
                 } else if (type.equals("AUTH_FAILURE")) {

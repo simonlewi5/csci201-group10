@@ -6,6 +6,8 @@ public class Card {
     private int value;
     private Suit suit;
     private float rotation;
+
+    // offsets
     private float x;
     private float y;
 
@@ -19,12 +21,9 @@ public class Card {
         rotation = (new Random()).nextFloat() * 30 - 15;
     }
 
-    public void offsetRandomly(float x, float y) {
-        // randomly offset position by -5 to 5 pixels in both x and y
-        x += (new Random()).nextFloat() * 10 - 5;
-        y += (new Random()).nextFloat() * 10 - 5;
-        this.x = x;
-        this.y = y;
+    public void offsetRandomly() {
+        this.x = (new Random()).nextFloat() * 10 - 5;
+        this.y = (new Random()).nextFloat() * 10 - 5;
     }
 
     public int getValue() {
