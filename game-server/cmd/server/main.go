@@ -108,15 +108,23 @@ func main() {
 	matcher = matchmaking.NewMatcher(dbService)
 	go matcher.StartMatching()
 
+	// Start WebSocket server
 	http.HandleFunc("/ws", websocketHandler(dbService))
-	fmt.Println("WebSocket server starting on port 8080...")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		fmt.Printf("Error starting server: %v\n", err)
-	}
+	go func() {
+		fmt.Println("WebSocket server starting on port 8080...")
+		if err := http.ListenAndServe(":8080", nil); err != nil {
+			log.Fatalf("Failed to start WebSocket server: %v", err)
+		}
+	}()
 
-    http.HandleFunc("/get_signed_url", getSignedURLHandler)
-    fmt.Println("HTTP server starting on port 8081...")
-    if err := http.ListenAndServe(":8081", nil); err != nil {
-        fmt.Printf("Error starting server: %v\n", err)
-    }
+	// Start HTTP server
+	http.HandleFunc("/get_signed_url", getSignedURLHandler)
+	go func() {
+		fmt.Println("HTTP server starting on port 8081...")
+		if err := http.ListenAndServe(":8081", nil); err != nil {
+			log.Fatalf("Failed to start HTTP server: %v", err)
+		}
+	}()
+
+    select {}
 }
