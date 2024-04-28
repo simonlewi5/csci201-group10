@@ -230,6 +230,14 @@ public class GameScreen implements Screen, MessageListener {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Slap button clicked");
+                String playerId = game.getPlayer().getId();
+                HashMap<String, Object> data = new HashMap<>();
+
+                data.put("action", "slap");
+                data.put("player_id", playerId);
+
+                String json = new Gson().toJson(data);
+                webSocketClient.send(json);
             }
         });
 
