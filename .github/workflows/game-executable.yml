@@ -73,7 +73,15 @@ jobs:
           credentials: ${{ secrets.GCP_CREDENTIALS }}
           path: ${{ env.FILENAME }}
           destination: game-assets-bucket-egyptian-ratscrew/game-dl/win
-          
+
+      - name: 'Rename uploaded file'
+        run: |
+          $fileNameOnly = [System.IO.Path]::GetFileName($env:FILENAME)
+          $sourceUri = "gs://game-assets-bucket-egyptian-ratscrew/game-dl/win/$env:FILENAME"
+          $destinationUri = "gs://game-assets-bucket-egyptian-ratscrew/game-dl/win/$fileNameOnly"
+          gcloud auth activate-service-account --key-file=${{ secrets.GCP_CREDENTIALS }}
+          gsutil cp $sourceUri $destinationUri
+          gsutil rm $sourceUri
   build-linux:
     permissions:
         id-token: write
