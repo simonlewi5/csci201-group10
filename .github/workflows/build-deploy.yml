@@ -96,6 +96,7 @@ jobs:
             export DB_HOST=${{ env.DB_HOST }}
             export DB_USER=admin
             export DB_NAME=game-db
+            export GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GCP_CREDENTIALS }}
             chmod +x /opt/game-server/game-server/bin/game-server
             nohup /opt/game-server/game-server/bin/game-server > /var/log/game-server/game-server.log 2>&1 &
       - name: 'Give actions user permissions for static content'

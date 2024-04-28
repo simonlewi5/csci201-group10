@@ -7,6 +7,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans+SC:ital,wght@0,100;0,300;0,400;0,500;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,700;1,800;1,900&family=Alegreya+Sans:ital,wght@0,100;0,300;0,400;0,500;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/style.css">
+    <script>
+        function requestSignedURL(file, buttonId) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '/get_signed_url?file=' + file);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    document.getElementById(buttonId).href = xhr.responseText;
+                    document.getElementById(buttonId).download = file.split('/').pop();
+                } else {
+                    console.error('Failed to retrieve signed URL');
+                }
+            };
+            xhr.send();
+        }
+    </script>
 </head>
 <body>
     <img src="img/egypt.png" alt="Egyptian Rat Screw Background" id="background-image">
@@ -17,14 +32,14 @@
         <h3>brought to you by nitya</h3>
     </div>
     <div class="container">
-        <a href="https://storage.googleapis.com/game-assets-bucket-egyptian-ratscrew/game-dl/windows/EgyptianRatscrew-1.0.exe" download>
-            <button>Download for Windows</button>
+        <a id="download-windows">
+            <button onclick="requestSignedURL('game-dl/windows/EgyptianRatscrew-1.0.exe', 'download-windows')">Download for Windows</button>
         </a>
-        <a href="https://storage.googleapis.com/game-assets-bucket-egyptian-ratscrew/game-dl/mac/EgyptianRatscrew-1.0.dmg" download>
-            <button>Download for macOS</button>
+        <a id="download-mac">
+            <button onclick="requestSignedURL('game-dl/mac/EgyptianRatscrew-1.0.dmg', 'download-mac')">Download for macOS</button>
         </a>
-        <a href="https://storage.googleapis.com/game-assets-bucket-egyptian-ratscrew/game-dl/linux/EgyptianRatscrew-1.0.deb" download>
-            <button>Download for Ubuntu</button>
+        <a id="download-linux">
+            <button onclick="requestSignedURL('game-dl/linux/EgyptianRatscrew-1.0.deb', 'download-linux')">Download for Ubuntu</button>
         </a>
     </div>
 </body>
