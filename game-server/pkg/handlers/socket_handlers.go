@@ -1,13 +1,14 @@
 package handlers
 
 import (
-    "encoding/json"
-    "log"
+	"encoding/json"
+	"log"
+	"time"
 
-    "github.com/gorilla/websocket"
-    "github.com/simonlewi5/csci201-group10/game-server/pkg/db"
-    "github.com/simonlewi5/csci201-group10/game-server/pkg/matchmaking"
-    "github.com/simonlewi5/csci201-group10/game-server/pkg/models"
+	"github.com/gorilla/websocket"
+	"github.com/simonlewi5/csci201-group10/game-server/pkg/db"
+	"github.com/simonlewi5/csci201-group10/game-server/pkg/matchmaking"
+	"github.com/simonlewi5/csci201-group10/game-server/pkg/models"
 )
 
 func HandleConnections(dbService db.DBService, matcher *matchmaking.Matcher) func(*websocket.Conn) {
@@ -34,6 +35,7 @@ func HandleConnections(dbService db.DBService, matcher *matchmaking.Matcher) fun
                     handlePlayCard(conn, matcher, data)
                 case "slap":
                     log.Println("Slap action received")
+                    handleSlap(conn, matcher, data)
                 case "search_for_match":
                     handleSearchForMatch(dbService, matcher, conn, data)
                 default:
@@ -146,6 +148,9 @@ func handlePlayCard(conn *websocket.Conn, matcher *matchmaking.Matcher, data map
         return
     }
 
+    match.GameLock.Lock()
+    defer match.GameLock.Unlock()
+    
     err := match.PlayCard(playerID)
     if err != nil {
         log.Println("Error playing card:", err)
@@ -164,6 +169,28 @@ func handlePlayCard(conn *websocket.Conn, matcher *matchmaking.Matcher, data map
             })
         }
     }
+
+    // Check for face card/Ace challenge
+    challengeIssued, challengeMet := match.CenterPile.CheckFaceCardChallenge()
+    if challengeIssued && !challengeMet {
+        // pause for a second so everyone can see the challenge
+        time.Sleep(1 * time.Second)
+
+        // award the center pile to the player who met the challenge
+        match.AddPileToHand(playerID)
+
+        // notify all players of the updated match state
+        for _, player := range match.Players {
+            if conn, ok := matcher.GetPlayerConns()[player.ID]; ok {
+                sendMessage(conn, models.Message{
+                    Type: models.MessageTypeMatchUpdate,
+                    Data: match,
+                })
+            }
+        }
+    }
+
+    // check if the match is over
 }
 
 func handleSlap(conn *websocket.Conn, matcher *matchmaking.Matcher, data map[string]interface{}) {
@@ -176,6 +203,7 @@ func handleSlap(conn *websocket.Conn, matcher *matchmaking.Matcher, data map[str
     //    added to the hand of the first slapper, other incoming slaps are ignored/marked as failures
     // 3. Update the match state
     // 4. Send the updated match state to all players
+
 
     // player validation checks
     playerID, ok := data["player_id"].(string)
@@ -198,22 +226,54 @@ func handleSlap(conn *websocket.Conn, matcher *matchmaking.Matcher, data map[str
         return
     }
 
-    // send results of slap to players
-    canSlap := match.CenterPile.CheckSlappable()
-    if !canSlap {
+    playerUsername := match.GetPlayerByID(playerID).Username
+
+    // lock the match before doing anything
+    match.GameLock.Lock()
+    defer match.GameLock.Unlock()
+
+    slappable := match.CenterPile.CheckSlappable()
+
+    deadMansSlaps := match.DeadMansSlaps[playerUsername]
+    if deadMansSlaps == 0 || (deadMansSlaps == 1 && !slappable) {
+        for _, player := range match.Players {
+            if conn, ok := matcher.GetPlayerConns()[player.ID]; ok {
+                sendMessage(conn, models.Message{
+                    Type: models.MessageTypePlayerLost,
+                    Data: playerUsername,
+                })
+            }
+        }
+        return
+    }
+
+    // check if player is allowed to slap
+    if slappable {
+        log.Println("Pile is slappable")
+        for _, player := range match.Players {
+            if conn, ok := matcher.GetPlayerConns()[player.ID]; ok {
+                sendMessage(conn, models.Message{
+                    Type: models.MessageTypeSlapSuccess,
+                    Data: playerUsername,
+                })
+            }
+        }
+        match.AddPileToHand(playerID)
+    } else {
         log.Println("Pile is not slappable")
         for _, player := range match.Players {
             if conn, ok := matcher.GetPlayerConns()[player.ID]; ok {
                 sendMessage(conn, models.Message{
                     Type: models.MessageTypeSlapFail,
-                    Data: match.GetPlayerByID(playerID).Username,
+                    Data: playerUsername,
                 })
             }
         }
+        match.PunishBadSlap(playerID)
     }
 
     // update match state before sending if slap succeeded
-    match.AddPileToHand(playerID)
+
     for _, player := range match.Players {
         if conn, ok := matcher.GetPlayerConns()[player.ID]; ok {
             sendMessage(conn, models.Message{

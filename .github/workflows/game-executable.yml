@@ -42,8 +42,6 @@ jobs:
         id-token: write
         contents: write
     runs-on: windows-latest
-    outputs:
-      filename: ${{ steps.set_filename.outputs.filename }}
     steps:
       - name: 'Checkout code'
         uses: actions/checkout@v2
@@ -68,7 +66,6 @@ jobs:
           $exePath = Get-ChildItem ./game-client/desktop/build/distribution/*.exe | Select-Object -ExpandProperty FullName
           echo "Game executable filename: $exePath"
           echo "FILENAME=$exePath" | Out-File -FilePath $env:GITHUB_ENV -Append
-          echo "::set-output name=filename::$exePath"
     
       - name: 'Upload game executable to storage bucket'
         uses: google-github-actions/upload-cloud-storage@v0.3.0
@@ -76,30 +73,6 @@ jobs:
           credentials: ${{ secrets.GCP_CREDENTIALS }}
           path: ${{ env.FILENAME }}
           destination: game-assets-bucket-egyptian-ratscrew/game-dl/win
-  rename-win-build:
-    needs: build-windows
-    runs-on: ubuntu-latest
-    steps:
-      - name: 'Install Google Cloud SDK'
-        uses: google-github-actions/setup-gcloud@v0.2.0
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
-
-      - name: 'Rename uploaded file'
-        run: |
-          # Extract just the filename from the full path
-          FILENAME="${{ needs.build-windows.outputs.filename }}"
-          BASENAME=$(basename "$FILENAME")
-
-          # Define source and destination URIs
-          SOURCE="gs://game-assets-bucket-egyptian-ratscrew/game-dl/win/$FILENAME"
-          DESTINATION="gs://game-assets-bucket-egyptian-ratscrew/game-dl/win/$BASENAME"
-
-          echo "Copying from $SOURCE to $DESTINATION"
-          gsutil cp "$SOURCE" "$DESTINATION"
-          gsutil rm "$SOURCE"
 
   build-linux:
     permissions:

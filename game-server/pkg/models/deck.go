@@ -76,6 +76,7 @@ func (c *CenterPile) VerifyPattern () bool {
 }
 
 func (c *CenterPile) CheckSlappable() bool {
+	
 	// TODO: verify that value checks are using correct numbers for face cards
 	card := c.Cards[len(c.Cards) - 1]
 
@@ -131,4 +132,30 @@ func (c *CenterPile) CheckSlappable() bool {
 	if card.Value == 13 && c.Cards[len(c.Cards) - 2].Value == 12 { return true }
 
 	return false;
+}
+
+func (c *CenterPile) CheckFaceCardChallenge() (bool, bool) {
+	if len(c.Cards) < 2 {
+		return false, false
+	}
+	lastCard := c.Cards[len(c.Cards) - 1]
+	secondToLastCard := c.Cards[len(c.Cards) - 2]
+
+	if isFaceOrAce(lastCard) && isFaceOrAce(secondToLastCard) {
+		return true, true
+	} else if isFaceOrAce(lastCard) {
+		return true, false
+	} else {
+		return false, false
+	}
+}
+
+
+func isFaceOrAce(card Card) bool {
+	switch card.Value {
+	case 11, 12, 13, 1:
+		return true
+	default:
+		return false
+	}
 }
