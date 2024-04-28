@@ -62,10 +62,17 @@ jobs:
         working-directory: ./game-client
       - name: 'Get the filename of the game executable'
         run: |
-          EXE_PATH=$(ls ./game-client/desktop/build/distribution/*.exe)
-          echo "Game executable filename: $EXE_PATH"
-          EXE_PATH="${EXE_PATH//\\//}"  # Convert backslashes to forward slashes if necessary
-          echo "FILENAME=$EXE_PATH" >> $GITHUB_ENV
+          $exePath = Get-ChildItem ./game-client/desktop/build/distribution/*.exe | Select-Object -ExpandProperty FullName
+          echo "Game executable filename: $exePath"
+          echo "FILENAME=$exePath" | Out-File -FilePath $env:GITHUB_ENV -Append
+      
+      - name: 'Upload game executable to storage bucket'
+        uses: google-github-actions/upload-cloud-storage@v0.3.0
+        with:
+          credentials: ${{ secrets.GCP_CREDENTIALS }}
+          path: ${{ env.FILENAME }}
+          destination: game-assets-bucket-egyptian-ratscrew/game-dl/win/EgyptianRatscrew-1.0.exe
+      
       - name: 'Upload game executable to storage bucket'
         uses: google-github-actions/upload-cloud-storage@v0.3.0
         with:
