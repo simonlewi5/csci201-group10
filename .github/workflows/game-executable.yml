@@ -60,18 +60,22 @@ jobs:
           echo "Building game executable for Windows"
           ./gradlew desktop:jpackage
         working-directory: ./game-client
+        
       - name: 'Get the filename of the game executable'
         run: |
           $exePath = Get-ChildItem ./game-client/desktop/build/distribution/*.exe | Select-Object -ExpandProperty FullName
-          echo "Game executable filename: $exePath"
-          echo "FILENAME=$exePath" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "Full executable path: $exePath"
+          
+          $exeName = [System.IO.Path]::GetFileName($exePath)
+          echo "Game executable filename: $exeName"
+          echo "FILENAME=$exeName" | Out-File -FilePath $env:GITHUB_ENV -Append
       
       - name: 'Upload game executable to storage bucket'
         uses: google-github-actions/upload-cloud-storage@v0.3.0
         with:
           credentials: ${{ secrets.GCP_CREDENTIALS }}
           path: ${{ env.FILENAME }}
-          destination: game-assets-bucket-egyptian-ratscrew/game-dl/win/EgyptianRatscrew-1.0.exe
+          destination: game-assets-bucket-egyptian-ratscrew/game-dl/win/${{ env.FILENAME }}
       
       - name: 'Upload game executable to storage bucket'
         uses: google-github-actions/upload-cloud-storage@v0.3.0
