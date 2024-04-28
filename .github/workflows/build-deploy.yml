@@ -100,7 +100,6 @@ jobs:
             export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-credentials.json
             chmod +x /opt/game-server/game-server/bin/game-server
             nohup /opt/game-server/game-server/bin/game-server > /var/log/game-server/game-server.log 2>&1 &
-            rm /tmp/gcp-credentials.json
       - name: 'Give actions user permissions for static content'
         uses: appleboy/ssh-action@master
         with:
