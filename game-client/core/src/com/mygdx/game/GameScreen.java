@@ -22,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GameScreen implements Screen, MessageListener {
@@ -90,8 +91,8 @@ public class GameScreen implements Screen, MessageListener {
             System.out.println(dataString + " FAILED");
         } else if ("SLAP_SUCCESS".equals(type)) {
             JsonElement dataElement = response.getData();
-            Match updated = gson.fromJson(dataElement, Match.class);
-            System.out.println(updated.getlastSuccessfulSlapper() + " SUCCEEDED");
+            String dataString = dataElement.getAsString();
+            System.out.println(dataString + " SUCCEEDED");
         }
     }
 
@@ -143,6 +144,8 @@ public class GameScreen implements Screen, MessageListener {
         int i = 0;
         if (centerPile.getCards().size() < updatedPile.getCards().size()) {
             i = centerPile.getCards().size();
+        } else {
+            resetCenterPile();
         }
         
         while (i < updatedPile.getCards().size()) {
@@ -153,6 +156,12 @@ public class GameScreen implements Screen, MessageListener {
             i++;
         }
     
+        match.setCenterPile(centerPile);
+    }
+
+    private void resetCenterPile() {
+        CenterPile centerPile = match.getCenterPile();
+        centerPile.clear();
         match.setCenterPile(centerPile);
     }
 
@@ -188,7 +197,8 @@ public class GameScreen implements Screen, MessageListener {
         float x = Gdx.graphics.getWidth() / 2 - CARD_SIZE_X / 2;
         float y = Gdx.graphics.getHeight() / 2 - CARD_SIZE_Y / 2;
         game.batch.begin();
-        for (Card card : match.getCenterPile().getCards()) {
+        List<Card> cardsToRender = new ArrayList<>(match.getCenterPile().getCards());
+        for (Card card : cardsToRender) {
             String key = card.getValue() + "_" + card.getSuit();
 
             // parameters: Texture texture, float x, float y,
@@ -230,6 +240,14 @@ public class GameScreen implements Screen, MessageListener {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Slap button clicked");
+                String playerId = game.getPlayer().getId();
+                HashMap<String, Object> data = new HashMap<>();
+
+                data.put("action", "slap");
+                data.put("player_id", playerId);
+
+                String json = new Gson().toJson(data);
+                webSocketClient.send(json);
             }
         });
 

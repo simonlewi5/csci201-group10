@@ -14,6 +14,7 @@ const (
 	MessageTypeAuthError    MessageType = "AUTH_ERROR"
 	MessageTypeSlapFail 	MessageType = "SLAP_FAILURE"
 	MessageTypeSlapSuccess 	MessageType = "SLAP_SUCCESS"
+	MessageTypePlayerLost 	MessageType = "PLAYER_LOST"
 )
 
 type Message struct {

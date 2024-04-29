@@ -76,59 +76,105 @@ func (c *CenterPile) VerifyPattern () bool {
 }
 
 func (c *CenterPile) CheckSlappable() bool {
-	// TODO: verify that value checks are using correct numbers for face cards
-	card := c.Cards[len(c.Cards) - 1]
+    // Ensure there are enough cards in the pile to check slappable conditions
+    if len(c.Cards) < 2 {
+        return false // Not enough cards to check any condition
+    }
 
-	// Double: same value in a row e.g. 5,5
-	if card.Value == c.Cards[len(c.Cards) - 2].Value { return true }
+    lastCard := c.Cards[len(c.Cards) - 1]
 
-	// Sandwich: same value with 1 card in between e.g. 5,7,5
-	if card.Value == c.Cards[len(c.Cards) - 3].Value { return true }
+    // Double: same value in a row e.g., 5,5
+    if len(c.Cards) > 1 && lastCard.Value == c.Cards[len(c.Cards) - 2].Value {
+        return true
+    }
 
-	// Top bottom: last card = first card
-	if card.Value == c.Cards[0].Value && card.Suit == c.Cards[0].Suit { return true }
+    // Additional checks require more cards
+    if len(c.Cards) < 3 {
+        return false
+    }
 
-	// Tens: two in a row add up to 10; ace counts as 1 for this
-	// are aces already valued at 1? if not, need to do extra check here
-	if card.Value + c.Cards[len(c.Cards) - 2].Value == 10 { return true }
+    // Sandwich: same value with one card in between e.g., 5,7,5
+    if lastCard.Value == c.Cards[len(c.Cards) - 3].Value {
+        return true
+    }
 
-	// Tens sandwich: tens but with 1 letter card in between
-	if card.Value + c.Cards[len(c.Cards) - 3].Value == 10 { return true }
+    // Tens sandwich: tens but with one letter card in between
+    if lastCard.Value + c.Cards[len(c.Cards) - 3].Value == 10 {
+        return true
+    }
 
-	// not implemnting jokers
+    // Top bottom: last card = first card
+    if lastCard.Value == c.Cards[0].Value && lastCard.Suit == c.Cards[0].Suit {
+        return true
+    }
 
-	// Four in a row: 4 ascending in a row (includes wrapping) e.g. Q,K,A,2
-	isFour := true
-	for i := 4; i >= 2; i-- {
-		tempCard := c.Cards[len(c.Cards) - i]
-		nextVal := tempCard.Value + 1
-		if nextVal > 13 { nextVal = 1 }
+    // Tens: two in a row add up to 10; ace counts as 1 for this check
+    if lastCard.Value + c.Cards[len(c.Cards) - 2].Value == 10 {
+        return true
+    }
 
-		if c.Cards[len(c.Cards) - i + 1].Value != nextVal {
-			isFour = false
-			break
-		}
+    // Check for sequences of four in a row, both ascending and descending
+    if len(c.Cards) < 4 {
+        return false
+    }
+
+    if checkSequence(c.Cards, true) || checkSequence(c.Cards, false) {
+        return true
+    }
+
+    // Marriage: Q,K or K,Q
+    if (lastCard.Value == 12 && c.Cards[len(c.Cards) - 2].Value == 13) ||
+       (lastCard.Value == 13 && c.Cards[len(c.Cards) - 2].Value == 12) {
+        return true
+    }
+
+    return false
+}
+
+func checkSequence(cards []Card, ascending bool) bool {
+    for i := 1; i < 4; i++ {
+        current := cards[len(cards)-i-1]
+        next := cards[len(cards)-i]
+        expectedNextValue := current.Value
+        if ascending {
+            expectedNextValue++
+            if expectedNextValue > 13 { expectedNextValue = 1 }
+        } else {
+            expectedNextValue--
+            if expectedNextValue < 1 { expectedNextValue = 13 }
+        }
+        if next.Value != expectedNextValue {
+            return false
+        }
+    }
+    return true
+}
+
+func (c *CenterPile) CheckFaceCardChallenge() (bool, bool) {
+    if len(c.Cards) < 2 {
+        return false, false
+    }
+
+    lastCard := c.Cards[len(c.Cards) - 1]
+    secondToLastCard := c.Cards[len(c.Cards) - 2]
+
+    // Check if the second to last card was a face card or Ace, setting a challenge
+    if isFaceOrAce(secondToLastCard) {
+        // If the last card is not a face card or Ace, challenge not met
+        if !isFaceOrAce(lastCard) {
+            return true, false
+        }
+    }
+    // No challenge was issued or it wasn't the time to meet one yet
+    return false, false
+}
+
+
+func isFaceOrAce(card Card) bool {
+	switch card.Value {
+	case 11, 12, 13, 1:
+		return true
+	default:
+		return false
 	}
-	if isFour { return true }
-
-	// Four in a row: descending
-	isFour = true
-	for i := 4; i >= 2; i-- {
-		tempCard := c.Cards[len(c.Cards) - i]
-		nextVal := tempCard.Value - 1
-		if nextVal < 1 { nextVal = 13 }
-
-		if c.Cards[len(c.Cards) - i + 1].Value != nextVal {
-			isFour = false
-			break
-		}
-	}
-	if isFour { return true }
-
-	// Marriage: Q,K or K,Q
-	// need to confirm that Q = 12 and K = 13
-	if card.Value == 12 && c.Cards[len(c.Cards) - 2].Value == 13 { return true }
-	if card.Value == 13 && c.Cards[len(c.Cards) - 2].Value == 12 { return true }
-
-	return false;
 }

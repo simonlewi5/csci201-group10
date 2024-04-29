@@ -56,6 +56,9 @@ func startPingRoutine(conn *websocket.Conn) {
 	}
 }
 
+
+// this is how you get a special URL so you can download one of the game files
+// from the GCP bucket
 type credentials struct {
     ClientEmail  string `json:"client_email"`
     PrivateKey   string `json:"private_key"`
@@ -81,8 +84,6 @@ func getSignedURLHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Failed to parse credentials", http.StatusInternalServerError)
         return
     }
-
-    // Use parsed credentials to create a Google Cloud storage client
     client, err := storage.NewClient(ctx, option.WithCredentialsJSON(credsBytes))
     if err != nil {
         log.Printf("Error creating storage client: %v", err)
@@ -90,8 +91,6 @@ func getSignedURLHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
     defer client.Close()
-
-    // Generate the signed URL
     signedURLOptions := &storage.SignedURLOptions{
         GoogleAccessID: creds.ClientEmail,
         PrivateKey:     []byte(creds.PrivateKey),
@@ -104,8 +103,6 @@ func getSignedURLHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Cannot create signed URL", http.StatusInternalServerError)
         return
     }
-
-    // http.Redirect(w, r, url, http.StatusFound)
     fmt.Fprint(w, url)
 }
 
@@ -116,7 +113,7 @@ func main() {
 	matcher = matchmaking.NewMatcher(dbService)
 	go matcher.StartMatching()
 
-	// Start WebSocket server
+	// websocket server in one goroutine
 	http.HandleFunc("/ws", websocketHandler(dbService))
 	go func() {
 		fmt.Println("WebSocket server starting on port 8080...")
@@ -125,7 +122,7 @@ func main() {
 		}
 	}()
 
-	// Start HTTP server
+	// HTTP server for getting signed URLs in another goroutine
 	http.HandleFunc("/get_signed_url", getSignedURLHandler)
 	go func() {
 		fmt.Println("HTTP server starting on port 8081...")
