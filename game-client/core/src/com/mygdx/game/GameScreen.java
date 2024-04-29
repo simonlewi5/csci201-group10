@@ -22,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GameScreen implements Screen, MessageListener {
@@ -196,7 +197,8 @@ public class GameScreen implements Screen, MessageListener {
         float x = Gdx.graphics.getWidth() / 2 - CARD_SIZE_X / 2;
         float y = Gdx.graphics.getHeight() / 2 - CARD_SIZE_Y / 2;
         game.batch.begin();
-        for (Card card : match.getCenterPile().getCards()) {
+        List<Card> cardsToRender = new ArrayList<>(match.getCenterPile().getCards());
+        for (Card card : cardsToRender) {
             String key = card.getValue() + "_" + card.getSuit();
 
             // parameters: Texture texture, float x, float y,

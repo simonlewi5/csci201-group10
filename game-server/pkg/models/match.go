@@ -200,17 +200,30 @@ func (m *Match) AddPileToHand(playerID string) {
 }
 
 func (m *Match) PunishBadSlap(playerID string) {
-	player := m.GetPlayerByID(playerID)
+    player := m.GetPlayerByID(playerID)
+    if player == nil {
+        return
+    }
 
-	if len(m.Hands[player.Username].Cards) == 0 {
-		m.DeadMansSlaps[player.Username]--
-		return
-	}
-	if len(m.Hands[player.Username].Cards) == 1 {
-		m.CenterPile.Cards = append(m.CenterPile.Cards, m.Hands[player.Username].Cards[0])
-		return
-	}
-	m.CenterPile.Cards = append(m.CenterPile.Cards, m.Hands[player.Username].Cards[0], m.Hands[player.Username].Cards[1])
+    hand := m.Hands[player.Username]
+    handSize := len(hand.Cards)
+    if handSize == 0 {
+        m.DeadMansSlaps[player.Username]--
+        return
+    }
+
+    numCardsToPenalize := min(2, handSize)
+    penaltyCards := hand.Cards[:numCardsToPenalize]
+    hand.Cards = hand.Cards[numCardsToPenalize:]
+    m.Hands[player.Username] = hand
+    m.CenterPile.Cards = append(penaltyCards, m.CenterPile.Cards...)
+}
+
+func min(a, b int) int {
+    if a < b {
+        return a
+    }
+    return b
 }
 
 func (m *Match) CheckEndGame() bool {
