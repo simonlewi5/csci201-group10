@@ -14,7 +14,9 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
@@ -29,7 +31,7 @@ public class LoginScreen implements Screen, MessageListener {
     private String serverMessage;
     private GameWebSocketClient webSocketClient;
     private Viewport viewport;
-    
+    private Label errorMessageLabel;
     private Stage stage;
     private TextField  usernameField, passwordField;
     private TextButton submitButton, exitButton;
@@ -65,8 +67,9 @@ public class LoginScreen implements Screen, MessageListener {
                     game.player = player;
                     System.out.println("Login successful for player: " + player.getUsername());
                     game.setScreen(new UserMenuScreen(game));
-                } else if (type.equals("AUTH_FAILURE")) {
+                } else if (type.equals("AUTH_ERROR")) {
                     System.out.println("Authentication failed");
+                    showErrorMessage("Authentication failed");
                 }
             }
         });
@@ -96,6 +99,12 @@ public class LoginScreen implements Screen, MessageListener {
     private void initScreenElements() {
         TextField.TextFieldStyle textFieldStyle = game.assetManager.getTextFieldStyle(1.0f);
         TextButtonStyle buttonStyle = game.assetManager.getTextButtonStyle(1.0f);
+        Label.LabelStyle labelStyle = game.assetManager.getLabelStyle(1.0f, "FF0000");
+
+        // set up error message display
+        errorMessageLabel = new Label("", labelStyle);
+        errorMessageLabel.setSize(300, 100);
+        errorMessageLabel.setPosition(650, 600);
 
         usernameField = new TextField("", textFieldStyle);
         usernameField.setMessageText("Username");
@@ -130,6 +139,7 @@ public class LoginScreen implements Screen, MessageListener {
         stage.addActor(passwordField);
         stage.addActor(submitButton);
         stage.addActor(exitButton);
+        stage.addActor(errorMessageLabel);
 
         submitButton.addListener(new ClickListener() {
            @Override
@@ -161,6 +171,26 @@ public class LoginScreen implements Screen, MessageListener {
         });
 
 
+    }
+
+    public void showErrorMessage(String text){
+        errorMessageLabel.setText(text);
+        errorMessageLabel.setVisible(true);
+
+        float fadeInDuration = 0.25f;
+        float visibleDuration = 1f;
+        float fadeOutDuration = 0.5f;
+
+        errorMessageLabel.addAction(Actions.sequence(
+                Actions.fadeIn(fadeInDuration),
+                Actions.delay(visibleDuration),
+                Actions.fadeOut(fadeOutDuration),
+                Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        errorMessageLabel.setVisible(false);
+                    }
+                })));
     }
 
     @Override
