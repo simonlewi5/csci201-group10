@@ -145,7 +145,7 @@ public class RegistrationScreen implements Screen, MessageListener  {
         // set up error message display
         errorMessageLabel = new Label("", labelStyle);
         errorMessageLabel.setSize(300, 100);
-        errorMessageLabel.setPosition(650, 600);
+        errorMessageLabel.setPosition(600, 600);
         
         // add all of it to the stage
         stage.addActor(emailField);

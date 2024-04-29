@@ -69,7 +69,10 @@ public class LoginScreen implements Screen, MessageListener {
                     game.setScreen(new UserMenuScreen(game));
                 } else if (type.equals("AUTH_ERROR")) {
                     System.out.println("Authentication failed");
-                    showErrorMessage("Authentication failed");
+                    int startIndex = serverMessage.indexOf("\"data\":\"") + "\"data\":\"".length();
+                    int endIndex = serverMessage.indexOf("\"", startIndex);
+                    String dataValue = serverMessage.substring(startIndex, endIndex);
+                    showErrorMessage(dataValue);
                 }
             }
         });
@@ -104,7 +107,7 @@ public class LoginScreen implements Screen, MessageListener {
         // set up error message display
         errorMessageLabel = new Label("", labelStyle);
         errorMessageLabel.setSize(300, 100);
-        errorMessageLabel.setPosition(650, 600);
+        errorMessageLabel.setPosition(600, 600);
 
         usernameField = new TextField("", textFieldStyle);
         usernameField.setMessageText("Username");
