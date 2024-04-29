@@ -93,6 +93,16 @@ public class GameScreen implements Screen, MessageListener {
             JsonElement dataElement = response.getData();
             String dataString = dataElement.getAsString();
             System.out.println(dataString + " SUCCEEDED");
+        } else if ("MATCH_END".equals(type)) {
+            System.out.println("Match end received");
+            JsonElement dataElement = response.getData();
+            updateMatch(gson.fromJson(dataElement, Match.class));
+            Gdx.app.postRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    game.setScreen(new EndScreen(game, webSocketClient));
+                }
+            });
         }
     }
 
