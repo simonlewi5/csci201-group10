@@ -227,12 +227,26 @@ func min(a, b int) int {
 }
 
 func (m *Match) CheckEndGame() bool {
+	numPlayers := len(m.Players)
+	deadPlayers := 0
 	for _, player := range m.Players {
 		if len(m.Hands[player.Username].Cards) == 52 {
 			m.MatchState = MatchStateComplete
 			m.Winner = *player
 			m.EndTime = time.Now().Unix()
 			return true
+		} else if (len(m.Hands[player.Username].Cards) == 0 && m.DeadMansSlaps[player.Username] == 0) {
+			deadPlayers++
+		}
+	}
+	if deadPlayers == numPlayers-1 {
+		m.MatchState = MatchStateComplete
+		m.EndTime = time.Now().Unix()
+		for _, player := range m.Players {
+			if len(m.Hands[player.Username].Cards) > 0 {
+				m.Winner = *player
+				return true
+			}
 		}
 	}
 	return false
