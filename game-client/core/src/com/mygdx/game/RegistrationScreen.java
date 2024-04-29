@@ -44,12 +44,26 @@ public class RegistrationScreen implements Screen, MessageListener  {
     private TextField emailField, usernameField, passwordField, confirmPasswordField;
     private TextButton submitButton, exitButton;
     Viewport viewport;
-
+    private boolean authSuccess = false;
     Color color = Color.valueOf("#e7e5e4");
-    
+
+
+    @Override
     public void messageReceived(String message) {
-    	this.serverMessage = message;
+        serverMessage = message;
         System.out.println("Message received: " + serverMessage);
+        Gson gson = new Gson();
+        Response response = gson.fromJson(serverMessage, Response.class);
+        if (response.getType().equals("AUTH_ERROR")) {
+            int startIndex = serverMessage.indexOf("\"data\":\"") + "\"data\":\"".length();
+            int endIndex = serverMessage.indexOf("\"", startIndex);
+            String dataValue = serverMessage.substring(startIndex, endIndex);
+            showErrorMessage(dataValue);
+        }
+        else{
+            authSuccess = true;
+        }
+            
     }
 
     public RegistrationScreen(final EgyptianRatscrew game) {
@@ -137,7 +151,6 @@ public class RegistrationScreen implements Screen, MessageListener  {
 
         // set up error message display
         errorMessageLabel = new Label("", labelStyle);
-        // TODO: fix label position, it is currently off center (too far right)
         errorMessageLabel.setSize(300, 100);
         errorMessageLabel.setPosition(650, 600);
         
@@ -167,16 +180,22 @@ public class RegistrationScreen implements Screen, MessageListener  {
                         data.put("username", username);
                         data.put("password", password);
 
-                        String json = new Gson().toJson(data);
-                        webSocketClient.send(json);
+                        Gson gson = new Gson();
+                        String jsonData = gson.toJson(data);
+                        webSocketClient.send(jsonData);
+
                         emailField.setText("");
                         usernameField.setText("");
                         passwordField.setText("");
                         confirmPasswordField.setText("");
-                        game.setScreen(new MainMenuScreen(game));
+                        
                     }
                 } else {
                     System.out.println("WebSocket is not open");
+                }
+                if (authSuccess) {
+                    showErrorMessage("Successfully registered!");
+                    game.setScreen(new MainMenuScreen(game));
                 }
             }
         });
@@ -210,6 +229,7 @@ public class RegistrationScreen implements Screen, MessageListener  {
             return false;
         }
 
+        
         return true;
     }
 
