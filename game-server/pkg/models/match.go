@@ -19,19 +19,19 @@ const (
 )
 
 type Match struct {
-	ID         				string          `json:"id"`
-	Players    				[]*Player       `json:"players"`
-	Hands      				map[string]Hand `json:"hands"` // map of player username to hand
-	MatchState 				MatchState      `json:"match_state"`
-	TurnIndex  				int             `json:"turn_index"`
-	Winner     				Player          `json:"winner"`
-	StartTime  				int64           `json:"start_time"`
-	EndTime    				int64           `json:"end_time"`
-	Deck      			 	Deck            `json:"deck"`
-	CenterPile 				CenterPile		`json:"center_pile"`
-	LastSuccessfulSlapper 	string 			`json:"last_successful_slapper"` // usernme of latest successful slapper
-	DeadMansSlaps 			map[string]int 			`json:"dead_mans_slaps"` // map username -> number of slaps they can do with a no cards left
-	GameLock 				sync.Mutex
+	ID                    string          `json:"id"`
+	Players               []*Player       `json:"players"`
+	Hands                 map[string]Hand `json:"hands"` // map of player username to hand
+	MatchState            MatchState      `json:"match_state"`
+	TurnIndex             int             `json:"turn_index"`
+	Winner                Player          `json:"winner"`
+	StartTime             int64           `json:"start_time"`
+	EndTime               int64           `json:"end_time"`
+	Deck                  Deck            `json:"deck"`
+	CenterPile            CenterPile      `json:"center_pile"`
+	LastSuccessfulSlapper string          `json:"last_successful_slapper"` // usernme of latest successful slapper
+	DeadMansSlaps         map[string]int  `json:"dead_mans_slaps"`         // map username -> number of slaps they can do with a no cards left
+	GameLock              sync.Mutex
 }
 
 type MatchRequest struct {
@@ -88,7 +88,7 @@ func NewMatch(players []*Player) *Match {
 			Cards: []Card{},
 		},
 		LastSuccessfulSlapper: "",
-		DeadMansSlaps: make(map[string]int),
+		DeadMansSlaps:         make(map[string]int),
 	}
 
 	for len(match.Deck.Cards) > 0 {
@@ -166,7 +166,6 @@ func (m *Match) PlayCard(playerID string) error {
 	// put it in the center pile
 	m.CenterPile.Cards = append(m.CenterPile.Cards, card)
 
-
 	m.TurnIndex = (m.TurnIndex + 1) % len(m.Players)
 
 	return nil
@@ -212,6 +211,18 @@ func (m *Match) PunishBadSlap(playerID string) {
 		return
 	}
 	m.CenterPile.Cards = append(m.CenterPile.Cards, m.Hands[player.Username].Cards[0], m.Hands[player.Username].Cards[1])
+}
+
+func (m *Match) CheckEndGame() bool {
+	for _, player := range m.Players {
+		if len(m.Hands[player.Username].Cards) == 52 {
+			m.MatchState = MatchStateComplete
+			m.Winner = *player
+			m.EndTime = time.Now().Unix()
+			return true
+		}
+	}
+	return false
 }
 
 /*
