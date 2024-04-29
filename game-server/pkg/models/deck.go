@@ -151,19 +151,22 @@ func checkSequence(cards []Card, ascending bool) bool {
 }
 
 func (c *CenterPile) CheckFaceCardChallenge() (bool, bool) {
-	if len(c.Cards) < 2 {
-		return false, false
-	}
-	lastCard := c.Cards[len(c.Cards) - 1]
-	secondToLastCard := c.Cards[len(c.Cards) - 2]
+    if len(c.Cards) < 2 {
+        return false, false
+    }
 
-	if isFaceOrAce(lastCard) && isFaceOrAce(secondToLastCard) {
-		return true, true
-	} else if isFaceOrAce(lastCard) {
-		return true, false
-	} else {
-		return false, false
-	}
+    lastCard := c.Cards[len(c.Cards) - 1]
+    secondToLastCard := c.Cards[len(c.Cards) - 2]
+
+    // Check if the second to last card was a face card or Ace, setting a challenge
+    if isFaceOrAce(secondToLastCard) {
+        // If the last card is not a face card or Ace, challenge not met
+        if !isFaceOrAce(lastCard) {
+            return true, false
+        }
+    }
+    // No challenge was issued or it wasn't the time to meet one yet
+    return false, false
 }
 
 

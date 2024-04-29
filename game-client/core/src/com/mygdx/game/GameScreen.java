@@ -143,6 +143,8 @@ public class GameScreen implements Screen, MessageListener {
         int i = 0;
         if (centerPile.getCards().size() < updatedPile.getCards().size()) {
             i = centerPile.getCards().size();
+        } else {
+            resetCenterPile();
         }
         
         while (i < updatedPile.getCards().size()) {
@@ -153,6 +155,12 @@ public class GameScreen implements Screen, MessageListener {
             i++;
         }
     
+        match.setCenterPile(centerPile);
+    }
+
+    private void resetCenterPile() {
+        CenterPile centerPile = match.getCenterPile();
+        centerPile.clear();
         match.setCenterPile(centerPile);
     }
 

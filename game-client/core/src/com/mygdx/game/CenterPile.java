@@ -32,4 +32,8 @@ public class CenterPile {
         }
         return removedCards;
     }
+
+    public void clear() {
+        cards.clear();
+    }
 }
