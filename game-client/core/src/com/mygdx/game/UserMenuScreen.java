@@ -29,7 +29,7 @@ public class UserMenuScreen implements Screen, MessageListener {
     
     private TextField codeInputField, volumeField;
     private TextButton quickPlayButton, codeSubmitButton, settingsButton, exitButton,
-            setVolumeButton, settingsExitButton, statsButton;
+            setVolumeButton, settingsExitButton, statsButton, statsExitButton;
     private Table playMenu, settingsMenu;
     String color = "#e7e5e4";
 
@@ -69,6 +69,7 @@ public class UserMenuScreen implements Screen, MessageListener {
 
         loadPlayMenu(textFieldStyle, textButtonStyle);
         loadSettingsMenu(textFieldStyle, textButtonStyle);
+        loadStatsMenu(textFieldStyle, textButtonStyle);
         settingsMenu.setVisible(false);
 
         try {
@@ -142,6 +143,18 @@ public class UserMenuScreen implements Screen, MessageListener {
         settingsMenu.row();
         settingsMenu.add(settingsExitButton).pad(20).colspan(2).expandX().center();
         stage.addActor(settingsMenu);
+    }
+    
+    private void loadStatsMenu(TextField.TextFieldStyle textFieldStyle, TextButton.TextButtonStyle textButtonStyle) {
+    	statsExitButton = new TextButton("Back", textButtonStyle);
+    	
+    	statsExitButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                displaySettings(false);
+            }
+    	});
+    	
     }
 
     private void loadPlayMenu(TextField.TextFieldStyle textFieldStyle, TextButton.TextButtonStyle textButtonStyle) {
