@@ -9,8 +9,8 @@ type Deck struct {
 }
 
 type Card struct {
-	Value int    `json:"value"`
-	Suit  Suit   `json:"suit"`
+	Value int  `json:"value"`
+	Suit  Suit `json:"suit"`
 }
 
 type Hand struct {
@@ -62,113 +62,102 @@ func (d *Deck) DrawCards(n int) []Card {
 	return cards
 }
 
-func (c *CenterPile) VerifyPattern () bool {
+func (c *CenterPile) CheckSlappable() bool {
+	// Ensure there are enough cards in the pile to check slappable conditions
+	if len(c.Cards) < 2 {
+		return false // Not enough cards to check any condition
+	}
+
+	lastCard := c.Cards[len(c.Cards)-1]
+
+	// Double: same value in a row e.g., 5,5
+	if len(c.Cards) > 1 && lastCard.Value == c.Cards[len(c.Cards)-2].Value {
+		return true
+	}
+
+	// Additional checks require more cards
 	if len(c.Cards) < 3 {
 		return false
 	}
-	if c.Cards[len(c.Cards) - 1].Value == c.Cards[len(c.Cards) - 2].Value && c.Cards[len(c.Cards) - 2].Value == c.Cards[len(c.Cards) - 3].Value {
+
+	// Sandwich: same value with one card in between e.g., 5,7,5
+	if lastCard.Value == c.Cards[len(c.Cards)-3].Value {
 		return true
 	}
-	if c.Cards[len(c.Cards) - 1].Value != c.Cards[len(c.Cards) - 2].Value && c.Cards[len(c.Cards) - 2].Value != c.Cards[len(c.Cards) - 3].Value && c.Cards[len(c.Cards) - 1].Value != c.Cards[len(c.Cards) - 3].Value {
+
+	// Tens sandwich: tens but with one letter card in between
+	if lastCard.Value+c.Cards[len(c.Cards)-3].Value == 10 {
 		return true
 	}
+
+	// Top bottom: last card = first card
+	if lastCard.Value == c.Cards[0].Value && lastCard.Suit == c.Cards[0].Suit {
+		return true
+	}
+
+	// Tens: two in a row add up to 10; ace counts as 1 for this check
+	if lastCard.Value+c.Cards[len(c.Cards)-2].Value == 10 {
+		return true
+	}
+
+	// Check for sequences of four in a row, both ascending and descending
+	if len(c.Cards) < 4 {
+		return false
+	}
+
+	if checkSequence(c.Cards, true) || checkSequence(c.Cards, false) {
+		return true
+	}
+
+	// Marriage: Q,K or K,Q
+	if (lastCard.Value == 12 && c.Cards[len(c.Cards)-2].Value == 13) ||
+		(lastCard.Value == 13 && c.Cards[len(c.Cards)-2].Value == 12) {
+		return true
+	}
+
 	return false
 }
 
-func (c *CenterPile) CheckSlappable() bool {
-    // Ensure there are enough cards in the pile to check slappable conditions
-    if len(c.Cards) < 2 {
-        return false // Not enough cards to check any condition
-    }
-
-    lastCard := c.Cards[len(c.Cards) - 1]
-
-    // Double: same value in a row e.g., 5,5
-    if len(c.Cards) > 1 && lastCard.Value == c.Cards[len(c.Cards) - 2].Value {
-        return true
-    }
-
-    // Additional checks require more cards
-    if len(c.Cards) < 3 {
-        return false
-    }
-
-    // Sandwich: same value with one card in between e.g., 5,7,5
-    if lastCard.Value == c.Cards[len(c.Cards) - 3].Value {
-        return true
-    }
-
-    // Tens sandwich: tens but with one letter card in between
-    if lastCard.Value + c.Cards[len(c.Cards) - 3].Value == 10 {
-        return true
-    }
-
-    // Top bottom: last card = first card
-    if lastCard.Value == c.Cards[0].Value && lastCard.Suit == c.Cards[0].Suit {
-        return true
-    }
-
-    // Tens: two in a row add up to 10; ace counts as 1 for this check
-    if lastCard.Value + c.Cards[len(c.Cards) - 2].Value == 10 {
-        return true
-    }
-
-    // Check for sequences of four in a row, both ascending and descending
-    if len(c.Cards) < 4 {
-        return false
-    }
-
-    if checkSequence(c.Cards, true) || checkSequence(c.Cards, false) {
-        return true
-    }
-
-    // Marriage: Q,K or K,Q
-    if (lastCard.Value == 12 && c.Cards[len(c.Cards) - 2].Value == 13) ||
-       (lastCard.Value == 13 && c.Cards[len(c.Cards) - 2].Value == 12) {
-        return true
-    }
-
-    return false
-}
-
 func checkSequence(cards []Card, ascending bool) bool {
-    for i := 1; i < 4; i++ {
-        current := cards[len(cards)-i-1]
-        next := cards[len(cards)-i]
-        expectedNextValue := current.Value
-        if ascending {
-            expectedNextValue++
-            if expectedNextValue > 13 { expectedNextValue = 1 }
-        } else {
-            expectedNextValue--
-            if expectedNextValue < 1 { expectedNextValue = 13 }
-        }
-        if next.Value != expectedNextValue {
-            return false
-        }
-    }
-    return true
+	for i := 1; i < 4; i++ {
+		current := cards[len(cards)-i-1]
+		next := cards[len(cards)-i]
+		expectedNextValue := current.Value
+		if ascending {
+			expectedNextValue++
+			if expectedNextValue > 13 {
+				expectedNextValue = 1
+			}
+		} else {
+			expectedNextValue--
+			if expectedNextValue < 1 {
+				expectedNextValue = 13
+			}
+		}
+		if next.Value != expectedNextValue {
+			return false
+		}
+	}
+	return true
 }
 
 func (c *CenterPile) CheckFaceCardChallenge() (bool, bool) {
-    if len(c.Cards) < 2 {
-        return false, false
-    }
+	if len(c.Cards) < 2 {
+		return false, false
+	}
 
-    lastCard := c.Cards[len(c.Cards) - 1]
-    secondToLastCard := c.Cards[len(c.Cards) - 2]
+	lastCard := c.Cards[len(c.Cards)-1]
+	secondToLastCard := c.Cards[len(c.Cards)-2]
 
-    // Check if the second to last card was a face card or Ace, setting a challenge
-    if isFaceOrAce(secondToLastCard) {
-        // If the last card is not a face card or Ace, challenge not met
-        if !isFaceOrAce(lastCard) {
-            return true, false
-        }
-    }
-    // No challenge was issued or it wasn't the time to meet one yet
-    return false, false
+	if isFaceOrAce(secondToLastCard) {
+		if !isFaceOrAce(lastCard) {
+			return true, false
+		} else {
+			return true, true
+		}
+	}
+	return false, false
 }
-
 
 func isFaceOrAce(card Card) bool {
 	switch card.Value {

@@ -18,15 +18,35 @@ type Matcher struct {
 	PlayerMatches map[string]*models.Match  // map of player IDs to their matches
 	MatchLock     sync.Mutex               // lock for queue and matches
 	DBService     db.DBService
+	Timer		  Timer
 }
 
-func NewMatcher(dbService db.DBService) *Matcher {
+type Timer interface {
+    Sleep(duration time.Duration)
+}
+
+type RealTimer struct{}
+
+func (rt *RealTimer) Sleep(duration time.Duration) {
+    time.Sleep(duration)
+}
+
+type MockTimer struct {
+    C chan bool
+}
+
+func (mt *MockTimer) Sleep(duration time.Duration) {
+    <-mt.C 
+}
+
+func NewMatcher(dbService db.DBService, timer Timer) *Matcher {
 	return &Matcher{
 		QueuedPlayers: make([]*models.Player, 0),
 		Matches:       make([]*models.Match, 0),
 		PlayerConns:   make(map[string]*websocket.Conn),
 		PlayerMatches: make(map[string]*models.Match),
 		DBService:     dbService,
+		Timer:         timer,
 	}
 }
 
@@ -91,7 +111,7 @@ func (m *Matcher) DequeuePlayer(p *models.Player, conn *websocket.Conn) {
 
 func (m *Matcher) StartMatching() {
 	for {
-		time.Sleep(5 * time.Second)
+		m.Timer.Sleep(5 * time.Second)
 		m.MatchLock.Lock()
 		
 		queueLength := len(m.QueuedPlayers)
@@ -106,7 +126,7 @@ func (m *Matcher) StartMatching() {
 			if queueLength == 2 {
 				m.MatchLock.Unlock()
 				// time.Sleep(30 * time.Second)
-				time.Sleep(5 * time.Second) // for testing
+				m.Timer.Sleep(5 * time.Second) // for testing
 				m.MatchLock.Lock()
 
 				queueLength = len(m.QueuedPlayers)
@@ -119,7 +139,7 @@ func (m *Matcher) StartMatching() {
 
 			if queueLength == 3 {
 				m.MatchLock.Unlock()
-				time.Sleep(20 * time.Second)
+				m.Timer.Sleep(20 * time.Second)
 				m.MatchLock.Lock()
 
 				queueLength = len(m.QueuedPlayers)

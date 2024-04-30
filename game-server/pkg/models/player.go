@@ -17,8 +17,8 @@ type Credentials struct {
 	Token    string `json:"token"`
 }
 
-func NewPlayer(id, username, firebaseUID, email string) Player {
-	return Player{
+func NewPlayer(id, username, firebaseUID, email string) *Player {
+	return &Player{
 		ID:          id,
 		Username:    username,
 		FirebaseUID: firebaseUID,

@@ -110,7 +110,8 @@ func getSignedURLHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	dbService = db.SetupDatabase()
-	matcher = matchmaking.NewMatcher(dbService)
+	realTimer := &matchmaking.RealTimer{}
+	matcher = matchmaking.NewMatcher(dbService, realTimer)
 	go matcher.StartMatching()
 
 	// websocket server in one goroutine
