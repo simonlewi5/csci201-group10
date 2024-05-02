@@ -197,29 +197,31 @@ public class GameAssetManager {
     public Label.LabelStyle getLabelStyle(float scale) {
         BitmapFont buttonFont = getFontMedium();
         buttonFont.getData().setScale(scale);
-        Label.LabelStyle labelStyle = new Label.LabelStyle(buttonFont, Color.valueOf(color));
-        return labelStyle;
+        return new Label.LabelStyle(buttonFont, Color.valueOf(color));
     }
 
     public Label.LabelStyle getLabelStyle(float scale, String fontColor) {
         BitmapFont buttonFont = getFontMedium();
         buttonFont.getData().setScale(scale);
-        Label.LabelStyle labelStyle = new Label.LabelStyle(buttonFont, Color.valueOf(fontColor));
-        return labelStyle;
+        return new Label.LabelStyle(buttonFont, Color.valueOf(fontColor));
     }
 
     public Label.LabelStyle getSmallLabelStyle(float scale) {
         BitmapFont buttonFont = getFontSmall();
         buttonFont.getData().setScale(scale);
-        Label.LabelStyle labelStyle = new Label.LabelStyle(buttonFont, Color.valueOf(color));
-        return labelStyle;
+        return new Label.LabelStyle(buttonFont, Color.valueOf(color));
     }
 
     public Label.LabelStyle getLargeLabelStyle(float scale) {
         BitmapFont buttonFont = getFontLarge();
         buttonFont.getData().setScale(scale);
-        Label.LabelStyle labelStyle = new Label.LabelStyle(buttonFont, Color.valueOf(color));
-        return labelStyle;
+        return new Label.LabelStyle(buttonFont, Color.valueOf(color));
+    }
+
+    public Label.LabelStyle getLargeLabelStyle(float scale, String fontColor) {
+        BitmapFont buttonFont = getFontLarge();
+        buttonFont.getData().setScale(scale);
+        return new Label.LabelStyle(buttonFont, Color.valueOf(fontColor));
     }
 
     public Texture getCursorImage() {
@@ -243,6 +245,9 @@ public class GameAssetManager {
         }
 
         manager.load(CARD_ASSETS_PATH + "card_back_pixel.png", Texture.class);
+        manager.load(CARD_ASSETS_PATH + "card_back_left.png", Texture.class);
+        manager.load(CARD_ASSETS_PATH + "card_back_right.png", Texture.class);
+        manager.load(CARD_ASSETS_PATH + "card_back_up.png", Texture.class);
     }
 
     private String formatCardKey(String rank, String suit) {
@@ -267,6 +272,9 @@ public class GameAssetManager {
             }
         }
         cardTextures.put("card_back", manager.get(CARD_ASSETS_PATH + "card_back_pixel.png", Texture.class));
+        cardTextures.put("card_back_left", manager.get(CARD_ASSETS_PATH + "card_back_left.png", Texture.class));
+        cardTextures.put("card_back_right", manager.get(CARD_ASSETS_PATH + "card_back_right.png", Texture.class));
+        cardTextures.put("card_back_up", manager.get(CARD_ASSETS_PATH + "card_back_up.png", Texture.class));
         return cardTextures;
     }
 

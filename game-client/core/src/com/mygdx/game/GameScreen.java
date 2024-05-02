@@ -45,8 +45,8 @@ public class GameScreen implements Screen, MessageListener {
     private Map<String, Texture> cardTextures;
     private Map<String, Label> cardCountLabels = new HashMap<>(); // map username to cardsRemaining labels
     private int playerIndex;
-    private String color = "#e7e5e4";
-    private String currentTurnColor = "#fde047";
+    private String color = "#000000";
+    private String currentTurnColor = "#2e7ae6";
 
     public GameScreen(final EgyptianRatscrew game, GameWebSocketClient webSocketClient) {
         this.game = game;
@@ -110,14 +110,6 @@ public class GameScreen implements Screen, MessageListener {
         updateCenterPile(m.getCenterPile());
         match.setHands(m.getHands());
         match.setTurnIndex(m.getTurnIndex());
-
-//        System.out.println("Updated center pile: " + match.getCenterPile().getCards());
-//        System.out.println("Updated pile count: " + match.getCenterPile().getCards().size());
-//        System.out.print("Updated hand count: ");
-//        for (Player p : match.getPlayers()) {
-//            System.out.print(p.getUsername() + "-" + match.getHands().get(p.getUsername()).getCards().size() + " ");
-//        }
-//        System.out.println();
     }
 
     private void updateHandCountLabels() {
@@ -131,11 +123,7 @@ public class GameScreen implements Screen, MessageListener {
     private void updateTurnIndicator() {
         // update the turn indicator to reflect the current player's turn
         int turnIndex = match.getTurnIndex();
-        if (turnIndex == playerIndex) {
-            playButton.setDisabled(false);
-        } else {
-            playButton.setDisabled(true);
-        }
+        playButton.setDisabled(turnIndex != playerIndex);
         for (int i = 0; i < match.getPlayers().size(); i++) {
             if (i == turnIndex) 
                 // highlight the current player's turn
@@ -148,7 +136,6 @@ public class GameScreen implements Screen, MessageListener {
     private void updateCenterPile(CenterPile updatedPile) {
         // if updated size bigger, cards were added to existing pile -> set random rotation only for new cards
         // if updated size smaller, the pile was reset -> set all cards
-        // TODO: implement a resetCenterPile() for when slaps succeed (not in this func)
         CenterPile centerPile = match.getCenterPile();
 
         int i = 0;
@@ -204,8 +191,8 @@ public class GameScreen implements Screen, MessageListener {
         stage.draw();
 
         // draw center pile separately on top of stage and stage.draw()
-        float x = Gdx.graphics.getWidth() / 2 - CARD_SIZE_X / 2;
-        float y = Gdx.graphics.getHeight() / 2 - CARD_SIZE_Y / 2;
+        float x = (float) Gdx.graphics.getWidth() / 2 - CARD_SIZE_X / 2;
+        float y = (float) Gdx.graphics.getHeight() / 2 - CARD_SIZE_Y / 2;
         game.batch.begin();
         List<Card> cardsToRender = new ArrayList<>(match.getCenterPile().getCards());
         for (Card card : cardsToRender) {
@@ -219,7 +206,7 @@ public class GameScreen implements Screen, MessageListener {
             game.batch.draw(game.assetManager.getCardTextures().get(key), x + card.getX(), y + card.getY(),
                             CARD_SIZE_X / 2, CARD_SIZE_Y / 2, CARD_SIZE_X, CARD_SIZE_Y,
                             1, 1, card.getRotation(),
-                            0, 0, 500, 726, // later, change srcWidth/Height to match pixel asset dimensions
+                            0, 0, (int) CARD_SIZE_X, (int) CARD_SIZE_Y,
                             false, false);
         }
         game.batch.end();
@@ -333,8 +320,8 @@ public class GameScreen implements Screen, MessageListener {
         Image cardBackImage = new Image(cardTextures.get("card_back"));
         Table playerTable = new Table();
         playerTable.defaults().expand();
-        Label.LabelStyle playerLabelStyle = game.assetManager.getLargeLabelStyle(1.5f);
-        Label.LabelStyle cardLabelStyle = game.assetManager.getLabelStyle(1.0f);
+        Label.LabelStyle playerLabelStyle = game.assetManager.getLargeLabelStyle(1.5f, "#000000");
+        Label.LabelStyle cardLabelStyle = game.assetManager.getLabelStyle(1.0f, "#000000");
 
         Label usernameLabel = new Label(username, playerLabelStyle);
         Label remaining = new Label("Cards remaining: " + cardsRemaining, cardLabelStyle);
@@ -352,16 +339,14 @@ public class GameScreen implements Screen, MessageListener {
             playerTable.row();
 
             // positions 2 and 4 have horizontal card backs
-            // TODO: fix card back rotation this shit stretched
             if (playerPosition == 2 || playerPosition == 4) {
-                cardBackImage.setOrigin(CARD_SIZE_X / 2, CARD_SIZE_Y / 2);
-                if (playerPosition == 2) cardBackImage.setRotation(-90);
-                else cardBackImage.setRotation(90);
-                cardBackImage.setSize(CARD_SIZE_Y, CARD_SIZE_X);
+                if (playerPosition == 2) cardBackImage = new Image(cardTextures.get("card_back_left"));
+                else cardBackImage = new Image(cardTextures.get("card_back_right"));
 
                 playerTable.add(cardBackImage).size(CARD_SIZE_Y, CARD_SIZE_X).uniform().fill();
             }
             else {
+                cardBackImage = new Image(cardTextures.get("card_back_up"));
                 playerTable.add(cardBackImage).size(CARD_SIZE_X, CARD_SIZE_Y).uniform().fill();
             }
             playerTable.row();
