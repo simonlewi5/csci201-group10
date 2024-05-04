@@ -30,7 +30,7 @@ public class UserMenuScreen implements Screen, MessageListener {
     private TextField codeInputField, volumeField;
     private TextButton quickPlayButton, codeSubmitButton, settingsButton, exitButton,
             setVolumeButton, settingsExitButton, statsButton, statsExitButton;
-    private Table playMenu, settingsMenu;
+    private Table playMenu, settingsMenu, statsMenu;
     String color = "#e7e5e4";
 
     public UserMenuScreen(final EgyptianRatscrew game) {
@@ -71,6 +71,7 @@ public class UserMenuScreen implements Screen, MessageListener {
         loadSettingsMenu(textFieldStyle, textButtonStyle);
         loadStatsMenu(textFieldStyle, textButtonStyle);
         settingsMenu.setVisible(false);
+        statsMenu.setVisible(false);
 
         try {
             webSocketClient = new GameWebSocketClient("wss://egyptianratscrew.dev/ws", this);
@@ -151,10 +152,29 @@ public class UserMenuScreen implements Screen, MessageListener {
     	statsExitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                displaySettings(false);
+                displayStats(false);
             }
     	});
     	
+    	statsMenu = new Table();
+        statsMenu.setFillParent(true);
+        statsMenu.center();
+        statsMenu.row();
+        statsMenu.add(statsExitButton).pad(20).colspan(2).expandX().center();
+        stage.addActor(statsMenu);
+    	
+    }
+    
+    private void displayStats(boolean showStats) {
+        // toggle which menu is displayed
+        if (showStats) {
+            playMenu.setVisible(false);
+            statsMenu.setVisible(true);
+        }
+        else {
+            playMenu.setVisible(true);
+            statsMenu.setVisible(false);
+        }
     }
 
     private void loadPlayMenu(TextField.TextFieldStyle textFieldStyle, TextButton.TextButtonStyle textButtonStyle) {
@@ -182,6 +202,12 @@ public class UserMenuScreen implements Screen, MessageListener {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 displaySettings(true);
+            }
+        });
+        statsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                displayStats(true);
             }
         });
         exitButton.addListener(new ClickListener() {
