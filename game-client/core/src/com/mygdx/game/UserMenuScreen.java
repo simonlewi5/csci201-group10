@@ -147,6 +147,16 @@ public class UserMenuScreen implements Screen, MessageListener {
     }
     
     private void loadStatsMenu(TextField.TextFieldStyle textFieldStyle, TextButton.TextButtonStyle textButtonStyle) {
+
+        Label.LabelStyle labelStyle = game.assetManager.getSmallLabelStyle(1.5f);
+
+    	// games played, won, lost
+        Label gamesPlayedLabel = new Label("Games played: ", labelStyle);
+     
+        Label gamesWonLabel = new Label("Games won: ", labelStyle);
+ 
+        Label gamesLostLabel = new Label("Games lost: ", labelStyle);
+     
     	statsExitButton = new TextButton("Back", textButtonStyle);
     	
     	statsExitButton.addListener(new ClickListener() {
@@ -160,7 +170,13 @@ public class UserMenuScreen implements Screen, MessageListener {
         statsMenu.setFillParent(true);
         statsMenu.center();
         statsMenu.row();
-        statsMenu.add(statsExitButton).pad(20).colspan(2).expandX().center();
+        statsMenu.add(gamesPlayedLabel).expandY().padTop(10);
+        statsMenu.row();
+        statsMenu.add(gamesWonLabel).expandY().padTop(10);
+        statsMenu.row();
+        statsMenu.add(gamesLostLabel).expandY().padTop(10);
+        statsMenu.row();
+        statsMenu.add(statsExitButton).pad(20).colspan(2).expandY().center();
         stage.addActor(statsMenu);
     	
     }
