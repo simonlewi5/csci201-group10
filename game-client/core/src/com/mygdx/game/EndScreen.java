@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 public class EndScreen implements Screen, MessageListener {
     final EgyptianRatscrew game;
+    Player player;
     private final float ASPECT_RATIO = 16 / 9f;
     private Texture backgroundImage;
     private Music backgroundMusic;
@@ -77,7 +78,7 @@ public class EndScreen implements Screen, MessageListener {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 game.setCurrentMatch(null);
-                game.setScreen(new UserMenuScreen(game));
+                game.setScreen(new UserMenuScreen(game, player));
             }
         });
         table.add(exitButton).expandX().padTop(10);

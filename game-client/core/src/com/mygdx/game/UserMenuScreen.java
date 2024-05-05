@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 public class UserMenuScreen implements Screen, MessageListener {
     final EgyptianRatscrew game;
+    Player player;
     private final float ASPECT_RATIO = 16 / 9f;
     private Texture backgroundImage;
     private Music mainMenuMusic;
@@ -34,8 +35,9 @@ public class UserMenuScreen implements Screen, MessageListener {
     String color = "#e7e5e4";
     String statsTextColor = "#000000";
 
-    public UserMenuScreen(final EgyptianRatscrew game) {
+    public UserMenuScreen(final EgyptianRatscrew game, Player player) {
         this.game = game;
+        this.player = player;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 800 / ASPECT_RATIO);
         viewport = new FitViewport(1600, 1600 / ASPECT_RATIO, camera);
@@ -152,13 +154,13 @@ public class UserMenuScreen implements Screen, MessageListener {
         Label.LabelStyle labelStyle = game.assetManager.getSmallLabelStyle(1.5f);
 
     	// games played, won, lost
-        Label gamesPlayedLabel = new Label("Games played: ", labelStyle);
+        Label gamesPlayedLabel = new Label("Games played: " + player.getGamesPlayed(), labelStyle);
         gamesPlayedLabel.setColor(Color.valueOf(statsTextColor));
      
-        Label gamesWonLabel = new Label("Games won: ", labelStyle);
+        Label gamesWonLabel = new Label("Games won: " + player.getGamesWon(), labelStyle);
         gamesWonLabel.setColor(Color.valueOf(statsTextColor));
  
-        Label gamesLostLabel = new Label("Games lost: ", labelStyle);
+        Label gamesLostLabel = new Label("Games lost: " + player.getGamesLost(), labelStyle);
         gamesLostLabel.setColor(Color.valueOf(statsTextColor));
     	statsExitButton = new TextButton("Back", textButtonStyle);
     	

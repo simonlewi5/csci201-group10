@@ -66,7 +66,7 @@ public class LoginScreen implements Screen, MessageListener {
     
                     game.player = player;
                     System.out.println("Login successful for player: " + player.getUsername());
-                    game.setScreen(new UserMenuScreen(game));
+                    game.setScreen(new UserMenuScreen(game, player));
                 } else if (type.equals("AUTH_ERROR")) {
                     System.out.println("Authentication failed");
                     int startIndex = serverMessage.indexOf("\"data\":\"") + "\"data\":\"".length();
