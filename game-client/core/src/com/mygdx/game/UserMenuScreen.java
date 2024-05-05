@@ -32,6 +32,7 @@ public class UserMenuScreen implements Screen, MessageListener {
             setVolumeButton, settingsExitButton, statsButton, statsExitButton;
     private Table playMenu, settingsMenu, statsMenu;
     String color = "#e7e5e4";
+    String statsTextColor = "#000000";
 
     public UserMenuScreen(final EgyptianRatscrew game) {
         this.game = game;
@@ -152,11 +153,13 @@ public class UserMenuScreen implements Screen, MessageListener {
 
     	// games played, won, lost
         Label gamesPlayedLabel = new Label("Games played: ", labelStyle);
+        gamesPlayedLabel.setColor(Color.valueOf(statsTextColor));
      
         Label gamesWonLabel = new Label("Games won: ", labelStyle);
+        gamesWonLabel.setColor(Color.valueOf(statsTextColor));
  
         Label gamesLostLabel = new Label("Games lost: ", labelStyle);
-     
+        gamesLostLabel.setColor(Color.valueOf(statsTextColor));
     	statsExitButton = new TextButton("Back", textButtonStyle);
     	
     	statsExitButton.addListener(new ClickListener() {
