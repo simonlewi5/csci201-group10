@@ -30,7 +30,7 @@ allprojects {
         aiVersion = '1.8.2'
         gdxControllersVersion = '2.2.1'
     }
-
+ 
     repositories {
         mavenLocal()
         mavenCentral()

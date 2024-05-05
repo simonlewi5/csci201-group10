@@ -65,7 +65,7 @@ public class EndScreen implements Screen, MessageListener {
 
         Label.LabelStyle labelStyle = game.assetManager.getLabelStyle(1.5f);
 
-        Label winnerLabel = new Label("Winner: " + match.getWinner(), labelStyle);
+        Label winnerLabel = new Label("Winner: " + match.getWinner().getUsername(), labelStyle);
         table.add(winnerLabel).expandX().padTop(10);
         table.row();
         Label endLabel = new Label("Game Over", labelStyle);

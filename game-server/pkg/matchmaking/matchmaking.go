@@ -126,7 +126,7 @@ func (m *Matcher) StartMatching() {
 			if queueLength == 2 {
 				m.MatchLock.Unlock()
 				// time.Sleep(30 * time.Second)
-				m.Timer.Sleep(5 * time.Second) // for testing
+				m.Timer.Sleep(30 * time.Second) // for testing
 				m.MatchLock.Lock()
 
 				queueLength = len(m.QueuedPlayers)
