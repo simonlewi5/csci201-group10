@@ -167,6 +167,17 @@ func (m *Match) PlayCard(playerID string) error {
 	m.CenterPile.Cards = append(m.CenterPile.Cards, card)
 
 	m.TurnIndex = (m.TurnIndex + 1) % len(m.Players)
+	for _, p := range m.Players {
+		if m.Players[m.TurnIndex].ID == p.ID {
+			if len(m.Hands[p.Username].Cards) > 0 {
+				break
+			} else {
+				m.TurnIndex = (m.TurnIndex + 1) % len(m.Players)
+			}
+		}
+	}
+
+
 
 	return nil
 }

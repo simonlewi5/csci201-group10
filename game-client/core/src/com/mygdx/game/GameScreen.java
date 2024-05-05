@@ -117,20 +117,28 @@ public class GameScreen implements Screen, MessageListener {
         for (String username : match.getHands().keySet()) {
             Label l = cardCountLabels.get(username);
             l.setText("Cards remaining: " + match.getHands().get(username).getCards().size());
+            if (match.getPlayers().get(match.getTurnIndex()).getUsername().equals(username)) {
+                l.setColor(Color.valueOf(currentTurnColor));
+            } else {
+                l.setColor(Color.valueOf(color));
+            }
         }
+        playButton.setDisabled(match.getTurnIndex() != playerIndex);
     }
 
     private void updateTurnIndicator() {
         // update the turn indicator to reflect the current player's turn
-        int turnIndex = match.getTurnIndex();
-        playButton.setDisabled(turnIndex != playerIndex);
-        for (int i = 0; i < match.getPlayers().size(); i++) {
-            if (i == turnIndex) 
-                // highlight the current player's turn
-                cardCountLabels.get(match.getPlayers().get(i).getUsername()).setColor(Color.valueOf(currentTurnColor));
-            else 
-                cardCountLabels.get(match.getPlayers().get(i).getUsername()).setColor(Color.valueOf(color));
-        }
+        // int turnIndex = match.getTurnIndex();
+        // playButton.setDisabled(turnIndex != playerIndex);
+        // for (int i = 0; i < match.getPlayers().size(); i++) {
+        //     if (i == turnIndex) 
+        //         // highlight the current player's turn
+        //         cardCountLabels.get(match.getPlayers().get(i).getUsername()).setColor(Color.valueOf(currentTurnColor));
+                
+        //     else 
+        //         cardCountLabels.get(match.getPlayers().get(i).getUsername()).setColor(Color.valueOf(color));
+        // }
+        return;
     }
 
     private void updateCenterPile(CenterPile updatedPile) {
